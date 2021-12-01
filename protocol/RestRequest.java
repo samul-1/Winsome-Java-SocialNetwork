@@ -5,7 +5,8 @@ import java.util.Map;
 public class RestRequest {
     private final String path;
     private final HttpMethod method;
-    private final Map<String, String> params;
+    private final Map<String, String> headers;
+    private final String body;
 
     RestRequest(String path, HttpMethod method) {
         this.path = path;
@@ -43,8 +44,12 @@ public class RestRequest {
         return this.method;
     }
 
-    public Map<String, String> getParams() {
-        return this.params;
+    public Map<String, String> getHeaders() {
+        return this.headers;
+    }
+
+    public String getBody() {
+        return this.body;
     }
 
 }
