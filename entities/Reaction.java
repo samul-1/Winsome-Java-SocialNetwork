@@ -4,7 +4,7 @@ public class Reaction {
     private final String voterUsername;
     private final short value;
 
-    Reaction(String username, short value) {
+    public Reaction(String username, short value) {
         if (username == null || username.length() == 0) {
             throw new IllegalArgumentException();
         }
