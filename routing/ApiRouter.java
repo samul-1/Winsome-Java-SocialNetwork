@@ -1,14 +1,14 @@
 package routing;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 
 import protocol.RestRequest;
 import exceptions.MethodNotSupportedException;
 import exceptions.RouteNotFoundException;
 
 public class ApiRouter {
-    List<ApiRoute> routes;
+    Set<ApiRoute> routes;
 
     ApiRouter(File routes) {
         // TODO de-serialize routes file
