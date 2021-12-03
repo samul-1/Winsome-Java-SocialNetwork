@@ -57,6 +57,7 @@ public class ApiRouter {
         }
 
         if (handler == null) {
+            // matched route doesn't support the requested HTTP method
             throw new MethodNotSupportedException();
         }
         return handler;

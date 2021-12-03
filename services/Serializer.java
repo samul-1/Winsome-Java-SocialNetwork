@@ -1,7 +1,5 @@
 package services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -19,18 +17,12 @@ public class Serializer<T> {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
-
     }
 
-    public T parse(String source, Class<T> cls) {
-        try {
-            return mapper.readValue(source, this.mapper.getTypeFactory().constructType(cls));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public T parse(String source, Class<T> cls) throws JsonMappingException, JsonProcessingException {
+        return mapper.readValue(source, this.mapper.getTypeFactory().constructType(cls));
     }
 
 }

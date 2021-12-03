@@ -21,7 +21,7 @@ public class DataStoreService {
     private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<String, AuthenticationToken>();
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<UUID, Post>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<String, Set<String>>();
-    
+
     /**
      * nestedAccessLock is used when having to modify a complex object associated
      * to a key in one of the ConcurrentHashMap (for example a Set or a Post
@@ -41,7 +41,6 @@ public class DataStoreService {
      * modification to it atomic to the eyes of other threads
      */
     private final ReentrantLock nestedAccessLock = new ReentrantLock();
-
 
     public DataStoreService(File persistedState) {
         // TODO implement loading the state from a file
@@ -141,8 +140,7 @@ public class DataStoreService {
         return feed;
     }
 
-    public Post createPost(String username, String title, String content) {
-        Post newPost = new Post(username, title, content);
+    public void addPost(String username, Post newPost) {
         this.nestedAccessLock.lock();
         Set<Post> userPosts = this.userPosts.get(username);
         synchronized (userPosts) {
@@ -150,22 +148,23 @@ public class DataStoreService {
             userPosts.add(newPost);
         }
         this.posts.put(newPost.getId(), newPost);
-        return newPost;
     }
 
     public Post getPost(UUID id) {
         return this.posts.get(id);
     }
 
-    public boolean deletePost(UUID id) {
+    public boolean deletePost(UUID id, String fromUser) {
         boolean ret;
         Post deletingPost = this.posts.get(id);
         this.nestedAccessLock.lock();
-        Set<Post> userPosts = this.userPosts.get(deletingPost.getAuthor());
+        Set<Post> userPosts = this.userPosts.get(fromUser);
         synchronized (userPosts) {
-            ret = this.posts.remove(id) != null;
+            ret = userPosts.remove(deletingPost);
+            if (ret) {
+                this.posts.remove(id);
+            }
             this.nestedAccessLock.unlock();
-            userPosts.remove(deletingPost);
         }
         return ret;
     }

@@ -7,15 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import entities.User;
-
 public class RestRequest {
     private final String path;
     private final UUID pathParameter;
     private final HttpMethod method;
     private final Map<String, String> headers;
     private final String body;
-    private User user;
 
     private final String URI_PARAMETER_TOKEN = "<id>";
 
@@ -44,7 +41,7 @@ public class RestRequest {
          * in place of the parameter: `/posts/<id>/comments`, and the second element
          * is the parameter `123e4567-e89b-12d3-a456-426614174000`.
          * 
-         * *NB* this assumes that the path will contain AT MOST ONE PARAMETER
+         * *NB* this assumes that the path will contain AT MOST ONE parameter
          * (it's a compromise but works fine here because no route in the project
          * ever uses more than one parameter, and this function could easily be
          * extended to accept an arbitrary number of parameters in the URI) and
@@ -130,17 +127,4 @@ public class RestRequest {
     public String getBody() {
         return this.body;
     }
-
-    public User getUser() {
-        return this.user;
-    }
-
-    public void setUser(User user) {
-        /**
-         * Used by the AuthenticationMiddleware class to authenticate requests
-         * 
-         */
-        this.user = user;
-    }
-
 }
