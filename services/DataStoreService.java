@@ -2,6 +2,7 @@ package services;
 
 import java.util.Map;
 import java.util.Set;
+import java.io.File;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +16,12 @@ import entities.Reaction;
 import entities.User;
 
 public class DataStoreService {
+    private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
+    private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<String, Set<Post>>();
+    private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<String, AuthenticationToken>();
+    private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<UUID, Post>();
+    private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<String, Set<String>>();
+    
     /**
      * nestedAccessLock is used when having to modify a complex object associated
      * to a key in one of the ConcurrentHashMap (for example a Set or a Post
@@ -35,11 +42,10 @@ public class DataStoreService {
      */
     private final ReentrantLock nestedAccessLock = new ReentrantLock();
 
-    private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
-    private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<String, Set<Post>>();
-    private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<String, AuthenticationToken>();
-    private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<UUID, Post>();
-    private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<String, Set<String>>();
+
+    public DataStoreService(File persistedState) {
+        // TODO implement loading the state from a file
+    }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {
         /**
@@ -151,15 +157,17 @@ public class DataStoreService {
         return this.posts.get(id);
     }
 
-    public void deletePost(UUID id) {
+    public boolean deletePost(UUID id) {
+        boolean ret;
         Post deletingPost = this.posts.get(id);
         this.nestedAccessLock.lock();
         Set<Post> userPosts = this.userPosts.get(deletingPost.getAuthor());
         synchronized (userPosts) {
-            this.posts.remove(id);
+            ret = this.posts.remove(id) != null;
             this.nestedAccessLock.unlock();
             userPosts.remove(deletingPost);
         }
+        return ret;
     }
 
     public boolean addPostReaction(String username, UUID postId, short reactionValue) {
