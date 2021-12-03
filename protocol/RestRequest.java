@@ -7,12 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import entities.User;
+
 public class RestRequest {
     private final String path;
     private final UUID pathParameter;
     private final HttpMethod method;
     private final Map<String, String> headers;
     private final String body;
+    private User user;
 
     private final String URI_PARAMETER_TOKEN = "<id>";
 
@@ -126,6 +129,18 @@ public class RestRequest {
 
     public String getBody() {
         return this.body;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public void setUser(User user) {
+        /**
+         * Used by the AuthenticationMiddleware class to authenticate requests
+         * 
+         */
+        this.user = user;
     }
 
 }
