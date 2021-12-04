@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import auth.AuthenticationToken;
 import auth.Password;
@@ -16,31 +15,11 @@ import entities.Reaction;
 import entities.User;
 
 public class DataStoreService {
-    private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<String, User>();
-    private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<String, Set<Post>>();
-    private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<String, AuthenticationToken>();
-    private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<UUID, Post>();
-    private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<String, Set<String>>();
-
-    /**
-     * nestedAccessLock is used when having to modify a complex object associated
-     * to a key in one of the ConcurrentHashMap (for example a Set or a Post
-     * instance),
-     * to prevent another thread from concurrently accessing the object (which
-     * isn't thread-safe)
-     * 
-     * The common pattern used in the methods that employ this lock is:
-     * - lock nestedAccessLock
-     * - get the object from the ConcurrentHashMap
-     * - enter a synchronized block for that object
-     * - release nestedAccessLock (while *still* in the synchronized block)
-     * - modify the object and leave the synchronized block
-     * 
-     * This prevents the object from being modified in between the `get` call
-     * to the concurrent map and when we actually edit it, making the whole
-     * modification to it atomic to the eyes of other threads
-     */
-    private final ReentrantLock nestedAccessLock = new ReentrantLock();
+    private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
 
     public DataStoreService(File persistedState) {
         // TODO implement loading the state from a file
@@ -78,7 +57,7 @@ public class DataStoreService {
          * identity
          * 
          */
-        this.sessions.compute(username, (k, v) -> v = token);
+        this.sessions.put(username, token);
     }
 
     public AuthenticationToken getUserToken(String username) {
@@ -95,13 +74,16 @@ public class DataStoreService {
 
     public Set<String> getUserFollowing(String username) {
         Set<String> following = new HashSet<String>();
-        this.nestedAccessLock.lock();
-        for (Map.Entry<String, Set<String>> entry : this.followers.entrySet()) {
-            if (entry.getValue().contains(username)) {
-                following.add(entry.getKey());
+
+        this.followers.forEach((user, followerSet) -> {
+            if (followerSet.contains(username)) {
+                // if the requested username (A) is in the user's (B) follower
+                // set, then this user is followed by the requested username
+                // (A follows B)
+                following.add(user);
             }
-        }
-        this.nestedAccessLock.unlock();
+        });
+
         return following;
     }
 
@@ -110,44 +92,38 @@ public class DataStoreService {
     }
 
     public void addFollower(String username, String newFollower) {
-        this.nestedAccessLock.lock();
-        Set<String> followers = this.followers.get(username);
-        synchronized (followers) {
-            this.nestedAccessLock.unlock();
-            followers.add(newFollower);
-        }
+        this.followers.computeIfPresent(username, (__, followerSet) -> {
+            followerSet.add(newFollower);
+            return followerSet;
+        });
     }
 
     public void removeFollower(String username, String removedFollower) {
-        this.nestedAccessLock.lock();
-        Set<String> followers = this.followers.get(username);
-        synchronized (followers) {
-            this.nestedAccessLock.unlock();
-            followers.remove(removedFollower);
-        }
+        this.followers.computeIfPresent(username, (__, followerSet) -> {
+            followerSet.remove(removedFollower);
+            return followerSet;
+        });
     }
 
     public Set<Post> getUserFeed(String username) {
-        // TODO probably won't work
-        Set<Post> feed = new HashSet<Post>();
-        this.nestedAccessLock.lock();
+        Set<Post> feed = new HashSet<>();
 
-        for (String followed : this.getUserFollowing(username)) {
-            feed.addAll(this.getUserPosts(followed));
-        }
+        this.followers.forEach((user, followerSet) -> {
+            if (followerSet.contains(username)) {
+                // current user is in the follow set of requested username;
+                // therefore their posts are in the user's feed
+                feed.addAll(this.getUserPosts(user))
+            }
+        });
 
-        this.nestedAccessLock.unlock();
         return feed;
     }
 
     public void addPost(String username, Post newPost) {
-        this.nestedAccessLock.lock();
-        Set<Post> userPosts = this.userPosts.get(username);
-        synchronized (userPosts) {
-            this.nestedAccessLock.unlock();
-            userPosts.add(newPost);
-        }
-        this.posts.put(newPost.getId(), newPost);
+        this.userPosts.computeIfPresent(username, (__, postSet) -> {
+            postSet.add(newPost);
+            return postSet;
+        });
     }
 
     public Post getPost(UUID id) {
@@ -155,48 +131,43 @@ public class DataStoreService {
     }
 
     public boolean deletePost(UUID id, String fromUser) {
-        boolean ret;
-        Post deletingPost = this.posts.get(id);
-        this.nestedAccessLock.lock();
-        Set<Post> userPosts = this.userPosts.get(fromUser);
-        synchronized (userPosts) {
-            ret = userPosts.remove(deletingPost);
-            if (ret) {
-                this.posts.remove(id);
+        return this.posts.computeIfPresent(id, (__, post) -> {
+            try {
+                // first try to remove post from the user's post set:
+                // this will fail if the post doesn't belong to the user
+                this.userPosts.computeIfPresent(fromUser, (user, postSet) -> {
+                    if (!postSet.remove(post)) {
+                        // the user who requested the deletion isn't
+                        // the author of the specified post
+                        throw new RuntimeException();
+                    }
+                    return postSet;
+                });
+            } catch (RuntimeException e) {
+                // don't delete the post since the removal from the user's
+                // post set failed
+                return post;
             }
-            this.nestedAccessLock.unlock();
-        }
-        return ret;
+            return null;
+        }) == null;
     }
 
     public boolean addPostReaction(String username, UUID postId, short reactionValue) {
         Reaction newReaction = new Reaction(username, reactionValue);
-        boolean ret;
-        this.nestedAccessLock.lock();
-        Post post = this.posts.get(postId);
-        if (post != null) {
+
+        return this.posts.computeIfPresent(postId, (__, post) -> {
             post.addReaction(newReaction);
-            ret = true;
-        } else {
-            ret = false;
-        }
-        this.nestedAccessLock.unlock();
-        return ret;
+            return post;
+        }) != null;
     }
 
     public boolean addPostComment(String username, UUID postId, String comment) {
-        boolean ret;
         Comment newComment = new Comment(username, comment);
-        this.nestedAccessLock.lock();
-        Post post = this.posts.get(postId);
-        if (post != null) {
+
+        return this.posts.computeIfPresent(postId, (__, post) -> {
             post.addComment(newComment);
-            ret = true;
-        } else {
-            ret = false;
-        }
-        this.nestedAccessLock.unlock();
-        return ret;
+            return post;
+        }) != null;
     }
 
 }
