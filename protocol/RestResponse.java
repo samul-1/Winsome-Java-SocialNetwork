@@ -14,9 +14,12 @@ public class RestResponse {
         this.body = body;
     }
 
+    private String getVerboseCode() {
+        return null;
+    }
+
     public String toString() {
-        // TODO turn the response into what could be sent to a browser
-        return "";
+        return "HTTP/1.1 " + this.getVerboseCode() + "\r\n\r\n" + this.body + "\r\n\r\n";
     }
 
 }

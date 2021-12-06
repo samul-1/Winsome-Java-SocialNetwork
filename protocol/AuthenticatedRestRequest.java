@@ -18,5 +18,4 @@ public class AuthenticatedRestRequest {
     public User getUser() {
         return this.user;
     }
-
 }

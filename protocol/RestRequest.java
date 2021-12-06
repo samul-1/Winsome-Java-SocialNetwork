@@ -135,4 +135,14 @@ public class RestRequest {
          */
         return this.path.equals("login");
     }
+
+    @Override
+    public String toString() {
+        String ret = this.method.name() + " " + this.path + "\r\n";
+        for (Map.Entry<String, String> entry : this.headers.entrySet()) {
+            ret += entry.getKey() + ": " + entry.getValue() + "\r\n";
+        }
+        ret += "\r\n" + this.body + "\r\n\r\n";
+        return ret;
+    }
 }

@@ -1,0 +1,79 @@
+package services;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+
+public class ServerConfig {
+    private InetAddress serverAddr; // = Inet4Address.getLocalHost();
+    private int tcpPort = 6666;
+    private int udpPort = 33333;
+    private InetAddress multicastAddr; // = InetAddress.getByName("239.255.32.32");
+    private int multicastPort = 44444;
+    private InetAddress registryHost; // = InetAddress.getLocalHost();
+    private int registryPort = 7777;
+    private int sktTimeout = 100000;
+
+    public InetAddress getServerAddr() {
+        return this.serverAddr;
+    }
+
+    public void setServerAddr(InetAddress serverAddr) {
+        this.serverAddr = serverAddr;
+    }
+
+    public int getTcpPort() {
+        return this.tcpPort;
+    }
+
+    public void setTcpPort(int tcpPort) {
+        this.tcpPort = tcpPort;
+    }
+
+    public int getUdpPort() {
+        return this.udpPort;
+    }
+
+    public void setUdpPort(int udpPort) {
+        this.udpPort = udpPort;
+    }
+
+    public InetAddress getMulticastAddr() {
+        return this.multicastAddr;
+    }
+
+    public void setMulticastAddr(InetAddress multicastAddr) {
+        this.multicastAddr = multicastAddr;
+    }
+
+    public int getMulticastPort() {
+        return this.multicastPort;
+    }
+
+    public void setMulticastPort(int multicastPort) {
+        this.multicastPort = multicastPort;
+    }
+
+    public InetAddress getRegistryHost() {
+        return this.registryHost;
+    }
+
+    public void setRegistryHost(InetAddress registryHost) {
+        this.registryHost = registryHost;
+    }
+
+    public int getRegistryPort() {
+        return this.registryPort;
+    }
+
+    public void setRegistryPort(int registryPort) {
+        this.registryPort = registryPort;
+    }
+
+    public int getSktTimeout() {
+        return this.sktTimeout;
+    }
+
+    public void setSktTimeout(int sktTimeout) {
+        this.sktTimeout = sktTimeout;
+    }
+}

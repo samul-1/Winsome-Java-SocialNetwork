@@ -2,6 +2,8 @@ package routing;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,8 +15,8 @@ import exceptions.RouteNotFoundException;
 public class ApiRouter {
     Set<ApiRoute> routes = new HashSet<ApiRoute>();
 
-    ApiRouter(File routes) {
-        // TODO de-serialize routes file
+    public ApiRouter(ApiRoute[] routes) {
+        this.routes = new HashSet<ApiRoute>(Arrays.asList(routes));
     }
 
     private ApiRoute resolveRoute(String requestPath) {
