@@ -20,7 +20,7 @@ public class DataStoreService {
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
 
-    public DataStoreService(File persistedState) {
+    public DataStoreService(String storageFilename) {
         // TODO implement loading the state from a file
     }
 

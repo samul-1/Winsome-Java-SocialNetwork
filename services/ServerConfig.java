@@ -1,6 +1,5 @@
 package services;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
 
 public class ServerConfig {
@@ -12,6 +11,7 @@ public class ServerConfig {
     private InetAddress registryHost; // = InetAddress.getLocalHost();
     private int registryPort = 7777;
     private int sktTimeout = 100000;
+    private String storageLocation = "db.json";
 
     public InetAddress getServerAddr() {
         return this.serverAddr;
@@ -75,5 +75,9 @@ public class ServerConfig {
 
     public void setSktTimeout(int sktTimeout) {
         this.sktTimeout = sktTimeout;
+    }
+
+    public String getStorageLocation() {
+        return this.storageLocation;
     }
 }

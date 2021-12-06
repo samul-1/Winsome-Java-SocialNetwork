@@ -33,9 +33,9 @@ import routing.ApiRouter;
 public class Server {
     private final int BUF_CAPACITY = 4096 * 4096;
 
-    private final ApiRouter router;
+    private ApiRouter router;
     private final SocialNetworkService service;
-    private final AuthenticationMiddleware authMiddlware;
+    private final AuthenticationMiddleware authMiddleware;
     private ServerConfig config;
     private Selector selector;
 
@@ -47,9 +47,9 @@ public class Server {
             e.printStackTrace();
             System.exit(1);
         }
-        store = new DataStoreService(this.config.getStorageLocation());
+        DataStoreService store = new DataStoreService(this.config.getStorageLocation());
         this.service = new SocialNetworkService(store);
-        this.authMiddlware = new AuthenticationMiddleware(store);
+        this.authMiddleware = new AuthenticationMiddleware(store);
     }
 
     private void loadConfig() throws JsonMappingException, JsonProcessingException {
@@ -80,7 +80,6 @@ public class Server {
             skt.bind(new InetSocketAddress(this.config.getServerAddr(), this.config.getTcpPort()));
             srvSktChan.configureBlocking(false);
             srvSktChan.register(selector, SelectionKey.OP_ACCEPT);
-
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -122,6 +121,15 @@ public class Server {
         }
     }
 
+    private void acceptKey(SelectionKey key) throws IOException {
+        ServerSocketChannel channel = (ServerSocketChannel) key.channel();
+        SocketChannel clientSkt = channel.accept();
+
+        clientSkt.configureBlocking(false);
+        SelectionKey clientKey = clientSkt.register(this.selector, SelectionKey.OP_READ);
+        clientKey.attach(new ClientConnectionState());
+    }
+
     private void writeToKey(SelectionKey key) throws IOException {
         SocketChannel clientSkt = (SocketChannel) key.channel();
 
@@ -135,15 +143,6 @@ public class Server {
         // as there isn't anything to be written to the client, and we're now
         // ready to read again from it
         key.interestOps(SelectionKey.OP_READ);
-    }
-
-    private void acceptKey(SelectionKey key) throws IOException {
-        ServerSocketChannel channel = (ServerSocketChannel) key.channel();
-        SocketChannel clientSkt = channel.accept();
-
-        clientSkt.configureBlocking(false);
-        SelectionKey clientKey = clientSkt.register(this.selector, SelectionKey.OP_READ);
-        clientKey.attach(new ClientConnectionState());
     }
 
     private void readFromKey(SelectionKey key) throws IOException {
@@ -163,10 +162,23 @@ public class Server {
         // as there isn't anything to be read from the client, but we now
         // have a response to write to it
         key.interestOps(SelectionKey.OP_WRITE);
+        // store the pending response so it can be written as soon
+        // as the client becomes writable
         ((ClientConnectionState) key.attachment()).pendingResponse = response;
     }
 
     private RestResponse handleRequest(RestRequest request) {
+        /**
+         * Main method to handle an incoming API request.
+         * 
+         * The flow is as follows:
+         * 1. the request path and method are used by the ApiRouter to get
+         * the handler method for the request
+         * 2. the request is authenticated by the AuthenticationMiddleware
+         * 3. the handler is invoked on the resulting AuthenticatedRestRequest
+         * and a RestResponse is returned
+         * 
+         */
         Method handler;
         RestResponse response = null;
         AuthenticatedRestRequest authenticatedRequest;
@@ -183,8 +195,8 @@ public class Server {
 
         // check request headers to authenticate the request
         try {
-            authenticatedRequest = requireAuth ? this.authMiddlware.authenticateRequest(request)
-                    : this.authMiddlware.getAnonymousRestRequest(request);
+            authenticatedRequest = requireAuth ? this.authMiddleware.authenticateRequest(request)
+                    : this.authMiddleware.getAnonymousRestRequest(request);
         } catch (NoAuthenticationProvidedException e) {
             return new RestResponse(401);
         } catch (InvalidTokenException e) {
@@ -195,6 +207,7 @@ public class Server {
         try {
             response = (RestResponse) handler.invoke(this.service, authenticatedRequest);
         } catch (IllegalAccessException | IllegalArgumentException e) {
+            e.printStackTrace();
             return new RestResponse(500);
         } catch (InvocationTargetException e) {
             try {
