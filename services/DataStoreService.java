@@ -1,6 +1,5 @@
 package services;
 
-import java.util.Map;
 import java.util.Set;
 import java.io.File;
 import java.util.HashSet;
@@ -17,7 +16,7 @@ import entities.User;
 public class DataStoreService {
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, AuthenticationToken> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<AuthenticationToken, User> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
 
@@ -46,7 +45,7 @@ public class DataStoreService {
         return true;
     }
 
-    public void setUserToken(String username, AuthenticationToken token) {
+    public void setUserToken(User user, AuthenticationToken token) {
         /**
          * Binds a user (via their username) to the given authentication
          * token.
@@ -57,11 +56,11 @@ public class DataStoreService {
          * identity
          * 
          */
-        this.sessions.put(username, token);
+        this.sessions.put(token, user);
     }
 
-    public AuthenticationToken getUserToken(String username) {
-        return this.sessions.get(username);
+    public User getUserFromToken(AuthenticationToken token) {
+        return this.sessions.get(token);
     }
 
     public User getUser(String username) {
@@ -112,7 +111,7 @@ public class DataStoreService {
             if (followerSet.contains(username)) {
                 // current user is in the follow set of requested username;
                 // therefore their posts are in the user's feed
-                feed.addAll(this.getUserPosts(user))
+                feed.addAll(this.getUserPosts(user));
             }
         });
 

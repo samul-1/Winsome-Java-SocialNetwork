@@ -22,6 +22,13 @@ public class AuthenticationMiddleware {
         this.store = store;
     }
 
+    public AuthenticatedRestRequest getAnonymousRestRequest(RestRequest request) {
+        /**
+         * Returns an AuthenticatedRestRequest whose user is `null`
+         */
+        return new AuthenticatedRestRequest(request, null);
+    }
+
     public AuthenticatedRestRequest authenticateRequest(RestRequest request)
             throws NoAuthenticationProvidedException, InvalidTokenException {
         /**

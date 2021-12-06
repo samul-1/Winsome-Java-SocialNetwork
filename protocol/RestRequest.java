@@ -127,4 +127,12 @@ public class RestRequest {
     public String getBody() {
         return this.body;
     }
+
+    public boolean isLoginRequest() {
+        /**
+         * Convenience method to check if the requested path is "login"
+         * 
+         */
+        return this.path.equals("login");
+    }
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ApiRoute {
     private final String path;
-    private Map<HttpMethod, String> actions;
+    private final Map<HttpMethod, String> actions;
 
     ApiRoute(String path, Map<HttpMethod, String> actions) {
         this.path = path;
