@@ -20,6 +20,10 @@ public class User {
         return this.username;
     }
 
+    public Password getPassword() {
+        return this.password;
+    }
+
     @Override
     public int hashCode() {
         return this.username.hashCode();

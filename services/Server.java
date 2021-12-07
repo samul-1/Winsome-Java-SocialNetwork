@@ -14,9 +14,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import auth.AuthenticationMiddleware;
 import exceptions.BadRequestException;
 import exceptions.InvalidTokenException;
@@ -26,6 +23,7 @@ import exceptions.PermissionDeniedException;
 import exceptions.ResourceNotFoundException;
 import exceptions.RouteNotFoundException;
 import protocol.AuthenticatedRestRequest;
+import protocol.HttpMethod;
 import protocol.RestRequest;
 import protocol.RestResponse;
 import routing.ApiRoute;
@@ -96,8 +94,10 @@ public class Server {
                         this.acceptKey(currKey);
                         System.out.println("A client connected");
                     } else if (currKey.isReadable()) {
+                        // System.out.println("A client is readable");
                         this.readFromKey(currKey);
                     } else if (currKey.isWritable()) {
+                        // System.out.println("A client is writable");
                         this.writeToKey(currKey);
                     }
                 } catch (IOException e) {
@@ -129,7 +129,7 @@ public class Server {
 
         // get previously stored response to be written to client
         RestResponse response = ((ClientConnectionState) key.attachment()).pendingResponse;
-
+        System.out.println("Response: " + response);
         ByteBuffer buf = ByteBuffer.wrap(response.toString().getBytes("UTF-8"));
         System.out.println("Written:\n" + response.toString());
         clientSkt.write(buf);
@@ -146,14 +146,25 @@ public class Server {
         int readCount = clientSkt.read(buf);
         if (readCount == -1) { // no data was read, client closed connection
             // the caller will catch this and remove the key from the readset
+            System.out.println("nothing to read");
             throw new IOException();
         }
         buf.flip();
 
         // System.out.println("Read:\n" +
         // StandardCharsets.UTF_8.decode(buf).toString());
-        RestRequest request = RestRequest.parseRequestString(StandardCharsets.UTF_8.decode(buf).toString());
-        RestResponse response = handleRequest(request);
+        String reqString = StandardCharsets.UTF_8.decode(buf).toString();
+        System.out.println("request: " + reqString);
+        RestRequest request = RestRequest.parseRequestString(reqString);
+
+        System.out.println("path: " + request.getPath() + "method: " + request.getMethod().name());
+
+        RestResponse response;
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            response = new RestResponse(200);
+        } else {
+            response = handleRequest(request);
+        }
 
         // remove OP_READ from the interest set and replace it with OP_WRITE
         // as there isn't anything to be read from the client, but we now
@@ -184,6 +195,8 @@ public class Server {
         // resolve route to get the handler method for this request
         try {
             handler = this.router.getRequestHandler(request);
+            System.out.println("got handler" + handler.getName());
+
         } catch (RouteNotFoundException e) {
             return new RestResponse(404);
         } catch (MethodNotSupportedException e) {
@@ -202,12 +215,14 @@ public class Server {
         // invoke handler to execute the request and get
         // response to write back to client
         try {
+            System.out.println("About to invoke: " + handler.getName());
             response = (RestResponse) handler.invoke(this.service, authenticatedRequest);
         } catch (IllegalAccessException | IllegalArgumentException e) {
             e.printStackTrace();
             return new RestResponse(500);
         } catch (InvocationTargetException e) {
             try {
+                e.printStackTrace();
                 // InvocationTargetException is thrown if the method called via
                 // `invoke()` throws an exception; in order to get the original
                 // exception, use exception chaining, so the correct HTTP error
@@ -225,7 +240,6 @@ public class Server {
                 assert false; // never reached
             }
         }
-
         return response;
     }
 }

@@ -1,5 +1,17 @@
 [
     {
+        "path": "/login",
+        "actions": {
+            "POST": "loginHandler"
+        }
+    },
+    {
+        "path": "/logout",
+        "actions": {
+            "POST": "logoutHandler"
+        }
+    },
+    {
         "path": "/users",
         "actions": {
             "GET": "userListHandler"

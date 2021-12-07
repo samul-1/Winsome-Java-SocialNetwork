@@ -2,6 +2,7 @@ package services;
 
 import java.util.Set;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,10 @@ public class DataStoreService {
 
     public DataStoreService(String storageFilename) {
         // TODO implement loading the state from a file
+
+        // dummy user for testing the web interface
+        String[] tags = { "a", "b", "c" };
+        this.registerUser("admin", new HashSet<String>(Arrays.asList(tags)), new Password("password"));
     }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {
@@ -50,16 +55,19 @@ public class DataStoreService {
          * Binds a user (via their username) to the given authentication
          * token.
          * 
-         * A new token is associated [resp. disassociated] to a user when
-         * they log in [resp. out], and the token for a user is checked
-         * when they make an authenticated request to validate their
-         * identity
-         * 
          */
         this.sessions.put(token, user);
     }
 
+    public void deleteUserToken(AuthenticationToken token) {
+        this.sessions.remove(token);
+    }
+
     public User getUserFromToken(AuthenticationToken token) {
+        return this.sessions.get(token);
+    }
+
+    public User getUser(AuthenticationToken token) {
         return this.sessions.get(token);
     }
 

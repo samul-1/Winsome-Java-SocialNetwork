@@ -44,10 +44,16 @@ public class AuthenticationMiddleware {
          * 
          */
 
-        // look for authorization token
-        // get user with that authorization token
-        User requestingUser = null;
-        // set user in request
+        String tokenString = request.getHeader("Authorization");
+        if (tokenString == null) {
+            throw new NoAuthenticationProvidedException();
+        }
+        AuthenticationToken token = new AuthenticationToken(tokenString.substring("Bearer ".length()));
+        User requestingUser = this.store.getUser(token);
+
+        if (requestingUser == null) {
+            throw new InvalidTokenException();
+        }
 
         return new AuthenticatedRestRequest(request, requestingUser);
     }

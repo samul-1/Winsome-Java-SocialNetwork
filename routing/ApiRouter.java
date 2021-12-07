@@ -53,20 +53,17 @@ public class ApiRouter {
 
         Method handler = null;
         try {
-            System.out.println("Handler method: " + matchingRoute.getMethodAction(request.getMethod()));
             // find handler method name based on the HTTP method of the request
-            handler = serviceClass.getMethod(matchingRoute.getMethodAction(request.getMethod()),
-                    AuthenticatedRestRequest.class);
+            String handlerName = matchingRoute.getMethodAction(request.getMethod());
+            System.out.println("handler: " + handlerName);
+            if (handlerName == null) {
+                // matched route doesn't support the requested HTTP method
+                throw new MethodNotSupportedException();
+            }
+            handler = serviceClass.getMethod(handlerName, AuthenticatedRestRequest.class);
         } catch (NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
             assert false; // this is never supposed to happen
-        }
-
-        if (handler == null) {
-            System.out.println("handler null");
-
-            // matched route doesn't support the requested HTTP method
-            throw new MethodNotSupportedException();
         }
         return handler;
     }

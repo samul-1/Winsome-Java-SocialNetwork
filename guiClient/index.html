@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winsome</title>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js" integrity="sha512-u9akINsQsAkG9xjc1cnGF4zw5TFDwkxuc9vUp5dltDWYCSmyd0meygbvgXrlc/z7/o4a19Fb5V0OUE58J7dcyw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #333881 60% , white 40%);
+        }
+        .animate-light-pulse {
+            animation: pulse 3s cubic-bezier(.6,1,.6,.9) infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="my-4 mx-8 flex flex-col z-10">
+        <h1 class="animate-light-pulse font-medium text-6xl text-center text-white">
+            Winsome
+        </h1>
+        <div class="bg-white py-8 flex space-y-4 flex-col mx-auto mt-32 border py-4 rounded-lg shadow-xl w-3/5">
+            <h2 class="mb-6 text-3xl text-center text-blue-800 font-medium">Login</h2>
+            <input id="form-username" type="text" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Username" />
+            <input id="form-password" type="password" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Password" />
+            <button
+            onclick="login()"
+            class="mx-auto rounded-md px-4 py-2 font-medium bg-indigo-800 w-60 text-white hover:bg-indigo-900">Entra</button>
+        </div>
+    </div>
+    <script>
+        axios.defaults.baseURL = 'http://127.0.0.1:8000'
+    </script>
+</body>
+</html>

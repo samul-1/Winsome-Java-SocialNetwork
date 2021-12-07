@@ -3,7 +3,7 @@ package auth;
 public class Password {
     private final String encryptedPassword;
 
-    Password(String password) {
+    public Password(String password) {
         if (password == null || password.length() == 0) {
             throw new IllegalArgumentException();
         }

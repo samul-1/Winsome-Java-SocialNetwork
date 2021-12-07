@@ -104,7 +104,11 @@ public class RestRequest {
 
             String bodyLine = reader.readLine();
             while (bodyLine != null) { // read until the end of the request string
-                body += bodyLine;
+                body += "\n" + bodyLine;
+                bodyLine = reader.readLine();
+            }
+            if (body.length() > 0) {
+                body = body.substring(1); // remove preceding '\n'
             }
             return new RestRequest(path, method, headers, body);
         }
@@ -135,7 +139,7 @@ public class RestRequest {
          * Convenience method to check if the requested path is "login"
          * 
          */
-        return this.path.equals("login");
+        return this.path.equals("/login");
     }
 
     @Override

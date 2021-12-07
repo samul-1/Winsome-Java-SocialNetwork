@@ -3,7 +3,12 @@ package auth;
 public class AuthenticationToken {
     private final String token;
 
-    AuthenticationToken() {
+    public AuthenticationToken(String token) {
+        // TODO implement
+        this.token = token;
+    }
+
+    public AuthenticationToken() {
         this.token = this.getRandomToken();
     }
 

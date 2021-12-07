@@ -33,6 +33,9 @@ public class RestResponse {
         this.body = body;
         this.headers.put("content-type", "application/json");
         this.headers.put("content-length", String.valueOf(this.body.length()));
+
+        // for usage inside of browser
+        this.headers.put("Access-Control-Allow-Origin", "*");
     }
 
     private String getVerboseCode() {

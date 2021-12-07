@@ -3,18 +3,66 @@ package services;
 import entities.Comment;
 import entities.Post;
 import entities.Reaction;
+import entities.User;
 import exceptions.BadRequestException;
 import exceptions.PermissionDeniedException;
 import exceptions.ResourceNotFoundException;
 import protocol.AuthenticatedRestRequest;
 import protocol.RestResponse;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import auth.AuthenticationToken;
+import auth.Password;
 
 public class SocialNetworkService {
     private final DataStoreService store;
 
     public SocialNetworkService(DataStoreService store) {
         this.store = store;
+    }
+
+    public RestResponse loginHandler(AuthenticatedRestRequest request)
+            throws PermissionDeniedException, BadRequestException {
+        String[] bodyTokens = request.getRequest().getBody().split("\n");
+        if (bodyTokens.length != 2) {
+            // request body is expected to have the username on the
+            // first line and the password on the second line
+            System.out.println("------- BODY is: " + request.getRequest().getBody() + "-----------");
+            System.out.println(
+                    "BODY TOKEN LENGTH IS " + bodyTokens.length + "\n\n\nFIRST ONE IS" + bodyTokens[0] + "\n\n\n");
+            throw new BadRequestException();
+        }
+
+        String username = bodyTokens[0];
+        Password password = new Password(bodyTokens[1]);
+
+        System.out.println("username: " + username + "password: " + password.getPassword());
+
+        User authenticatingUser = this.store.getUser(username);
+
+        if (authenticatingUser == null) {
+            throw new PermissionDeniedException();
+        }
+        if (authenticatingUser.getPassword().equals(password)) {
+            // correct password, create and return a
+            // new authentication token for this user
+            AuthenticationToken token = new AuthenticationToken();
+            this.store.setUserToken(authenticatingUser, token);
+            // client will use this new token to authenticate subsequent requests
+            return new RestResponse(200, token.getToken());
+        }
+
+        // incorrect password
+        throw new PermissionDeniedException();
+    }
+
+    public RestResponse logoutHandler(AuthenticatedRestRequest request) {
+        this.store.deleteUserToken(new AuthenticationToken(request.getRequest().getHeader("Authorization")));
+        return new RestResponse(204);
     }
 
     public RestResponse userListHandler(AuthenticatedRestRequest request) {
@@ -46,8 +94,9 @@ public class SocialNetworkService {
     }
 
     public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
+        Set<Post> feed = this.store.getUserFeed(request.getUser().getUsername());
         String body = new Serializer<Post[]>()
-                .serialize((Post[]) this.store.getUserFeed(request.getUser().getUsername()).toArray());
+                .serialize((Post[]) ((feed == null ? new HashSet<Post>() : feed).toArray()));
         return new RestResponse(200, body);
     }
 
