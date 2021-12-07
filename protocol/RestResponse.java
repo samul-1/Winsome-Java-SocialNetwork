@@ -8,7 +8,6 @@ public class RestResponse {
     private final int code;
     private final String body;
     private final Map<String, String> headers = new HashMap<>();
-
     private static final Map<Integer, String> verboseCodes = initMap();
 
     private static Map<Integer, String> initMap() {
@@ -26,15 +25,14 @@ public class RestResponse {
     }
 
     public RestResponse(int code) {
-        this.code = code;
-        this.body = "";
-        // this.headers.put("content-type", "application/json");
-        this.headers.put("content-length", String.valueOf(this.body.length()));
+        this(code, "");
     }
 
     public RestResponse(int code, String body) {
         this.code = code;
         this.body = body;
+        this.headers.put("content-type", "application/json");
+        this.headers.put("content-length", String.valueOf(this.body.length()));
     }
 
     private String getVerboseCode() {
@@ -46,9 +44,7 @@ public class RestResponse {
         for (Map.Entry<String, String> entry : this.headers.entrySet()) {
             ret += entry.getKey() + ": " + entry.getValue() + "\r\n";
         }
-        ret += "\r\n" + this.body +
-                "\r\n\r\n";
+        ret += "\r\n" + this.body + "\r\n\r\n";
         return ret;
     }
-
 }

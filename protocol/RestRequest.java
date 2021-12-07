@@ -17,6 +17,8 @@ public class RestRequest {
     private final String URI_PARAMETER_TOKEN = "<id>";
 
     private RestRequest(String path, HttpMethod method, Map<String, String> headers, String body) {
+        // TODO this should only be done in the parseRequestString method, because you
+        // don't want your client doing this when you create a request to send to server
         String[] pathAndParameter = this.getParsedRequestPath(path);
 
         this.path = pathAndParameter[0];
@@ -82,10 +84,7 @@ public class RestRequest {
          * 
          */
         try (BufferedReader reader = new BufferedReader(new StringReader(request))) {
-            System.out.println("REQ: " + request);
-
             String reqLine = reader.readLine(); // first line contains HTTP method and URI
-            System.out.println("REQLINE: " + reqLine);
             String[] reqTokens = reqLine.split(" ");
             if (reqTokens.length != 3) {
                 throw new IllegalArgumentException("Invalid HTTP request line");

@@ -90,18 +90,18 @@ public class DataStoreService {
         return this.userPosts.get(username);
     }
 
-    public void addFollower(String username, String newFollower) {
-        this.followers.computeIfPresent(username, (__, followerSet) -> {
+    public boolean addFollower(String username, String newFollower) {
+        return this.followers.computeIfPresent(username, (__, followerSet) -> {
             followerSet.add(newFollower);
             return followerSet;
-        });
+        }) != null;
     }
 
-    public void removeFollower(String username, String removedFollower) {
-        this.followers.computeIfPresent(username, (__, followerSet) -> {
+    public boolean removeFollower(String username, String removedFollower) {
+        return this.followers.computeIfPresent(username, (__, followerSet) -> {
             followerSet.remove(removedFollower);
             return followerSet;
-        });
+        }) != null;
     }
 
     public Set<Post> getUserFeed(String username) {
@@ -151,20 +151,16 @@ public class DataStoreService {
         }) == null;
     }
 
-    public boolean addPostReaction(String username, UUID postId, short reactionValue) {
-        Reaction newReaction = new Reaction(username, reactionValue);
-
+    public boolean addPostReaction(UUID postId, Reaction reaction) {
         return this.posts.computeIfPresent(postId, (__, post) -> {
-            post.addReaction(newReaction);
+            post.addReaction(reaction);
             return post;
         }) != null;
     }
 
-    public boolean addPostComment(String username, UUID postId, String comment) {
-        Comment newComment = new Comment(username, comment);
-
+    public boolean addPostComment(UUID postId, Comment comment) {
         return this.posts.computeIfPresent(postId, (__, post) -> {
-            post.addComment(newComment);
+            post.addComment(comment);
             return post;
         }) != null;
     }

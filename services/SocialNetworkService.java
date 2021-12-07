@@ -1,6 +1,8 @@
 package services;
 
+import entities.Comment;
 import entities.Post;
+import entities.Reaction;
 import exceptions.BadRequestException;
 import exceptions.PermissionDeniedException;
 import exceptions.ResourceNotFoundException;
@@ -23,21 +25,31 @@ public class SocialNetworkService {
 
     // }
 
-    // public RestResponse followUserHandler(AuthenticatedRestRequest request) {
+    public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
+        if (this.store.addFollower(request.getRequest().getBody(), request.getUser().getUsername())) {
+            return new RestResponse(204);
+        }
+        throw new ResourceNotFoundException();
+    }
 
-    // }
+    public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
+        if (this.store.removeFollower(request.getRequest().getBody(), request.getUser().getUsername())) {
+            return new RestResponse(204);
+        }
+        throw new ResourceNotFoundException();
+    }
 
-    // public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) {
+    public RestResponse listMyPostsHandler(AuthenticatedRestRequest request) {
+        String body = new Serializer<Post[]>()
+                .serialize((Post[]) this.store.getUserPosts(request.getUser().getUsername()).toArray());
+        return new RestResponse(200, body);
+    }
 
-    // }
-
-    // public RestResponse listMyPostsHandler(AuthenticatedRestRequest request) {
-
-    // }
-
-    // public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
-
-    // }
+    public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
+        String body = new Serializer<Post[]>()
+                .serialize((Post[]) this.store.getUserFeed(request.getUser().getUsername()).toArray());
+        return new RestResponse(200, body);
+    }
 
     public RestResponse createPostHandler(AuthenticatedRestRequest request) throws BadRequestException {
         String postData = request.getRequest().getBody();
@@ -78,13 +90,37 @@ public class SocialNetworkService {
 
     // }
 
-    // public RestResponse ratePostHandler(AuthenticatedRestRequest request) {
+    public RestResponse ratePostHandler(AuthenticatedRestRequest request)
+            throws BadRequestException, ResourceNotFoundException {
+        Reaction reaction;
+        try {
+            reaction = new Serializer<Reaction>().parse(request.getRequest().getBody(), Reaction.class);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException();
+        }
+        reaction.setUser(request.getUser().getUsername());
 
-    // }
+        if (this.store.addPostReaction(request.getRequest().getPathParameter(), reaction)) {
+            return new RestResponse(200);
+        }
+        throw new ResourceNotFoundException();
+    }
 
-    // public RestResponse createCommentHandler(AuthenticatedRestRequest request) {
+    public RestResponse createCommentHandler(AuthenticatedRestRequest request)
+            throws BadRequestException, ResourceNotFoundException {
+        Comment comment;
+        try {
+            comment = new Serializer<Comment>().parse(request.getRequest().getBody(), Comment.class);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException();
+        }
+        comment.setUser(request.getUser().getUsername());
 
-    // }
+        if (this.store.addPostComment(request.getRequest().getPathParameter(), comment)) {
+            return new RestResponse(201, new Serializer<Comment>().serialize(comment));
+        }
+        throw new ResourceNotFoundException();
+    }
 
     // public RestResponse showWalletHandler(AuthenticatedRestRequest request) {
 

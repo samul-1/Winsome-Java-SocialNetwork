@@ -1,8 +1,12 @@
 package entities;
 
 public class Reaction {
-    private final String voterUsername;
+    private String voterUsername;
     private final short value;
+
+    public Reaction(short value) {
+        this(null, value);
+    }
 
     public Reaction(String username, short value) {
         if (username == null || username.length() == 0) {
@@ -14,5 +18,9 @@ public class Reaction {
 
         this.voterUsername = username;
         this.value = value;
+    }
+
+    public void setUser(String username) {
+        this.voterUsername = username;
     }
 }
