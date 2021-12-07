@@ -1,5 +1,8 @@
 package services;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,6 +23,10 @@ public class Serializer<T> {
     }
 
     public T parse(String source, Class<T> cls) throws JsonMappingException, JsonProcessingException {
+        return mapper.readValue(source, this.mapper.getTypeFactory().constructType(cls));
+    }
+
+    public T parse(File source, Class<T> cls) throws IOException {
         return mapper.readValue(source, this.mapper.getTypeFactory().constructType(cls));
     }
 

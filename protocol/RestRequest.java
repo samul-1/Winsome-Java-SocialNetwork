@@ -71,7 +71,7 @@ public class RestRequest {
             }
         }
 
-        pair[0] = constructedString;
+        pair[0] = constructedString.substring(1); // remove the extra `/` at the beginning
         return pair;
     }
 
@@ -82,7 +82,10 @@ public class RestRequest {
          * 
          */
         try (BufferedReader reader = new BufferedReader(new StringReader(request))) {
+            System.out.println("REQ: " + request);
+
             String reqLine = reader.readLine(); // first line contains HTTP method and URI
+            System.out.println("REQLINE: " + reqLine);
             String[] reqTokens = reqLine.split(" ");
             if (reqTokens.length != 3) {
                 throw new IllegalArgumentException("Invalid HTTP request line");

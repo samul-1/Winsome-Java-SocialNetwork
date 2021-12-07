@@ -1,65 +1,65 @@
 [
     {
-        "path": "users",
-        "methods": {
+        "path": "/users",
+        "actions": {
             "GET": "userListHandler"
         }
     },
     {
-        "path": "users/following",
-        "methods": {
+        "path": "/users/following",
+        "actions": {
             "GET": "followingListHandler",
             "PUT": "followUserHandler",
             "DELETE": "unfollowUserHandler"
         }
     },
     {
-        "path": "posts/my-posts",
-        "methods": {
+        "path": "/posts/my-posts",
+        "actions": {
             "GET": "listMyPostsHandler"
         }
     },
     {
-        "path": "posts",
-        "methods": {
+        "path": "/posts",
+        "actions": {
             "GET": "showFeedHandler",
             "POST": "createPostHandler"
         }
     },
     {
-        "path": "posts/<id>",
-        "methods": {
+        "path": "/posts/<id>",
+        "actions": {
             "GET": "showPostHandler",
             "DELETE": "deletePostHandler"
         }
     },
     {
-        "path": "posts/<id>/rewin",
-        "methods": {
+        "path": "/posts/<id>/rewin",
+        "actions": {
             "POST": "rewinPostHandler"
         }
     },
     {
-        "path": "posts/<id>/rate",
-        "methods": {
+        "path": "/posts/<id>/rate",
+        "actions": {
             "POST": "ratePostHandler"
         }
     },
     {
-        "path": "posts/<id>/comments",
-        "methods": {
+        "path": "/posts/<id>/comments",
+        "actions": {
             "POST": "createCommentHandler"
         }
     },
     {
-        "path": "wallet",
-        "methods": {
+        "path": "/wallet",
+        "actions": {
             "GET": "showWalletHandler"
         }
     },
     {
-        "path": "wallet/btc",
-        "methods": {
+        "path": "/wallet/btc",
+        "actions": {
             "GET": "showWalletInBitcoinHandler"
         }
     }

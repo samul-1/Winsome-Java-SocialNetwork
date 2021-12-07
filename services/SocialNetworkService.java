@@ -16,28 +16,28 @@ public class SocialNetworkService {
     }
 
     public RestResponse userListHandler(AuthenticatedRestRequest request) {
-
+        return new RestResponse(500);
     }
 
-    public RestResponse followingListHandler(AuthenticatedRestRequest request) {
+    // public RestResponse followingListHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse followUserHandler(AuthenticatedRestRequest request) {
+    // public RestResponse followUserHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) {
+    // public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse listMyPostsHandler(AuthenticatedRestRequest request) {
+    // public RestResponse listMyPostsHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
+    // public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
     public RestResponse createPostHandler(AuthenticatedRestRequest request) throws BadRequestException {
         String postData = request.getRequest().getBody();
@@ -74,23 +74,24 @@ public class SocialNetworkService {
         return new RestResponse(204);
     }
 
-    public RestResponse rewinPostHandler(AuthenticatedRestRequest request) {
+    // public RestResponse rewinPostHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse ratePostHandler(AuthenticatedRestRequest request) {
+    // public RestResponse ratePostHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse createCommentHandler(AuthenticatedRestRequest request) {
+    // public RestResponse createCommentHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse showWalletHandler(AuthenticatedRestRequest request) {
+    // public RestResponse showWalletHandler(AuthenticatedRestRequest request) {
 
-    }
+    // }
 
-    public RestResponse showWalletInBitcoinHandler(AuthenticatedRestRequest request) {
+    // public RestResponse showWalletInBitcoinHandler(AuthenticatedRestRequest
+    // request) {
 
-    }
+    // }
 }

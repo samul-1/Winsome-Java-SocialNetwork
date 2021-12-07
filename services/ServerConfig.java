@@ -4,7 +4,7 @@ import java.net.InetAddress;
 
 public class ServerConfig {
     private InetAddress serverAddr; // = Inet4Address.getLocalHost();
-    private int tcpPort = 6666;
+    private int tcpPort = 8000;
     private int udpPort = 33333;
     private InetAddress multicastAddr; // = InetAddress.getByName("239.255.32.32");
     private int multicastPort = 44444;

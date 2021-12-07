@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import protocol.AuthenticatedRestRequest;
 import protocol.RestRequest;
 import services.SocialNetworkService;
 import exceptions.MethodNotSupportedException;
@@ -39,24 +40,31 @@ public class ApiRouter {
          * doesn't have a handler for the request http method.
          * 
          */
+
+        System.out.println("REQ IN ROUTER: " + request.getMethod().name() + " --- " + request.getPath());
         Class<?> serviceClass = SocialNetworkService.class;
 
         ApiRoute matchingRoute = this.resolveRoute(request.getPath());
 
         if (matchingRoute == null) {
+            System.out.println("matching route null");
             throw new RouteNotFoundException();
         }
 
         Method handler = null;
         try {
+            System.out.println("Handler method: " + matchingRoute.getMethodAction(request.getMethod()));
             // find handler method name based on the HTTP method of the request
-            handler = serviceClass.getMethod(matchingRoute.getMethodAction(request.getMethod()));
+            handler = serviceClass.getMethod(matchingRoute.getMethodAction(request.getMethod()),
+                    AuthenticatedRestRequest.class);
         } catch (NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
             assert false; // this is never supposed to happen
         }
 
         if (handler == null) {
+            System.out.println("handler null");
+
             // matched route doesn't support the requested HTTP method
             throw new MethodNotSupportedException();
         }

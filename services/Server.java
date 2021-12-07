@@ -1,5 +1,6 @@
 package services;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,29 +40,21 @@ public class Server {
     private ServerConfig config;
     private Selector selector;
 
-    public Server() {
-        try {
-            this.loadConfig();
-            this.loadRouter();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    public Server(File config, File apiSchema) throws IOException {
+        this.loadConfig(config);
+        this.loadRouter(apiSchema);
+
         DataStoreService store = new DataStoreService(this.config.getStorageLocation());
         this.service = new SocialNetworkService(store);
         this.authMiddleware = new AuthenticationMiddleware(store);
     }
 
-    private void loadConfig() throws JsonMappingException, JsonProcessingException {
-        // TODO read json file
-        String jsonConfig = "";
-        this.config = new Serializer<ServerConfig>().parse(jsonConfig, ServerConfig.class);
+    private void loadConfig(File config) throws IOException {
+        this.config = new Serializer<ServerConfig>().parse(config, ServerConfig.class);
     }
 
-    private void loadRouter() throws JsonMappingException, JsonProcessingException {
-        // TODO read json file
-        String jsonRoutes = "";
-        this.router = new ApiRouter(new Serializer<ApiRoute[]>().parse(jsonRoutes, ApiRoute[].class));
+    private void loadRouter(File apiSchema) throws IOException {
+        this.router = new ApiRouter(new Serializer<ApiRoute[]>().parse(apiSchema, ApiRoute[].class));
     }
 
     private class ClientConnectionState {
@@ -69,9 +62,6 @@ public class Server {
     }
 
     public void start() {
-        System.out.println("Server address: " + this.config.getServerAddr());
-        System.out.println("Listening on port " + this.config.getTcpPort() + "...");
-
         try {
             ServerSocketChannel srvSktChan = ServerSocketChannel.open();
             ServerSocket skt = srvSktChan.socket();
@@ -80,6 +70,8 @@ public class Server {
             skt.bind(new InetSocketAddress(this.config.getServerAddr(), this.config.getTcpPort()));
             srvSktChan.configureBlocking(false);
             srvSktChan.register(selector, SelectionKey.OP_ACCEPT);
+            System.out.println("Server address: " + this.config.getServerAddr());
+            System.out.println("Listening on port " + this.config.getTcpPort() + "...");
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -87,7 +79,9 @@ public class Server {
 
         while (true) {
             try {
+                System.out.println("ready to accept...");
                 this.selector.select();
+                System.out.println("accepted...");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -136,7 +130,8 @@ public class Server {
         // get previously stored response to be written to client
         RestResponse response = ((ClientConnectionState) key.attachment()).pendingResponse;
 
-        ByteBuffer buf = ByteBuffer.wrap(response.toString().getBytes());
+        ByteBuffer buf = ByteBuffer.wrap(response.toString().getBytes("UTF-8"));
+        System.out.println("Written:\n" + response.toString());
         clientSkt.write(buf);
 
         // remove OP_WRITE from the interest set and replace it with OP_READ
@@ -155,6 +150,8 @@ public class Server {
         }
         buf.flip();
 
+        // System.out.println("Read:\n" +
+        // StandardCharsets.UTF_8.decode(buf).toString());
         RestRequest request = RestRequest.parseRequestString(StandardCharsets.UTF_8.decode(buf).toString());
         RestResponse response = handleRequest(request);
 
@@ -187,9 +184,9 @@ public class Server {
         // resolve route to get the handler method for this request
         try {
             handler = this.router.getRequestHandler(request);
-        } catch (MethodNotSupportedException e) {
-            return new RestResponse(404);
         } catch (RouteNotFoundException e) {
+            return new RestResponse(404);
+        } catch (MethodNotSupportedException e) {
             return new RestResponse(405);
         }
 
