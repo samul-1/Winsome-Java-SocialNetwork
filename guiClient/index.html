@@ -14,20 +14,68 @@
         .animate-light-pulse {
             animation: pulse 3s cubic-bezier(.6,1,.6,.9) infinite;
         }
+        .view {
+            display: none;
+        }
+        .current-view {
+            display: block !important;
+        }
+        .avatar {
+            background-image: url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1024px-User-avatar.svg.png");
+            background-size: contain;
+        }
     </style>
 </head>
 <body>
+    <div id="notification" class="opacity-0 w-3/5 mx-auto bg-green-300 text-green-900 rounded-md transition-opacity duration-100 shadow-2xl text-center px-4 py-2.5 fixed top-6 left-1/2 transform -translate-x-1/2 z-50"></div>
     <div class="my-4 mx-8 flex flex-col z-10">
-        <h1 class="animate-light-pulse font-medium text-6xl text-center text-white">
+        <h1 class="animate-light-pulse font-medium text-6xl text-center text-white mb-10">
             Winsome
         </h1>
-        <div class="bg-white py-8 flex space-y-4 flex-col mx-auto mt-32 border py-4 rounded-lg shadow-xl w-3/5">
-            <h2 class="mb-6 text-3xl text-center text-blue-800 font-medium">Login</h2>
-            <input id="form-username" type="text" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Username" />
-            <input id="form-password" type="password" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Password" />
-            <button
-            onclick="login()"
-            class="mx-auto rounded-md px-4 py-2 font-medium bg-indigo-800 w-60 text-white hover:bg-indigo-900">Entra</button>
+        <div class="view current-view" id="login-view">
+            <div class="bg-white py-8 flex space-y-4 flex-col mx-auto mt-24 border py-4 rounded-lg shadow-xl w-3/5">
+                <h2 class="mb-6 text-3xl text-center text-blue-800 font-medium">Login</h2>
+                <input id="form-username" type="text" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Username" />
+                <input id="form-password" type="password" class="w-4/5 mx-auto rounded-md px-2 py-4 border border-gray-200" placeholder="Password" />
+                <button
+                onclick="login()"
+                class="mx-auto rounded-md px-4 py-2 font-medium bg-indigo-800 w-60 text-white hover:bg-indigo-900">Entra</button>
+            </div>
+        </div>
+        <div id="navbar" class="hidden w-full py-2 px-10 flex h-12 text-white bg-gray-800 rounded-t-lg">
+            <p id="my-username" class="mr-auto my-auto text-lg"></p> <button class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600" onclick="logout()">Logout</button>
+        </div>
+        <div class="view" id="feed-view">
+            <div class="bg-white py-8 flex px-6 space-y-4 flex-col border py-4 rounded-b-lg shadow-xl w-full">
+                <h2 class="mb-6 text-3xl text-center text-blue-800 font-medium">Il tuo feed</h2>
+                <div class="my-4 mx-auto w-full p-6 rounded-md border border-gray-300">
+                    <div class="flex space-x-2 mb-4">
+                        <div class="avatar w-10 h-10 shadow-md bg-gray-50 rounded-full"></div>
+                        <h3 class="font-medium my-auto text-xl text-blue-800">Titolo del post</h3>
+                    </div>
+                    <div>
+                        <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
+                    </div>
+                </div>
+                <div class="my-4 mx-auto w-full p-6 rounded-md border border-gray-300">
+                    <div class="flex space-x-2 mb-6">
+                        <div class="avatar w-10 h-10 shadow-md bg-gray-50 rounded-full"></div>
+                        <h3 class="font-medium my-auto text-2xl text-blue-800">Titolo del post</h3>
+                    </div>
+                    <div>
+                        <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
+                    </div>
+                </div>
+                <div class="my-4 mx-auto w-full p-6 rounded-md border border-gray-300">
+                    <div class="flex space-x-2 mb-6">
+                        <div class="avatar w-10 h-10 shadow-md bg-gray-50 rounded-full"></div>
+                        <h3 class="font-medium my-auto text-2xl text-blue-800">Titolo del post</h3>
+                    </div>
+                    <div>
+                        <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script>

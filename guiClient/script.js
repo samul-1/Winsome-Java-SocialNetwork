@@ -1,10 +1,27 @@
 async function login () {
   try {
-    const response = await axios.post('login', getLoginParameter())
+    const response = await axios.post('login', getLoginParameters())
     axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data
-    switchViewTo('feed')
+    switchViewTo('feed-view')
+    notify('Login effettuato con successo')
+    document.getElementById('navbar').classList.remove('hidden')
+    document.getElementById(
+      'my-username'
+    ).innerHTML = getLoginParameters().split('\n')[0]
   } catch {
     showErrorNotification('Username o password errati.')
+  }
+}
+
+async function logout () {
+  try {
+    await axios.post('logout')
+    axios.defaults.headers.common['Authorization'] = undefined
+    switchViewTo('login-view')
+    notify('Logout effettuato con successo')
+    document.getElementById('navbar').classList.add('hidden')
+  } catch {
+    showErrorNotification('Si è verificato un errore durante il logout.')
   }
 }
 
@@ -16,7 +33,7 @@ async function upVotePost () {}
 
 async function downVotePost () {}
 
-function getLoginParameter () {
+function getLoginParameters () {
   return `${document.getElementById('form-username').value}\n${
     document.getElementById('form-password').value
   }`
@@ -26,4 +43,19 @@ function showErrorNotification (msg) {
   alert(msg)
 }
 
-function switchViewTo (viewId) {}
+function switchViewTo (viewId) {
+  document
+    .getElementsByClassName('current-view')[0]
+    .classList.remove('current-view')
+  document.getElementById(viewId).classList.add('current-view')
+}
+
+function notify (msg) {
+  document.getElementById('notification').classList.remove('opacity-0')
+  document.getElementById('notification').classList.add('opacity-100')
+  document.getElementById('notification').innerHTML = msg
+  setTimeout(() => {
+    document.getElementById('notification').classList.remove('opacity-100')
+    document.getElementById('notification').classList.add('opacity-0')
+  }, 3000)
+}

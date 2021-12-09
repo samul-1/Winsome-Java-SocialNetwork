@@ -49,6 +49,7 @@ public class AuthenticationMiddleware {
             throw new NoAuthenticationProvidedException();
         }
         AuthenticationToken token = new AuthenticationToken(tokenString.substring("Bearer ".length()));
+        System.out.println("Token used is: " + token.getToken());
         User requestingUser = this.store.getUser(token);
 
         if (requestingUser == null) {

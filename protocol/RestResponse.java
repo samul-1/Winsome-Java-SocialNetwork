@@ -36,6 +36,7 @@ public class RestResponse {
 
         // for usage inside of browser
         this.headers.put("Access-Control-Allow-Origin", "*");
+        this.headers.put("Access-Control-Allow-Headers", "*");
     }
 
     private String getVerboseCode() {

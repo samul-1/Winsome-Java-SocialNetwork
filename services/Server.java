@@ -210,6 +210,7 @@ public class Server {
         } catch (NoAuthenticationProvidedException e) {
             return new RestResponse(401);
         } catch (InvalidTokenException e) {
+            System.out.println("invalid token");
             return new RestResponse(400);
         }
         // invoke handler to execute the request and get
@@ -231,6 +232,7 @@ public class Server {
                     throw (Exception) e.getCause();
                 }
             } catch (BadRequestException e1) {
+                System.out.println("Raised bad request");
                 return new RestResponse(400);
             } catch (PermissionDeniedException e1) {
                 return new RestResponse(403);

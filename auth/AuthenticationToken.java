@@ -19,4 +19,14 @@ public class AuthenticationToken {
     public String getToken() {
         return this.token;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.token.equals(((AuthenticationToken) obj).getToken());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.token.hashCode();
+    }
 }

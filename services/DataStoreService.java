@@ -56,6 +56,7 @@ public class DataStoreService {
          * token.
          * 
          */
+        System.out.println("set token " + token.getToken() + " for user " + user.getUsername());
         this.sessions.put(token, user);
     }
 
