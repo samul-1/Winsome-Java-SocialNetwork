@@ -59,3 +59,12 @@ function notify (msg) {
     document.getElementById('notification').classList.add('opacity-0')
   }, 3000)
 }
+
+function showComments (postId) {
+  document
+    .getElementById('post-' + postId + '-comments')
+    .classList.toggle('hidden')
+  const toggle = document.getElementById('post-' + postId + '-comments-toggle')
+  toggle.innerHTML =
+    toggle.innerHTML[0] == 'M' ? 'Nascondi commenti' : 'Mostra commenti'
+}
