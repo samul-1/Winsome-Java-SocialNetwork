@@ -28,11 +28,21 @@
 </head>
 <body>
     <div id="notification" class="opacity-0 w-3/5 mx-auto bg-green-300 text-green-900 rounded-md transition-opacity duration-100 shadow-2xl text-center px-4 py-2.5 fixed top-6 left-1/2 transform -translate-x-1/2 z-50"></div>
+    <div id="post-creation-backdrop" class="hidden w-screen h-screen absolute top-0 left-0 bg-gray-800 opacity-50 z-40"></div>
+    <div id="post-creation-modal" class="flex flex-col pt-10 pb-16 px-8 hidden w-9/12 absolute top-0 left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 bg-white z-50 rounded-lg shadow-lg my-4">
+        <div class="flex">
+            <h1 class="text-2xl font-semibold mb-10">Nuovo post</h1>
+            <button class="ml-auto bg-red-500 w-6 h-6 rounded-full text-white font-bold pb-1" onclick="togglePostCreation()">&times;</button>
+        </div>
+        <input id="new-post-title" type="text" maxlength="20" placeholder="Titolo" class="w-full rounded-md border border-gray-200 py-2 px-4" />
+        <textarea id="new-post-content" placeholder="Contenuto del post" rows="10" maxlength="200" class="mt-6 w-full rounded-md border border-gray-200 py-2 px-4"></textarea>
+        <button class="mt-8 ml-auto rounded-md px-4 py-1.5 bg-green-500 text-white hover:bg-green-600" onclick="createPost()">Nuovo post</button>
+    </div>
     <div class="z-10 flex flex-col mx-8 my-4">
         <h1 class="mb-10 text-6xl font-medium text-center text-white animate-light-pulse">
             Winsome
         </h1>
-        <div class="view" id="login-view">
+        <div class="view current-view" id="login-view">
             <div class="flex flex-col w-3/5 py-4 py-8 mx-auto mt-24 space-y-4 bg-white border rounded-lg shadow-xl">
                 <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Login</h2>
                 <input id="form-username" type="text" class="w-4/5 px-2 py-4 mx-auto border border-gray-200 rounded-md" placeholder="Username" />
@@ -43,71 +53,23 @@
             </div>
         </div>
         <div id="navbar" class="flex hidden w-full h-12 px-10 py-2 text-white bg-gray-800 rounded-t-lg">
-            <p id="my-username" class="my-auto mr-auto text-lg"></p> <button class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600" onclick="logout()">Logout</button>
+            <p id="my-username" class="my-auto text-lg"></p> 
+            <button class="ml-4 rounded-md px-4 py-0.5 bg-green-500 text-white hover:bg-green-600 mr-auto" onclick="togglePostCreation()">Nuovo post</button>
+            <button class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600" onclick="logout()">Logout</button>
         </div>
-        <div class="view current-view" id="feed-view">
+        <div class="view" id="feed-view">
             <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
                 <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Il tuo feed</h2>
-                <div id="post-POSTID" class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
-                    <div class="flex mb-4 space-x-2">
-                        <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
-                        <h3 class="my-auto text-xl font-medium text-blue-800">Titolo del post</h3>
-                    </div>
-                    <div class="flex">
-                        <div class="w-11/12">
-                            <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
-                        </div>
-                        <div class="ml-auto flex flex-col space-y-6">
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="vote('postId', 1)">+1</button>
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="vote('postId', -1)">&minus;1</button>
-                        </div>
-                    </div>
-                    <p id="post-POSTID-comments-toggle" onclick="showComments('POSTID')" class="mt-6 mb-4 text-blue-900 cursor-pointer hover:underline">Mostra commenti</p>
-                    <div id="post-POSTID-comments" class="hidden">
-                        <div class="my-1">
-                            <div class="flex mb-6 space-x-2">
-                                <div class="w-4 h-4 my-auto rounded-full shadow-md avatar bg-gray-50"></div>
-                                <p class="my-auto">Contenuto del commento.</p>
-                            </div>
-                        </div>
-                        <div class="my-0.5">
-                            <div class="flex mb-6 space-x-2">
-                                <div class="flex space-x-1">
-                                    <div class="w-4 h-4 my-auto rounded-full shadow-md avatar bg-gray-50"></div>
-                                <p class="text-blue-800 font-medium">User</p>
-                                </div>
-                                <p class="my-auto">Contenuto del commento.</p>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <input id="post-POSTID-comment-input" type="text" placeholder="Commenta..." class="rounded-full py-2 px-3 border border-gray-300 w-4/5" />
-                            <button class="bg-blue-800 hover:bg-blue-900 rounded-xl shadow-md py-1 px-3 my-auto text-white" onclick="addComment('postId')">Invia</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md">
-                    <div class="flex mb-6 space-x-2">
-                        <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
-                        <h3 class="my-auto text-2xl font-medium text-blue-800">Titolo del post</h3>
-                    </div>
-                    <div>
-                        <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
-                    </div>
-                </div>
-                <div class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md">
-                    <div class="flex mb-6 space-x-2">
-                        <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
-                        <h3 class="my-auto text-2xl font-medium text-blue-800">Titolo del post</h3>
-                    </div>
-                    <div>
-                        <p>Contenuto del post, Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas minima non, minus quod dicta odio facere suscipit pariatur debitis a nulla, magni sit eum ratione adipisci expedita aliquid dignissimos eius?</p>
-                    </div>
+                <div id="feed-content">
                 </div>
             </div>
         </div>
     </div>
     <script>
         axios.defaults.baseURL = 'http://127.0.0.1:8000'
+        setTimeout(()=> {
+            document.getElementById("feed-content").innerHTML = getPostHtml("id", "title", "wejoriefwop", "username", [{username: "abc", content: "qweuiorwiqo"},{username: "qwerty", content:"asdjfoiew"}])
+        }, 100)
     </script>
 </body>
 </html>
