@@ -8,10 +8,13 @@ async function login () {
     document.getElementById(
       'my-username'
     ).innerHTML = getLoginParameters().split('\n')[0]
-    await getUsers()
   } catch {
     showErrorNotification('Username o password errati.')
+    return
   }
+  await getUsers()
+  await getMyPosts()
+  await getFeed()
 }
 
 async function logout () {
@@ -26,13 +29,36 @@ async function logout () {
   }
 }
 
-async function getUsers() {
+async function getUsers () {
   try {
-    const response = await axios.get("users")
+    const response = await axios.get('users')
+    document.getElementById('user-list-content').innerHTML = getUserListHtml(
+      response.data
+    )
     console.log(response.data)
   } catch {
-    showErrorNotification("Si è verificato un errore accedendo alla lista degli utenti. Riprova.")
+    showErrorNotification(
+      'Si è verificato un errore accedendo alla lista degli utenti. Riprova.'
+    )
   }
+}
+
+async function getMyPosts () {
+  const response = await axios.get('posts/my-posts')
+  console.log(response.data)
+  response.data.forEach(post => {
+    console.log(post)
+    document.getElementById('my-posts-content').innerHTML += getPostHtml(post)
+  })
+}
+
+async function getFeed () {
+  const response = await axios.get('posts')
+  console.log(response.data)
+  response.data.forEach(post => {
+    console.log(post)
+    document.getElementById('feed-content').innerHTML += getPostHtml(post)
+  })
 }
 
 async function createPost () {}
@@ -58,6 +84,12 @@ function switchViewTo (viewId) {
     .getElementsByClassName('current-view')[0]
     .classList.remove('current-view')
   document.getElementById(viewId).classList.add('current-view')
+  // const btn = document.getElementById(viewId + '-btn')
+  // if (btn) {
+  //   btn.classList.toggle('opacity-60')
+  //   btn.classList.toggle('cursor-not-allowed')
+  //   btn.classList.toggle('pointer-events-none')
+  // }
 }
 
 function notify (msg) {
@@ -79,30 +111,44 @@ function showComments (postId) {
     toggle.innerHTML[0] == 'M' ? 'Nascondi commenti' : 'Mostra commenti'
 }
 
-function getPostHtml (id, title, content, username, comments) {
-  let ret = `<div id="post-${id}" class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
+function getPostHtml (post) {
+  let ret = `<div id="post-${
+    post.id
+  }" class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
                   <div class="flex mb-4 space-x-2">
                   <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
                 <div class="flex space-x-2">
-                  <h3 class="my-auto text-xl font-medium text-blue-800">${title}</h3>
-                  <p class="my-auto text-sm text-gray-400 font-light">&mdash; di ${username}</p>
+                  <h3 class="my-auto text-xl font-medium text-blue-800">${
+                    post.title
+                  }</h3>
+                  <p class="my-auto text-sm text-gray-400 font-light">&mdash; di ${
+                    post.author
+                  }</p>
                 </div>
                 </div>
                     <div class="flex">
                         <div class="w-11/12">
-                            <p>${content}</p>
+                            <p>${post.content}</p>
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
                             <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="vote('postId', 1)">+1</button>
                             <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="vote('postId', -1)">&minus;1</button>
                         </div>
                     </div>
-                    <p id="post-${id}-comments-toggle" onclick="showComments('${id}')" class="mt-6 mb-4 text-blue-900 cursor-pointer hover:underline">Mostra commenti</p>
-                    <div id="post-${id}-comments" class="hidden">
-                        ${getCommentsHtml(comments)}
+                    <p id="post-${
+                      post.id
+                    }-comments-toggle" onclick="showComments('${
+    post.id
+  }')" class="mt-6 mb-4 text-blue-900 cursor-pointer hover:underline">Mostra commenti</p>
+                    <div id="post-${post.id}-comments" class="hidden">
+                        ${getCommentsHtml(post.comments)}
                         <div class="flex space-x-2">
-                            <input id="post-${id}-comment-input" type="text" placeholder="Commenta..." class="rounded-full py-2 px-3 border border-gray-300 w-4/5" />
-                            <button class="bg-blue-800 hover:bg-blue-900 rounded-xl shadow-md py-1 px-3 my-auto text-white" onclick="addComment('${id}')">Invia</button>
+                            <input id="post-${
+                              post.id
+                            }-comment-input" type="text" placeholder="Commenta..." class="rounded-full py-2 px-3 border border-gray-300 w-4/5" />
+                            <button class="bg-blue-800 hover:bg-blue-900 rounded-xl shadow-md py-1 px-3 my-auto text-white" onclick="addComment('${
+                              post.id
+                            }')">Invia</button>
                         </div>
                     </div>
                 </div>`
@@ -116,13 +162,47 @@ function getCommentsHtml (comments) {
                             <div class="flex mb-6 space-x-2">
                                 <div class="flex space-x-1">
                                     <div class="w-4 h-4 my-auto rounded-full shadow-md avatar bg-gray-50"></div>
-                                <p class="text-blue-800 font-medium">${comment.username}</p>
+                                    <p class="text-blue-800 font-medium">${comment.username}</p>
                                 </div>
                                 <p class="my-auto">${comment.content}</p>
                             </div>
                         </div>`),
     ''
   )
+}
+
+function getUserListHtml (userList) {
+  return userList.reduce(
+    (acc, user) =>
+      (acc += `<div class="flex my-3">
+                  <div class="w-4 h-4 my-auto rounded-full shadow-md avatar bg-gray-50"></div>
+                  <p class="ml-1 mr-4 text-blue-800 font-medium">${
+                    user.username
+                  }</p>
+                  <div class="flex space-x-2">
+                    ${getTagsHtml(user.tags)}
+                  </div>
+                  <button class="ml-auto rounded-md px-4 py-0.5 text-sm bg-green-500 text-white hover:bg-green-600">Segui</button>
+               </div>`),
+    ''
+  )
+}
+
+function getTagsHtml (tagList) {
+  return tagList.reduce((acc, tag) => {
+    const { bg, text } = getRandomTagColor()
+    acc += `<div style="min-width: 75px" class="text-center px-2 py-0.5 rounded-full shadow-sm opacity-90 text-sm text-${text} bg-${bg}">${tag}</div>`
+    return acc
+  }, '')
+}
+
+function getRandomTagColor () {
+  const colors = ['yellow', 'green', 'blue', 'indigo', 'purple', 'red']
+  const color = colors[Math.round(Math.random() * (colors.length - 1))]
+  return {
+    bg: color + '-300',
+    text: color + '-900'
+  }
 }
 
 function togglePostCreation () {

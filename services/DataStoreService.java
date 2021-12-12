@@ -24,9 +24,17 @@ public class DataStoreService {
     public DataStoreService(String storageFilename) {
         // TODO implement loading the state from a file
 
-        // dummy user for testing the web interface
-        String[] tags = { "a", "b", "c" };
-        this.registerUser("admin", new HashSet<String>(Arrays.asList(tags)), new Password("password"));
+        // dummy data for testing the web interface
+        String[] tags1 = { "Crypto", "CS", "JavaScript", "Python", "C++" };
+        String[] tags2 = { "CS", "OCaml", "Python", "C" };
+        String[] tags3 = { "Unix", "CS", "JavaScript", "Java", "C++" };
+        this.registerUser("admin", new HashSet<String>(Arrays.asList(tags1)), new Password("p"));
+        this.registerUser("admin2", new HashSet<String>(Arrays.asList(tags2)), new Password("password"));
+        this.registerUser("admin3", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
+        this.addPost("admin", new Post("admin", "Test post 1", "Test post content abc abc abc"));
+        this.addPost("admin", new Post("admin", "Test post 2", "Test post content abc abc abc"));
+        this.addPost("admin2", new Post("admin2", "Test post 3", "Test post content abc abc abc"));
+        this.addFollower("admin2", "admin");
     }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {
