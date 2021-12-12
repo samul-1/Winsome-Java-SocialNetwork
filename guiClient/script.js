@@ -8,6 +8,7 @@ async function login () {
     document.getElementById(
       'my-username'
     ).innerHTML = getLoginParameters().split('\n')[0]
+    await getUsers()
   } catch {
     showErrorNotification('Username o password errati.')
   }
@@ -22,6 +23,15 @@ async function logout () {
     document.getElementById('navbar').classList.add('hidden')
   } catch {
     showErrorNotification('Si è verificato un errore durante il logout.')
+  }
+}
+
+async function getUsers() {
+  try {
+    const response = await axios.get("users")
+    console.log(response.data)
+  } catch {
+    showErrorNotification("Si è verificato un errore accedendo alla lista degli utenti. Riprova.")
   }
 }
 

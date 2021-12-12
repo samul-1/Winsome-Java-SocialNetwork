@@ -2,6 +2,8 @@ package entities;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import auth.Password;
 
 public class User {
@@ -20,8 +22,22 @@ public class User {
         return this.username;
     }
 
+    public Set<String> getTags() {
+        return this.tags;
+    }
+
+    @JsonIgnore
     public Password getPassword() {
         return this.password;
+    }
+
+    public boolean isCompatibleWith(User user) {
+        for (String tag : user.getTags()) {
+            if (this.tags.contains(tag)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

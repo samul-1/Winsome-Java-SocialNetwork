@@ -66,7 +66,10 @@ public class SocialNetworkService {
     }
 
     public RestResponse userListHandler(AuthenticatedRestRequest request) {
-        return new RestResponse(500);
+        Set<User> users = this.store.getCompatibleUsers(request.getUser().getUsername());
+        String body = new Serializer<User[]>()
+                .serialize((User[]) ((users == null ? new HashSet<User>() : users).toArray(new User[0])));
+        return new RestResponse(200, body);
     }
 
     // public RestResponse followingListHandler(AuthenticatedRestRequest request) {
@@ -89,14 +92,14 @@ public class SocialNetworkService {
 
     public RestResponse listMyPostsHandler(AuthenticatedRestRequest request) {
         String body = new Serializer<Post[]>()
-                .serialize((Post[]) this.store.getUserPosts(request.getUser().getUsername()).toArray());
+                .serialize((Post[]) this.store.getUserPosts(request.getUser().getUsername()).toArray(new Post[0]));
         return new RestResponse(200, body);
     }
 
     public RestResponse showFeedHandler(AuthenticatedRestRequest request) {
         Set<Post> feed = this.store.getUserFeed(request.getUser().getUsername());
         String body = new Serializer<Post[]>()
-                .serialize((Post[]) ((feed == null ? new HashSet<Post>() : feed).toArray()));
+                .serialize((Post[]) ((feed == null ? new HashSet<Post>() : feed).toArray(new Post[0])));
         return new RestResponse(200, body);
     }
 

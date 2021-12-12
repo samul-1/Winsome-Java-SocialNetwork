@@ -76,6 +76,21 @@ public class DataStoreService {
         return this.users.get(username);
     }
 
+    public Set<User> getCompatibleUsers(String requestingUsername) {
+        Set<User> ret = new HashSet<>();
+        User requestingUser = this.getUser(requestingUsername);
+
+        this.users.forEach((_username, user) -> {
+            if (user.isCompatibleWith(requestingUser)) {
+                // if the requested username (A) is in the user's (B) follower
+                // set, then this user is followed by the requested username
+                // (A follows B)
+                ret.add(user);
+            }
+        });
+        return ret;
+    }
+
     public Set<String> getUserFollowers(String username) {
         return this.followers.get(username);
     }

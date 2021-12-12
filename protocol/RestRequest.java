@@ -73,7 +73,8 @@ public class RestRequest {
             }
         }
 
-        pair[0] = constructedString.substring(1); // remove the extra `/` at the beginning
+        // remove the extra `/` at the beginning
+        pair[0] = constructedString.length() > 1 ? constructedString.substring(1) : constructedString;
         return pair;
     }
 
