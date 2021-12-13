@@ -102,7 +102,27 @@ async function createPost () {
   }
 }
 
-async function createComment () {}
+function _createComment (postId) {
+  createComment(postId).then(() => {})
+}
+
+async function createComment (postId) {
+  console.log('creating')
+  const content = document.getElementById(`post-${postId}-comment-input`).value
+  try {
+    const response = await axios.post(`posts/${postId}/comments`, {
+      content
+    })
+    console.log(response)
+    const commentsElement = document.getElementById(
+      `post-${postId}-comments-content`
+    )
+    commentsElement.innerHTML += getCommentsHtml([response.data])
+    document.getElementById(`post-${postId}-comment-input`).value = ''
+  } catch {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+  }
+}
 
 async function upVotePost () {}
 
@@ -170,8 +190,12 @@ function getPostHtml (post) {
                             <p>${post.content}</p>
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="vote('postId', 1)">+1</button>
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="vote('postId', -1)">&minus;1</button>
+                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="vote(${
+                              post.id
+                            }, 1)">+1</button>
+                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="vote(${
+                              post.id
+                            }, -1)">&minus;1</button>
                         </div>
                     </div>
                     <p id="post-${
@@ -180,12 +204,16 @@ function getPostHtml (post) {
     post.id
   }')" class="mt-6 mb-4 text-blue-900 cursor-pointer hover:underline">Mostra commenti</p>
                     <div id="post-${post.id}-comments" class="hidden">
-                        ${getCommentsHtml(post.comments)}
+                        <div id="post-${
+                          post.id
+                        }-comments-content">${getCommentsHtml(
+    post.comments
+  )}</div>
                         <div class="flex space-x-2">
                             <input id="post-${
                               post.id
                             }-comment-input" type="text" placeholder="Commenta..." class="rounded-full py-2 px-3 border border-gray-300 w-4/5" />
-                            <button class="bg-blue-800 hover:bg-blue-900 rounded-xl shadow-md py-1 px-3 my-auto text-white" onclick="addComment('${
+                            <button class="bg-blue-800 hover:bg-blue-900 rounded-xl shadow-md py-1 px-3 my-auto text-white" onclick="_createComment('${
                               post.id
                             }')">Invia</button>
                         </div>

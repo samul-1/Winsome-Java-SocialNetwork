@@ -166,6 +166,7 @@ public class SocialNetworkService {
         try {
             comment = new Serializer<Comment>().parse(request.getRequest().getBody(), Comment.class);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new BadRequestException();
         }
         comment.setUser(request.getUser().getUsername());
