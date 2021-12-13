@@ -150,6 +150,7 @@ public class SocialNetworkService {
         try {
             reaction = new Serializer<Reaction>().parse(request.getRequest().getBody(), Reaction.class);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new BadRequestException();
         }
         reaction.setUser(request.getUser().getUsername());

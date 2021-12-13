@@ -39,7 +39,7 @@
         <button class="mt-8 ml-auto rounded-md px-4 py-1.5 bg-green-500 text-white hover:bg-green-600" onclick="createPost()">Nuovo post</button>
     </div>
     <div class="z-10 flex flex-col mx-8 my-4">
-        <h1 class="mb-10 text-6xl font-medium text-center text-white animate-light-pulse">
+        <h1 class="mb-8 text-5xl font-medium text-center text-white">
             Winsome
         </h1>
         <div class="view current-view" id="login-view">
@@ -53,24 +53,25 @@
             </div>
         </div>
         <div id="navbar" class="hidden flex w-full h-12 px-10 py-2 text-white bg-gray-800 rounded-t-lg">
-            <p id="my-username" class="my-auto text-lg"></p> 
-            <button class="ml-4 rounded-md px-4 py-0.5 bg-green-500 text-white hover:bg-green-600" onclick="togglePostCreation()">Nuovo post</button>
-            <button id="user-list-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent border border-gray-500 text-white hover:bg-gray-700" onclick="switchViewTo('user-list-view')">Utenti</button>
-            <button id="feed-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent border border-gray-500 text-white hover:bg-gray-700" onclick="switchViewTo('feed-view')">Feed</button>
-            <button id="my-posts-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent border border-gray-500 text-white hover:bg-gray-700 mr-auto" onclick="switchViewTo('my-posts-view')">I tuoi post</button>
+            <div class="my-auto w-6 h-6 mr-2 rounded-full shadow-md avatar bg-gray-50"></div>
+            <p id="my-username" class="my-auto"></p> 
+            <button class="ml-6 rounded-md px-4 py-0.5 bg-green-500 text-white hover:bg-green-600" onclick="togglePostCreation()">Nuovo post</button>
+            <button id="user-list-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700" onclick="switchViewTo('user-list-view')">Utenti</button>
+            <button id="feed-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700" onclick="switchViewTo('feed-view')">Feed</button>
+            <button id="my-posts-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700 mr-auto" onclick="switchViewTo('my-posts-view')">I tuoi post</button>
 
             <button class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600" onclick="logout()">Logout</button>
         </div>
         <div class="view" id="feed-view">
             <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
-                <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Il tuo feed</h2>
+                <h2 class="mb-2 text-3xl font-medium text-center text-blue-800">Il tuo feed</h2>
                 <div id="feed-content">
                 </div>
             </div>
         </div>
         <div class="view" id="my-posts-view">
             <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
-                <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Il tuo blog</h2>
+                <h2 class="mb-2 text-3xl font-medium text-center text-blue-800">Il tuo blog</h2>
                 <div id="my-posts-content">
                 </div>
             </div>

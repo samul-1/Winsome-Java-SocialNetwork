@@ -1,14 +1,25 @@
+function getCurrentViewButton () {
+  const currViewId = document.getElementsByClassName('current-view')[0].id
+  return document.getElementById(currViewId + '-btn')
+}
+
+function applyViewButtonStyle () {
+  getCurrentViewButton()?.classList.toggle('opacity-50')
+  getCurrentViewButton()?.classList.toggle('pointer-events-none')
+  getCurrentViewButton()?.classList.toggle('font-medium')
+}
+
 async function restoreToken () {
   const token = localStorage.getItem('winsome_token')
   const username = localStorage.getItem('winsome_username')
 
-  console.log(token, username)
-
   if (token && username) {
-    console.log('Restore')
-    await onLoginDone(username, token)
-  } else {
-    console.log('nothing to restore')
+    try {
+      await onLoginDone(username, token)
+    } catch {
+      localStorage.removeItem('winsome_token')
+      localStorage.removeItem('winsome_username')
+    }
   }
 }
 
@@ -106,6 +117,10 @@ function _createComment (postId) {
   createComment(postId).then(() => {})
 }
 
+function _vote (postId, value) {
+  vote(postId, value).then(() => {})
+}
+
 async function createComment (postId) {
   console.log('creating')
   const content = document.getElementById(`post-${postId}-comment-input`).value
@@ -124,9 +139,14 @@ async function createComment (postId) {
   }
 }
 
-async function upVotePost () {}
-
-async function downVotePost () {}
+async function vote (postId, value) {
+  try {
+    await axios.post(`posts/${postId}/rate`, value)
+  } catch (e) {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+    throw e
+  }
+}
 
 function getLoginParameters () {
   return `${document.getElementById('form-username').value}\n${
@@ -139,16 +159,12 @@ function showErrorNotification (msg) {
 }
 
 function switchViewTo (viewId) {
+  applyViewButtonStyle()
   document
     .getElementsByClassName('current-view')[0]
     .classList.remove('current-view')
   document.getElementById(viewId).classList.add('current-view')
-  // const btn = document.getElementById(viewId + '-btn')
-  // if (btn) {
-  //   btn.classList.toggle('opacity-60')
-  //   btn.classList.toggle('cursor-not-allowed')
-  //   btn.classList.toggle('pointer-events-none')
-  // }
+  applyViewButtonStyle()
 }
 
 function notify (msg) {
@@ -190,12 +206,12 @@ function getPostHtml (post) {
                             <p>${post.content}</p>
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="vote(${
+                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
                               post.id
-                            }, 1)">+1</button>
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="vote(${
+                            }', 1)">+1</button>
+                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
                               post.id
-                            }, -1)">&minus;1</button>
+                            }', -1)">&minus;1</button>
                         </div>
                     </div>
                     <p id="post-${
