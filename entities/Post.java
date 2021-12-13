@@ -4,9 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Post {
     private final UUID id;
-    private final String authorUsername;
+    private String authorUsername;
     private final String title;
     private final String content;
     private final Set<Comment> comments = new HashSet<Comment>();
@@ -23,8 +25,21 @@ public class Post {
         this.id = UUID.randomUUID();
     }
 
+    public Post(
+            @JsonProperty("title") String title,
+            @JsonProperty("content") String content) {
+        this.title = title;
+        this.content = content;
+        this.id = UUID.randomUUID();
+
+    }
+
     public UUID getId() {
         return this.id;
+    }
+
+    public void setAuthor(String username) {
+        this.authorUsername = username;
     }
 
     public String getAuthor() {
@@ -37,5 +52,9 @@ public class Post {
 
     public void addReaction(Reaction reaction) {
         this.reactions.add(reaction);
+    }
+
+    public Set<Comment> getComments() {
+        return this.comments;
     }
 }

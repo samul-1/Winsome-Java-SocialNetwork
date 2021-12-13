@@ -110,8 +110,10 @@ public class SocialNetworkService {
         try {
             post = new Serializer<Post>().parse(postData, Post.class);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new BadRequestException();
         }
+        post.setAuthor(request.getUser().getUsername());
         this.store.addPost(request.getUser().getUsername(), post);
 
         return new RestResponse(201, new Serializer<Post>().serialize(post));

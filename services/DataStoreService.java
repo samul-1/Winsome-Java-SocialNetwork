@@ -31,10 +31,18 @@ public class DataStoreService {
         this.registerUser("admin", new HashSet<String>(Arrays.asList(tags1)), new Password("p"));
         this.registerUser("admin2", new HashSet<String>(Arrays.asList(tags2)), new Password("password"));
         this.registerUser("admin3", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
-        this.addPost("admin", new Post("admin", "Test post 1", "Test post content abc abc abc"));
-        this.addPost("admin", new Post("admin", "Test post 2", "Test post content abc abc abc"));
-        this.addPost("admin2", new Post("admin2", "Test post 3", "Test post content abc abc abc"));
+
+        Post post1 = new Post("admin", "Test post 1", "Test post1 content abc abc abc");
+        System.out.println(post1.getComments());
+
+        this.addPost("admin", post1);
+        this.addPost("admin", new Post("admin", "Test post 2", "Test post2 content abc abc abc"));
+        this.addPost("admin2", new Post("admin2", "Test post 3", "Test post3 content abc abc abc"));
         this.addFollower("admin2", "admin");
+        this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
+        this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
+        this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
+        System.out.println(post1.getComments());
     }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {
@@ -153,6 +161,7 @@ public class DataStoreService {
     public void addPost(String username, Post newPost) {
         this.userPosts.computeIfPresent(username, (__, postSet) -> {
             postSet.add(newPost);
+            this.posts.put(newPost.getId(), newPost);
             return postSet;
         });
     }
@@ -192,6 +201,7 @@ public class DataStoreService {
 
     public boolean addPostComment(UUID postId, Comment comment) {
         return this.posts.computeIfPresent(postId, (__, post) -> {
+            System.out.println("Adding comment");
             post.addComment(comment);
             return post;
         }) != null;

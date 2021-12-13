@@ -61,7 +61,24 @@ async function getFeed () {
   })
 }
 
-async function createPost () {}
+async function createPost () {
+  try {
+    const response = await axios.post('posts', {
+      title: document.getElementById('new-post-title').value,
+      content: document.getElementById('new-post-content').value
+    })
+    const myPostsContent = document.getElementById('my-posts-content')
+    myPostsContent.innerHTML =
+      getPostHtml(response.data) + myPostsContent.innerHTML
+    notify('Post creato con successo')
+    console.log(response)
+    togglePostCreation()
+  } catch {
+    showErrorNotification(
+      'Si è verificato un errore durante la creazione del post. Riprova.'
+    )
+  }
+}
 
 async function createComment () {}
 
@@ -162,7 +179,7 @@ function getCommentsHtml (comments) {
                             <div class="flex mb-6 space-x-2">
                                 <div class="flex space-x-1">
                                     <div class="w-4 h-4 my-auto rounded-full shadow-md avatar bg-gray-50"></div>
-                                    <p class="text-blue-800 font-medium">${comment.username}</p>
+                                    <p class="text-blue-800 font-medium">${comment.authorUsername}</p>
                                 </div>
                                 <p class="my-auto">${comment.content}</p>
                             </div>
