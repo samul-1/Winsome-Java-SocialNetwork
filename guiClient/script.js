@@ -1,26 +1,48 @@
+async function restoreToken () {
+  const token = localStorage.getItem('winsome_token')
+  const username = localStorage.getItem('winsome_username')
+
+  console.log(token, username)
+
+  if (token && username) {
+    console.log('Restore')
+    await onLoginDone(username, token)
+  } else {
+    console.log('nothing to restore')
+  }
+}
+
+async function onLoginDone (username, token) {
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
+  await getUsers()
+  await getMyPosts()
+  await getFeed()
+  switchViewTo('feed-view')
+  document.getElementById('navbar').classList.remove('hidden')
+  document.getElementById('my-username').innerHTML = username
+}
+
 async function login () {
   try {
     const response = await axios.post('login', getLoginParameters())
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data
-    switchViewTo('feed-view')
+    const token = response.data
+    const username = getLoginParameters().split('\n')[0]
     notify('Login effettuato con successo')
-    document.getElementById('navbar').classList.remove('hidden')
-    document.getElementById(
-      'my-username'
-    ).innerHTML = getLoginParameters().split('\n')[0]
+    localStorage.setItem('winsome_token', token)
+    localStorage.setItem('winsome_username', username)
+    await onLoginDone(username, token)
   } catch {
     showErrorNotification('Username o password errati.')
     return
   }
-  await getUsers()
-  await getMyPosts()
-  await getFeed()
 }
 
 async function logout () {
   try {
     await axios.post('logout')
     axios.defaults.headers.common['Authorization'] = undefined
+    localStorage.removeItem('winsome_token')
+    localStorage.removeItem('winsome_username')
     switchViewTo('login-view')
     notify('Logout effettuato con successo')
     document.getElementById('navbar').classList.add('hidden')
