@@ -23,14 +23,18 @@ async function restoreToken () {
   }
 }
 
+function getMyUsername () {
+  return document.getElementById('my-username').innerHTML
+}
+
 async function onLoginDone (username, token) {
+  document.getElementById('my-username').innerHTML = username
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token
   await getUsers()
   await getMyPosts()
   await getFeed()
   switchViewTo('feed-view')
   document.getElementById('navbar').classList.remove('hidden')
-  document.getElementById('my-username').innerHTML = username
 }
 
 async function login () {
@@ -142,6 +146,21 @@ async function createComment (postId) {
 async function vote (postId, value) {
   try {
     await axios.post(`posts/${postId}/rate`, value)
+    document
+      .getElementById(`post-${postId}-${value == 1 ? 'up' : 'down'}vote-btn`)
+      .classList.add(
+        'pointer-events-none',
+        `bg-${value == 1 ? 'green' : 'red'}-200`
+      )
+    document
+      .querySelector(`#post-${postId}-reactions`)
+      .querySelector(value == 1 ? '.upvotes' : '.downvotes')
+      .classList.remove('hidden')
+    document
+      .querySelector(`#post-${postId}-reactions`)
+      .querySelector(
+        value == 1 ? '.upvotes-content' : '.downvotes-content'
+      ).innerHTML += getMyUsername()
   } catch (e) {
     showErrorNotification('Si è verificato un errore. Riprova.')
     throw e
@@ -189,7 +208,7 @@ function showComments (postId) {
 function getPostHtml (post) {
   let ret = `<div id="post-${
     post.id
-  }" class="w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
+  }" class="post w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
                   <div class="flex mb-4 space-x-2">
                   <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
                 <div class="flex space-x-2">
@@ -206,14 +225,27 @@ function getPostHtml (post) {
                             <p>${post.content}</p>
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
-                              post.id
-                            }', 1)">+1</button>
-                            <button class="py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
-                              post.id
-                            }', -1)">&minus;1</button>
+                            <button id="post-${post.id}-upvote-btn" class="${
+    post.reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
+      ? 'pointer-events-none bg-green-200'
+      : ''
+  } py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
+    post.id
+  }', 1)">+1</button>
+                            <button id="post-${post.id}-downvote-btn" class="${
+    post.reactions.some(
+      r => r.voterUsername == getMyUsername() && r.value == -1
+    )
+      ? 'pointer-events-none bg-red-200'
+      : ''
+  } py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
+    post.id
+  }', -1)">&minus;1</button>
                         </div>
                     </div>
+                    <div class="mt-4 text-xs flex space-x-6" id="post-${
+                      post.id
+                    }-reactions">${getReactionsHtml(post.reactions)}</div>
                     <p id="post-${
                       post.id
                     }-comments-toggle" onclick="showComments('${
@@ -236,6 +268,28 @@ function getPostHtml (post) {
                     </div>
                 </div>`
   return ret
+}
+
+function getReactionsHtml (reactions) {
+  const upVotesHtml = `<div class="my-2"><p><strong class="upvotes text-green-800 mr-1 ${
+    reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
+      ? ''
+      : 'hidden'
+  }">+1</strong><span class="upvotes-content">${reactions
+    .filter(r => r.value == 1)
+    .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
+    .slice(0, -2)}</span></p></div>`
+
+  const downVotesHtml = `<div class="my-2"><p><strong class="downvotes text-red-800 mr-1 ${
+    reactions.some(r => r.voterUsername == getMyUsername() && r.value == -1)
+      ? ''
+      : 'hidden'
+  }">&minus;1</strong><span class="downvotes-content">${reactions
+    .filter(r => r.value == -1)
+    .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
+    .slice(0, -2)}</span></p></div>`
+
+  return upVotesHtml + downVotesHtml
 }
 
 function getCommentsHtml (comments) {
