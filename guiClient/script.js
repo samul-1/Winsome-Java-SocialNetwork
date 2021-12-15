@@ -129,6 +129,13 @@ function _rewin (postId) {
   rewin(postId).then(() => {})
 }
 
+function _deletePost (postId) {
+  if (!confirm('Sei sicuro di voler cancellare questo post?')) {
+    return
+  }
+  deletePost(postId).then(() => {})
+}
+
 async function createComment (postId) {
   console.log('creating')
   const content = document.getElementById(`post-${postId}-comment-input`).value
@@ -154,6 +161,16 @@ async function rewin (postId) {
     myPostsContent.innerHTML =
       getPostHtml(response.data) + myPostsContent.innerHTML
     notify('Post rewinnato con successo. Lo trovi nel tuo blog!')
+  } catch {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+  }
+}
+
+async function deletePost (postId) {
+  try {
+    await axios.delete(`posts/${postId}`)
+    document.getElementById(`post-${postId}`).outerHTML = ''
+    notify('Post cancellato con successo.')
   } catch {
     showErrorNotification('Si è verificato un errore. Riprova.')
   }
@@ -225,7 +242,12 @@ function getPostHtml (post) {
   const actualPost = post.originalPost ?? post
   let ret = `<div id="post-${
     post.id
-  }" class="post w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
+  }" class="post relative w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
+  <button class="${
+    post.author != getMyUsername() ? 'hidden pointer-events-none' : ''
+  } absolute opacity-60 hover:opacity-100 right-0 top-0 mt-4 mr-4 bg-red-500 w-6 h-6 rounded-full text-white font-bold pb-1" onclick="_deletePost('${
+    post.id
+  }')">&times;</button>
   ${
     post.originalPost
       ? `<div class="mb-6">

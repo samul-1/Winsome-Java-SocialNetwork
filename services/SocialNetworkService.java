@@ -31,16 +31,11 @@ public class SocialNetworkService {
         if (bodyTokens.length != 2) {
             // request body is expected to have the username on the
             // first line and the password on the second line
-            System.out.println("------- BODY is: " + request.getRequest().getBody() + "-----------");
-            System.out.println(
-                    "BODY TOKEN LENGTH IS " + bodyTokens.length + "\n\n\nFIRST ONE IS" + bodyTokens[0] + "\n\n\n");
             throw new BadRequestException();
         }
 
         String username = bodyTokens[0];
         Password password = new Password(bodyTokens[1]);
-
-        System.out.println("username: " + username + "password: " + password.getPassword());
 
         User authenticatingUser = this.store.getUser(username);
 
