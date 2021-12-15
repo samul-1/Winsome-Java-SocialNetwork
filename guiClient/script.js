@@ -125,6 +125,10 @@ function _vote (postId, value) {
   vote(postId, value).then(() => {})
 }
 
+function _rewin (postId) {
+  rewin(postId).then(() => {})
+}
+
 async function createComment (postId) {
   console.log('creating')
   const content = document.getElementById(`post-${postId}-comment-input`).value
@@ -138,6 +142,18 @@ async function createComment (postId) {
     )
     commentsElement.innerHTML += getCommentsHtml([response.data])
     document.getElementById(`post-${postId}-comment-input`).value = ''
+  } catch {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+  }
+}
+
+async function rewin (postId) {
+  try {
+    const response = await axios.post(`posts/${postId}/rewin`)
+    const myPostsContent = document.getElementById('my-posts-content')
+    myPostsContent.innerHTML =
+      getPostHtml(response.data) + myPostsContent.innerHTML
+    notify('Post rewinnato con successo. Lo trovi nel tuo blog!')
   } catch {
     showErrorNotification('Si è verificato un errore. Riprova.')
   }
@@ -206,30 +222,44 @@ function showComments (postId) {
 }
 
 function getPostHtml (post) {
+  const actualPost = post.originalPost ?? post
   let ret = `<div id="post-${
     post.id
   }" class="post w-full p-6 mx-auto my-4 border border-gray-300 rounded-md post hover:shadow-inner">
+  ${
+    post.originalPost
+      ? `<div class="mb-6">
+    <div class="flex space-x-2">
+    <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
+    <h3 class="my-auto text-xl font-medium text-blue-800">Rewinnato da ${post.author}</h3>
+    </div>
+  </div>`
+      : ''
+  }
+  <div class="${
+    post.originalPost ? 'rounded-md shadow-md border my-2 p-4 bg-blue-50' : ''
+  }">
                   <div class="flex mb-4 space-x-2">
                   <div class="w-10 h-10 rounded-full shadow-md avatar bg-gray-50"></div>
                 <div class="flex space-x-2">
                   <h3 class="my-auto text-xl font-medium text-blue-800">${
-                    post.title
+                    actualPost.title
                   }</h3>
                   <p class="my-auto text-sm text-gray-400 font-light">&mdash; di ${
-                    post.author
+                    actualPost.author
                   }</p>
                 </div>
                 </div>
                     <div class="flex">
                         <div class="w-11/12">
-                            <p>${post.content}</p>
+                            <p>${actualPost.content}</p>
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
                             <button id="post-${post.id}-upvote-btn" class="${
     post.reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
       ? 'pointer-events-none bg-green-200'
       : ''
-  } py-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
+  } p-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
     post.id
   }', 1)">+1</button>
                             <button id="post-${post.id}-downvote-btn" class="${
@@ -238,14 +268,21 @@ function getPostHtml (post) {
     )
       ? 'pointer-events-none bg-red-200'
       : ''
-  } py-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
+  } p-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
     post.id
   }', -1)">&minus;1</button>
+  <button id="post-${post.id}-rewin-btn" class="${
+    actualPost.author != getMyUsername() && !post.originalPost
+      ? ''
+      : 'hidden pointer-events-none'
+  } text-sm py-1.5 px-2 rounded-xl transition-colors duration-75 text-indigo-800 hover:text-indigo-900 hover:bg-indigo-200 active:bg-indigo-300 font-semibold" onclick="_rewin('${
+    post.id
+  }', -1)">Rewin</button>
                         </div>
                     </div>
                     <div class="mt-4 text-xs flex space-x-6" id="post-${
                       post.id
-                    }-reactions">${getReactionsHtml(post.reactions)}</div>
+                    }-reactions">${getReactionsHtml(post.reactions)}</div></div>
                     <p id="post-${
                       post.id
                     }-comments-toggle" onclick="showComments('${

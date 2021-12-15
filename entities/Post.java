@@ -13,6 +13,7 @@ public class Post {
     private final String content;
     private final Set<Comment> comments = new HashSet<Comment>();
     private final Set<Reaction> reactions = new HashSet<Reaction>();
+    private Post originalPost; // for retwin feature
 
     public Post(String author, String title, String content) {
         if (author == null || author.length() == 0 || title == null || title.length() == 0 || content == null
@@ -32,6 +33,14 @@ public class Post {
         this.content = content;
         this.id = UUID.randomUUID();
 
+    }
+
+    public Post(String retwiner, Post retwinedPost) {
+        this.authorUsername = retwiner;
+        this.title = "";
+        this.content = "";
+        this.originalPost = retwinedPost;
+        this.id = UUID.randomUUID();
     }
 
     public UUID getId() {

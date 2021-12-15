@@ -140,9 +140,21 @@ public class SocialNetworkService {
         return new RestResponse(204);
     }
 
-    // public RestResponse rewinPostHandler(AuthenticatedRestRequest request) {
+    public RestResponse rewinPostHandler(AuthenticatedRestRequest request)
+            throws ResourceNotFoundException, PermissionDeniedException {
+        Post post = this.store.getPost(request.getRequest().getPathParameter());
+        if (post == null) {
+            throw new ResourceNotFoundException();
+        }
+        if (post.getAuthor() == request.getUser().getUsername()) {
+            // can't rewin your own posts
+            throw new PermissionDeniedException();
+        }
 
-    // }
+        Post rewinPost = new Post(request.getUser().getUsername(), post);
+        this.store.addPost(request.getUser().getUsername(), rewinPost);
+        return new RestResponse(200, new Serializer<Post>().serialize(rewinPost));
+    }
 
     public RestResponse ratePostHandler(AuthenticatedRestRequest request)
             throws BadRequestException, ResourceNotFoundException {
