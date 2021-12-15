@@ -67,9 +67,12 @@ public class SocialNetworkService {
         return new RestResponse(200, body);
     }
 
-    // public RestResponse followingListHandler(AuthenticatedRestRequest request) {
-
-    // }
+    public RestResponse followingListHandler(AuthenticatedRestRequest request) {
+        Set<String> users = this.store.getUserFollowing(request.getUser().getUsername());
+        String body = new Serializer<String[]>()
+                .serialize((String[]) ((users == null ? new HashSet<String>() : users).toArray(new String[0])));
+        return new RestResponse(200, body);
+    }
 
     public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
         if (this.store.addFollower(request.getRequest().getBody(), request.getUser().getUsername())) {

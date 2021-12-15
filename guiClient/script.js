@@ -1,3 +1,5 @@
+let followingUsers = []
+
 function getCurrentViewButton () {
   const currViewId = document.getElementsByClassName('current-view')[0].id
   return document.getElementById(currViewId + '-btn')
@@ -48,7 +50,6 @@ async function login () {
     await onLoginDone(username, token)
   } catch {
     showErrorNotification('Username o password errati.')
-    return
   }
 }
 
@@ -60,6 +61,9 @@ async function logout () {
     localStorage.removeItem('winsome_username')
     switchViewTo('login-view')
     notify('Logout effettuato con successo')
+    document.getElementById('my-posts-content').innerHTML = ''
+    document.getElementById('feed-content').innerHTML = ''
+    document.getElementById('user-list-content').innerHTML = ''
     document.getElementById('navbar').classList.add('hidden')
   } catch {
     showErrorNotification('Si è verificato un errore durante il logout.')
@@ -69,6 +73,8 @@ async function logout () {
 async function getUsers () {
   try {
     const response = await axios.get('users')
+    const followingList = await axios.get('users/following')
+    followingUsers = followingList.data
     document.getElementById('user-list-content').innerHTML = getUserListHtml(
       response.data
     )
@@ -82,7 +88,10 @@ async function getUsers () {
 
 async function getMyPosts () {
   const response = await axios.get('posts/my-posts')
-  console.log(response.data)
+  if (response.data.length == 0) {
+    document.getElementById('my-posts-content').innerHTML =
+      'Non hai post. Clicca sul bottone in alto a sinistra per crearne uno!'
+  }
   response.data.forEach(post => {
     console.log(post)
     document.getElementById('my-posts-content').innerHTML += getPostHtml(post)
@@ -90,10 +99,13 @@ async function getMyPosts () {
 }
 
 async function getFeed () {
+  document.getElementById('feed-content').innerHTML = ''
   const response = await axios.get('posts')
-  console.log(response.data)
+  if (response.data.length == 0) {
+    document.getElementById('feed-content').innerHTML =
+      'Non ci sono post nel tuo feed. Inizia a seguire qualcuno!'
+  }
   response.data.forEach(post => {
-    console.log(post)
     document.getElementById('feed-content').innerHTML += getPostHtml(post)
   })
 }
@@ -117,6 +129,19 @@ async function createPost () {
   }
 }
 
+function _followUser (username) {
+  followUser(username).then(() => {})
+  document.getElementById(
+    'user-' + username + '-follow-btn'
+  ).innerHTML = `<button onclick="_unfollowUser('${username}')" class="ml-auto rounded-md px-4 py-0.5 text-sm bg-red-500 text-white hover:bg-red-600">Smetti di seguire</button>`
+}
+function _unfollowUser (username) {
+  unfollowUser(username).then(() => {})
+  document.getElementById(
+    'user-' + username + '-follow-btn'
+  ).innerHTML = `<button onclick="_followUser('${username}')" class="ml-auto rounded-md px-4 py-0.5 text-sm bg-green-500 text-white hover:bg-green-600">Segui</button>`
+}
+
 function _createComment (postId) {
   createComment(postId).then(() => {})
 }
@@ -134,6 +159,26 @@ function _deletePost (postId) {
     return
   }
   deletePost(postId).then(() => {})
+}
+
+async function followUser (username) {
+  try {
+    await axios.put('users/following', username)
+    await getFeed()
+    notify('Hai iniziato a seguire ' + username)
+  } catch {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+  }
+}
+
+async function unfollowUser (username) {
+  try {
+    await axios.delete('users/following', { data: username })
+    await getFeed()
+    notify('Hai smesso di seguire ' + username)
+  } catch {
+    showErrorNotification('Si è verificato un errore. Riprova.')
+  }
 }
 
 async function createComment (postId) {
@@ -281,6 +326,8 @@ function getPostHtml (post) {
     post.reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
       ? 'pointer-events-none bg-green-200'
       : ''
+  } ${
+    post.author == getMyUsername() ? 'hidden' : ''
   } p-1 px-2 rounded-xl transition-colors duration-75 text-green-800 hover:text-green-900 hover:bg-green-200 active:bg-green-300 font-semibold" onclick="_vote('${
     post.id
   }', 1)">+1</button>
@@ -290,6 +337,8 @@ function getPostHtml (post) {
     )
       ? 'pointer-events-none bg-red-200'
       : ''
+  } ${
+    post.author == getMyUsername() ? 'hidden' : ''
   } p-1 px-2 rounded-xl transition-colors duration-75 text-red-800 hover:text-red-900 hover:bg-red-200 active:bg-red-300 font-semibold" onclick="_vote('${
     post.id
   }', -1)">&minus;1</button>
@@ -331,18 +380,14 @@ function getPostHtml (post) {
 
 function getReactionsHtml (reactions) {
   const upVotesHtml = `<div class="my-2"><p><strong class="upvotes text-green-800 mr-1 ${
-    reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
-      ? ''
-      : 'hidden'
+    reactions.some(r => r.value == 1) ? '' : 'hidden'
   }">+1</strong><span class="upvotes-content">${reactions
     .filter(r => r.value == 1)
     .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
     .slice(0, -2)}</span></p></div>`
 
   const downVotesHtml = `<div class="my-2"><p><strong class="downvotes text-red-800 mr-1 ${
-    reactions.some(r => r.voterUsername == getMyUsername() && r.value == -1)
-      ? ''
-      : 'hidden'
+    reactions.some(r => r.value == -1) ? '' : 'hidden'
   }">&minus;1</strong><span class="downvotes-content">${reactions
     .filter(r => r.value == -1)
     .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
@@ -378,7 +423,19 @@ function getUserListHtml (userList) {
                   <div class="flex space-x-2">
                     ${getTagsHtml(user.tags)}
                   </div>
-                  <button class="ml-auto rounded-md px-4 py-0.5 text-sm bg-green-500 text-white hover:bg-green-600">Segui</button>
+                  <div class="ml-auto" id="user-${
+                    user.username
+                  }-follow-btn"><button onclick="_${
+        followingUsers.includes(user.username) ? 'un' : ''
+      }followUser('${user.username}')" class="${
+        user.username == getMyUsername() ? 'hidden' : ''
+      } rounded-md px-4 py-0.5 text-sm ${
+        followingUsers.includes(user.username)
+          ? 'bg-red-500 hover:bg-red-600'
+          : 'bg-green-500 hover:bg-green-600'
+      } text-white">${
+        followingUsers.includes(user.username) ? 'Smetti di seguire' : 'Segui'
+      }</button></div>
                </div>`),
     ''
   )
