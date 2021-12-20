@@ -17,8 +17,6 @@ public class RestRequest {
     private final String URI_PARAMETER_TOKEN = "<id>";
 
     private RestRequest(String path, HttpMethod method, Map<String, String> headers, String body) {
-        // TODO this should only be done in the parseRequestString method, because you
-        // don't want your client doing this when you create a request to send to server
         String[] pathAndParameter = this.getParsedRequestPath(path);
 
         this.path = pathAndParameter[0];
@@ -145,7 +143,8 @@ public class RestRequest {
 
     @Override
     public String toString() {
-        String ret = this.method.name() + " " + this.path + "\r\n";
+        String ret = this.method.name() + " " + this.path.replace(this.URI_PARAMETER_TOKEN,
+                this.pathParameter != null ? this.pathParameter.toString() : "") + "\r\n";
         for (Map.Entry<String, String> entry : this.headers.entrySet()) {
             ret += entry.getKey() + ": " + entry.getValue() + "\r\n";
         }

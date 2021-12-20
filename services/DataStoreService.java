@@ -21,9 +21,19 @@ public class DataStoreService {
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
 
     public DataStoreService(String storageFilename) {
-        // TODO implement loading the state from a file
+        // TODO implement loading the state from a file and periodically saving to it
 
         // dummy data for testing the web interface
+        loadFakeData();
+    }
+
+    private void loadFakeData() {
+        /**
+         * Utility function to load some fake data into the store,
+         * used for testing the browser GUI more easily with some
+         * data already present
+         * 
+         */
         String[] tags1 = { "Crypto", "CS", "JavaScript", "Python", "C++" };
         String[] tags2 = { "CS", "OCaml", "Python", "C" };
         String[] tags3 = { "Unix", "CS", "JavaScript", "Java", "C++" };
@@ -32,7 +42,6 @@ public class DataStoreService {
         this.registerUser("admin3", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
 
         Post post1 = new Post("admin", "Test post 1", "Test post1 content abc abc abc");
-        System.out.println(post1.getComments());
 
         this.addPost("admin", post1);
         this.addPost("admin", new Post("admin", "Test post 2", "Test post2 content abc abc abc"));
@@ -41,7 +50,6 @@ public class DataStoreService {
         this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
         this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
         this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
-        System.out.println(post1.getComments());
     }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {

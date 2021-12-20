@@ -155,15 +155,21 @@ public class Server {
         // StandardCharsets.UTF_8.decode(buf).toString());
         String reqString = StandardCharsets.UTF_8.decode(buf).toString();
         System.out.println("request: " + reqString);
-        RestRequest request = RestRequest.parseRequestString(reqString);
-
-        System.out.println("path: " + request.getPath() + "method: " + request.getMethod().name());
-
+        RestRequest request;
         RestResponse response;
-        if (request.getMethod() == HttpMethod.OPTIONS) {
-            response = new RestResponse(200);
-        } else {
-            response = handleRequest(request);
+
+        try {
+            request = RestRequest.parseRequestString(reqString);
+
+            if (request.getMethod() == HttpMethod.OPTIONS) {
+                // ignore OPTION requests sent from browsers
+                response = new RestResponse(200);
+            } else {
+                response = handleRequest(request);
+            }
+        } catch (IllegalArgumentException e) {
+            // a malformed HTTP request was sent
+            response = new RestResponse(400);
         }
 
         // remove OP_READ from the interest set and replace it with OP_WRITE
