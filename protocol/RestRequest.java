@@ -16,7 +16,7 @@ public class RestRequest {
 
     private final String URI_PARAMETER_TOKEN = "<id>";
 
-    private RestRequest(String path, HttpMethod method, Map<String, String> headers, String body) {
+    public RestRequest(String path, HttpMethod method, Map<String, String> headers, String body) {
         String[] pathAndParameter = this.getParsedRequestPath(path);
 
         this.path = pathAndParameter[0];

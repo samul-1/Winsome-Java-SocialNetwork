@@ -40,8 +40,25 @@ public class RestResponse {
         this.headers.put("Access-Control-Allow-Headers", "*");
     }
 
+    public static RestResponse fromString(String source) {
+        // TODO implement
+        return null;
+    }
+
     private String getVerboseCode() {
         return RestResponse.verboseCodes.get(this.code);
+    }
+
+    public boolean isSuccessResponse() {
+        return (this.code / 100) == 2;
+    }
+
+    public boolean isClientErrorResponse() {
+        return (this.code / 100) == 4;
+    }
+
+    public boolean isServerErrorResponse() {
+        return (this.code / 100) == 5;
     }
 
     public String toString() {

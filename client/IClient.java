@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import auth.Password;
@@ -7,7 +8,7 @@ import entities.Post;
 import entities.User;
 
 public interface IClient {
-    void login(String username, Password password);
+    void login(String username, String password) throws IOException;
 
     void logout(String username);
 
