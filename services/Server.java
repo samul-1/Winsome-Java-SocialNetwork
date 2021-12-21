@@ -77,9 +77,9 @@ public class Server {
 
         while (true) {
             try {
-                System.out.println("ready to accept...");
+                // System.out.println("ready to accept...");
                 this.selector.select();
-                System.out.println("accepted...");
+                // System.out.println("accepted...");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -146,7 +146,7 @@ public class Server {
         int readCount = clientSkt.read(buf);
         if (readCount == -1) { // no data was read, client closed connection
             // the caller will catch this and remove the key from the readset
-            System.out.println("nothing to read");
+            // System.out.println("nothing to read");
             throw new IOException();
         }
         buf.flip();
@@ -159,6 +159,7 @@ public class Server {
         RestResponse response;
 
         try {
+            System.out.println(reqString);
             request = RestRequest.parseRequestString(reqString);
 
             if (request.getMethod() == HttpMethod.OPTIONS) {

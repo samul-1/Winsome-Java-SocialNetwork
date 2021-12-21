@@ -68,17 +68,19 @@ public class Client implements IClient {
                 String instructionLine = scanner.nextLine();
                 String[] instructionLineTokens = instructionLine.split(" ");
                 String command = instructionLineTokens[0];
-                String[] commandArguments = Arrays.copyOfRange(instructionLineTokens, 1, instructionLineTokens.length) 
+                String[] commandArguments = Arrays.copyOfRange(instructionLineTokens, 1, instructionLineTokens.length);
                 if (command.equals("EXIT")) {
                     break;
                 }
-                
+
                 // named arguments used in the switch branches
                 String username, password, title, content, comment, parameter;
                 UUID postId;
                 int value;
 
-                switch (instructionLine) {
+                String renderedResponseData = "";
+                System.out.println(instructionLine);
+                switch (command) {
                     case "login":
                         username = this.getStringArgument(commandArguments, 0);
                         password = this.getStringArgument(commandArguments, 1);
@@ -92,7 +94,8 @@ public class Client implements IClient {
                         parameter = instructionLineTokens[1];
                         switch (parameter) {
                             case "users":
-                                this.listUsers();
+                                User[] data = this.listUsers();
+                                renderedResponseData = new UserRenderer().render(data);
                                 break;
                             case "followers":
                                 this.listFollowers();
@@ -101,7 +104,7 @@ public class Client implements IClient {
                                 this.listFollowing();
                                 break;
                             default:
-                                System.out.println(this.UNKNOWN_OPERATION_MSG + "list " + parameter);
+                                System.out.println(this.UNKNOWN_OPERATION_MSG + "list- " + parameter);
                         }
                         break;
                     case "follow":
@@ -149,7 +152,7 @@ public class Client implements IClient {
                         break;
                     case "comment":
                         postId = this.getUUIDArgument(commandArguments, 0);
-                        comment = this.getStringArgument(commandArguments,1);
+                        comment = this.getStringArgument(commandArguments, 1);
                         this.addComment(postId, comment);
                         break;
                     case "wallet":
@@ -158,19 +161,15 @@ public class Client implements IClient {
                     default:
                         System.out.println(this.UNKNOWN_OPERATION_MSG + command);
                 }
-
-                ByteBuffer buf = ByteBuffer.wrap(instructionLine.getBytes());
-                sktChan.write(buf);
-
-                buf.flip();
-                sktChan.read(buf);
-                buf.flip();
-                System.out.println("Received: " + StandardCharsets.UTF_8.decode(buf).toString());
+                System.out.println(renderedResponseData);
             }
             this.sktChan.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        } catch (OperationFailedException e) {
+            System.out.println("OPERATION FAILED!");
+            e.printStackTrace();
         }
     }
 
@@ -191,17 +190,26 @@ public class Client implements IClient {
         this.sktChan.write(buf);
     }
 
+    private Map<String, String> getRequestHeaders() {
+        Map<String, String> ret = new HashMap<>();
+        ret.put("Authorization", "Bearer aaa");
+        return ret;
+    }
+
     private RestResponse receiveResponse() throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(this.BUF_CAPACITY);
         this.sktChan.read(buf);
-        RestResponse response = RestResponse.fromString(StandardCharsets.UTF_8.decode(buf).toString());
+        buf.flip();
+        String responseString = StandardCharsets.UTF_8.decode(buf).toString();
+        System.out.println("RESPONSE:\n" + responseString);
+        RestResponse response = RestResponse.fromString(responseString);
 
         return response;
     }
 
     @Override
     public void login(String username, String password) throws IOException, OperationFailedException {
-        RestRequest request = new RestRequest("login", HttpMethod.POST, null, username + "\n" + password);
+        RestRequest request = new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password);
         this.sendRequest(request);
         RestResponse response = this.receiveResponse();
 
@@ -214,7 +222,7 @@ public class Client implements IClient {
 
     @Override
     public void logout(String username) throws IOException, OperationFailedException {
-        RestRequest request = new RestRequest("logout", HttpMethod.POST, null, username);
+        RestRequest request = new RestRequest("/logout", HttpMethod.POST, this.getRequestHeaders(), username);
         this.sendRequest(request);
         RestResponse response = this.receiveResponse();
 
@@ -226,9 +234,18 @@ public class Client implements IClient {
     }
 
     @Override
-    public User[] listUsers() {
-        // TODO Auto-generated method stub
-        return null;
+    public User[] listUsers() throws IOException, OperationFailedException {
+        RestRequest request = new RestRequest("/users", HttpMethod.GET, this.getRequestHeaders());
+        this.sendRequest(request);
+        RestResponse response = this.receiveResponse();
+        if (response.isClientErrorResponse()) {
+            throw new OperationFailedException(this.clientMessages.get("cannot_log_out"));
+        } else if (response.isServerErrorResponse()) {
+            throw new OperationFailedException(this.clientMessages.get("server_error"));
+        }
+
+        User[] data = new Serializer<User[]>().parse(response.getBody(), User[].class);
+        return data;
     }
 
     @Override

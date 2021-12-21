@@ -3,16 +3,16 @@ package client;
 import java.io.IOException;
 import java.util.UUID;
 
-import auth.Password;
 import entities.Post;
 import entities.User;
+import exceptions.OperationFailedException;
 
 public interface IClient {
-    void login(String username, String password) throws IOException;
+    void login(String username, String password) throws IOException, OperationFailedException;
 
-    void logout(String username);
+    void logout(String username) throws IOException, OperationFailedException;
 
-    User[] listUsers();
+    User[] listUsers() throws IOException, OperationFailedException;
 
     User[] listFollowers();
 

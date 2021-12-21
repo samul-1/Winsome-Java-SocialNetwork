@@ -16,6 +16,10 @@ public class RestRequest {
 
     private final String URI_PARAMETER_TOKEN = "<id>";
 
+    public RestRequest(String path, HttpMethod method, Map<String, String> headers) {
+        this(path, method, headers, "");
+    }
+
     public RestRequest(String path, HttpMethod method, Map<String, String> headers, String body) {
         String[] pathAndParameter = this.getParsedRequestPath(path);
 
@@ -144,7 +148,7 @@ public class RestRequest {
     @Override
     public String toString() {
         String ret = this.method.name() + " " + this.path.replace(this.URI_PARAMETER_TOKEN,
-                this.pathParameter != null ? this.pathParameter.toString() : "") + "\r\n";
+                this.pathParameter != null ? this.pathParameter.toString() : "") + " HTTP/1.1\r\n";
         for (Map.Entry<String, String> entry : this.headers.entrySet()) {
             ret += entry.getKey() + ": " + entry.getValue() + "\r\n";
         }

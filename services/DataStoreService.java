@@ -50,6 +50,7 @@ public class DataStoreService {
         this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
         this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
         this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
+        this.setUserToken(this.getUser("admin"), new AuthenticationToken("aaa"));
     }
 
     public boolean registerUser(String username, Set<String> tags, Password password) {

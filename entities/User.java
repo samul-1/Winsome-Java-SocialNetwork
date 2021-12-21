@@ -3,6 +3,7 @@ package entities;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import auth.Password;
 
@@ -10,6 +11,14 @@ public class User {
     private final String username;
     private final Set<String> tags;
     private final Password password;
+
+    public User(@JsonProperty("username") String username,
+            @JsonProperty("tags") Set<String> tags) {
+        // TODO validate input
+        this.username = username;
+        this.tags = tags;
+        this.password = null;
+    }
 
     public User(String username, Set<String> tags, Password password) {
         // TODO validate input
