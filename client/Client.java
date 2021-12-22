@@ -17,7 +17,9 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
+import auth.AuthenticationToken;
 import auth.Password;
+import entities.Comment;
 import entities.Post;
 import entities.User;
 import exceptions.OperationFailedException;
@@ -31,6 +33,8 @@ public class Client implements IClient {
     private final String UNKNOWN_OPERATION_MSG = "Unknown operation: ";
     private final int BUF_CAPACITY = 4096 * 4096;
     private final ServerConfig config;
+
+    private Map<String, String> requestHeaders = new HashMap<>();
 
     private SocketChannel sktChan;
 
@@ -173,6 +177,12 @@ public class Client implements IClient {
         }
     }
 
+    private Map<String, String> getRequestHeaders() {
+        Map<String, String> ret = new HashMap<>();
+        ret.put("Authorization", "Bearer aaa");
+        return ret;
+    }
+
     private UUID getUUIDArgument(String[] arguments, int at) {
         return null;
     }
@@ -185,64 +195,47 @@ public class Client implements IClient {
         return 1;
     }
 
-    private void sendRequest(RestRequest request) throws IOException {
-        ByteBuffer buf = ByteBuffer.wrap(request.toString().getBytes());
-        this.sktChan.write(buf);
-    }
+    private RestResponse receiveResponse(RestRequest request) throws IOException, OperationFailedException {
+        this.sktChan.write(ByteBuffer.wrap(request.toString().getBytes()));
 
-    private Map<String, String> getRequestHeaders() {
-        Map<String, String> ret = new HashMap<>();
-        ret.put("Authorization", "Bearer aaa");
-        return ret;
-    }
-
-    private RestResponse receiveResponse() throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(this.BUF_CAPACITY);
         this.sktChan.read(buf);
         buf.flip();
+
         String responseString = StandardCharsets.UTF_8.decode(buf).toString();
         System.out.println("RESPONSE:\n" + responseString);
         RestResponse response = RestResponse.fromString(responseString);
 
+        if (response.isClientErrorResponse()) {
+            this.throwClientErrorException(response);
+        } else if (response.isServerErrorResponse()) {
+            throw new OperationFailedException(this.clientMessages.get("server_error"));
+        }
+
         return response;
+    }
+
+    private void throwClientErrorException(RestResponse response) throws OperationFailedException {
+        throw new OperationFailedException("");
     }
 
     @Override
     public void login(String username, String password) throws IOException, OperationFailedException {
-        RestRequest request = new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password);
-        this.sendRequest(request);
-        RestResponse response = this.receiveResponse();
-
-        if (response.isClientErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("wrong_username_password"));
-        } else if (response.isServerErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("server_error"));
-        }
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
+        this.requestHeaders.put("Authorization", new AuthenticationToken(response.getBody()).toString());
     }
 
     @Override
     public void logout(String username) throws IOException, OperationFailedException {
-        RestRequest request = new RestRequest("/logout", HttpMethod.POST, this.getRequestHeaders(), username);
-        this.sendRequest(request);
-        RestResponse response = this.receiveResponse();
-
-        if (response.isClientErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("cannot_log_out"));
-        } else if (response.isServerErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("server_error"));
-        }
+        this.receiveResponse(new RestRequest("/logout", HttpMethod.POST, this.getRequestHeaders(), username));
+        this.requestHeaders.remove("Authorization");
     }
 
     @Override
     public User[] listUsers() throws IOException, OperationFailedException {
-        RestRequest request = new RestRequest("/users", HttpMethod.GET, this.getRequestHeaders());
-        this.sendRequest(request);
-        RestResponse response = this.receiveResponse();
-        if (response.isClientErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("cannot_log_out"));
-        } else if (response.isServerErrorResponse()) {
-            throw new OperationFailedException(this.clientMessages.get("server_error"));
-        }
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/users", HttpMethod.GET, this.getRequestHeaders()));
 
         User[] data = new Serializer<User[]>().parse(response.getBody(), User[].class);
         return data;
@@ -255,69 +248,91 @@ public class Client implements IClient {
     }
 
     @Override
-    public User[] listFollowing() {
-        // TODO Auto-generated method stub
-        return null;
+    public User[] listFollowing() throws IOException, OperationFailedException {
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/users/following", HttpMethod.GET, this.getRequestHeaders()));
+
+        User[] data = new Serializer<User[]>().parse(response.getBody(), User[].class);
+        return data;
     }
 
     @Override
-    public void followUser(String username) {
-        // TODO Auto-generated method stub
-
+    public void followUser(String username) throws IOException, OperationFailedException {
+        this.receiveResponse(new RestRequest("/users/following", HttpMethod.PUT, this.getRequestHeaders(), username));
     }
 
     @Override
-    public void unfollowUser(String username) {
-        // TODO Auto-generated method stub
-
+    public void unfollowUser(String username) throws IOException, OperationFailedException {
+        this.receiveResponse(new RestRequest("/users/following", HttpMethod.PUT, this.getRequestHeaders(), username));
     }
 
     @Override
-    public Post[] viewBlog() {
-        // TODO Auto-generated method stub
-        return null;
+    public Post[] viewBlog() throws IOException, OperationFailedException {
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/posts/my-posts", HttpMethod.GET, this.getRequestHeaders()));
+
+        Post[] data = new Serializer<Post[]>().parse(response.getBody(), Post[].class);
+        return data;
     }
 
     @Override
-    public Post createPost(String title, String content) {
-        // TODO Auto-generated method stub
-        return null;
+    public Post createPost(String title, String content) throws IOException, OperationFailedException {
+        String requestData = new Serializer<Post>().serialize(new Post(title, content));
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/posts", HttpMethod.POST, this.getRequestHeaders(), requestData));
+
+        Post responseData = new Serializer<Post>().parse(response.getBody(), Post.class);
+        return responseData;
     }
 
     @Override
-    public Post[] showFeed() {
-        // TODO Auto-generated method stub
-        return null;
+    public Post[] showFeed() throws IOException, OperationFailedException {
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/posts", HttpMethod.GET, this.getRequestHeaders()));
+
+        Post[] data = new Serializer<Post[]>().parse(response.getBody(), Post[].class);
+        return data;
     }
 
     @Override
-    public Post showPost(UUID postId) {
-        // TODO Auto-generated method stub
-        return null;
+    public Post showPost(UUID postId) throws IOException, OperationFailedException {
+        RestResponse response = this
+                .receiveResponse(
+                        new RestRequest("/posts/" + postId.toString(), HttpMethod.GET, this.getRequestHeaders()));
+
+        Post data = new Serializer<Post>().parse(response.getBody(), Post.class);
+        return data;
     }
 
     @Override
-    public void deletePost(UUID postId) {
-        // TODO Auto-generated method stub
-
+    public void deletePost(UUID postId) throws IOException, OperationFailedException {
+        this.receiveResponse(
+                new RestRequest("/posts/" + postId.toString(), HttpMethod.DELETE, this.getRequestHeaders()));
     }
 
     @Override
-    public Post rewinPost(UUID postId) {
-        // TODO Auto-generated method stub
-        return null;
+    public Post rewinPost(UUID postId) throws IOException, OperationFailedException {
+        RestResponse response = this
+                .receiveResponse(
+                        new RestRequest("/posts/" + postId.toString() + "/rewin", HttpMethod.POST,
+                                this.getRequestHeaders()));
+
+        Post data = new Serializer<Post>().parse(response.getBody(), Post.class);
+        return data;
     }
 
     @Override
-    public void ratePost(UUID postId, int value) {
-        // TODO Auto-generated method stub
-
+    public void ratePost(UUID postId, int value) throws IOException, OperationFailedException {
+        this.receiveResponse(
+                new RestRequest("/posts/" + postId.toString() + "/rate", HttpMethod.POST, this.getRequestHeaders(),
+                        Integer.toString(value)));
     }
 
     @Override
-    public Post addComment(UUID postId, String comment) {
-        // TODO Auto-generated method stub
-        return null;
+    public void addComment(UUID postId, String comment) throws IOException, OperationFailedException {
+        String requestData = new Serializer<Comment>().serialize(new Comment(comment));
+        this.receiveResponse(new RestRequest("/posts/" + postId.toString() + "/comments", HttpMethod.POST,
+                this.getRequestHeaders(), requestData));
     }
 
 }

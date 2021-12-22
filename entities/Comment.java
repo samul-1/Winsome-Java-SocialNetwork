@@ -12,9 +12,9 @@ public class Comment {
         this.content = content;
     }
 
-    // public Comment(@JsonProperty("content") String content) {
-    // this.content = content;
-    // }
+    public Comment(@JsonProperty("content") String content) {
+        this.content = content;
+    }
 
     public void setUser(String username) {
         this.authorUsername = username;

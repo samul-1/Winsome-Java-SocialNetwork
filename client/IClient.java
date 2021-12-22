@@ -16,27 +16,27 @@ public interface IClient {
 
     User[] listFollowers();
 
-    User[] listFollowing();
+    User[] listFollowing() throws IOException, OperationFailedException;
 
-    void followUser(String username);
+    void followUser(String username) throws IOException, OperationFailedException;
 
-    void unfollowUser(String username);
+    void unfollowUser(String username) throws IOException, OperationFailedException;
 
-    Post[] viewBlog();
+    Post[] viewBlog() throws IOException, OperationFailedException;
 
-    Post createPost(String title, String content);
+    Post createPost(String title, String content) throws IOException, OperationFailedException;
 
-    Post[] showFeed();
+    Post[] showFeed() throws IOException, OperationFailedException;
 
-    Post showPost(UUID postId);
+    Post showPost(UUID postId) throws IOException, OperationFailedException;
 
-    void deletePost(UUID postId);
+    void deletePost(UUID postId) throws IOException, OperationFailedException;
 
-    Post rewinPost(UUID postId);
+    Post rewinPost(UUID postId) throws IOException, OperationFailedException;
 
-    void ratePost(UUID postId, int value);
+    void ratePost(UUID postId, int value) throws IOException, OperationFailedException;
 
-    Post addComment(UUID postId, String comment);
+    void addComment(UUID postId, String comment);
 
     // WalletData getWallet();
 
