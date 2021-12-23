@@ -55,6 +55,22 @@ public class Post {
         return this.authorUsername;
     }
 
+    public String getTitle() {
+        return this.title;
+    }
+
+    public String getContent() {
+        return this.content;
+    }
+
+    public int getUpVotesCount() {
+        return -1;
+    }
+
+    public int getDownVotesCount() {
+        return -1;
+    }
+
     public void addComment(Comment comment) {
         this.comments.add(comment);
     }
@@ -65,5 +81,13 @@ public class Post {
 
     public Set<Comment> getComments() {
         return this.comments;
+    }
+
+    public Post getRewinedPost() {
+        return this.originalPost;
+    }
+
+    public boolean isRewin() {
+        return this.originalPost != null;
     }
 }

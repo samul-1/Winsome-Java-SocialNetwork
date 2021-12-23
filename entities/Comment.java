@@ -19,4 +19,12 @@ public class Comment {
     public void setUser(String username) {
         this.authorUsername = username;
     }
+
+    public String getUser() {
+        return this.authorUsername;
+    }
+
+    public String getContent() {
+        return this.content;
+    }
 }

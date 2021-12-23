@@ -5,38 +5,38 @@ import java.util.UUID;
 
 import entities.Post;
 import entities.User;
-import exceptions.OperationFailedException;
+import exceptions.ClientOperationFailedException;
 
 public interface IClient {
-    void login(String username, String password) throws IOException, OperationFailedException;
+    void login(String username, String password) throws IOException, ClientOperationFailedException;
 
-    void logout(String username) throws IOException, OperationFailedException;
+    void logout(String username) throws IOException, ClientOperationFailedException;
 
-    User[] listUsers() throws IOException, OperationFailedException;
+    User[] listUsers() throws IOException, ClientOperationFailedException;
 
     User[] listFollowers();
 
-    User[] listFollowing() throws IOException, OperationFailedException;
+    User[] listFollowing() throws IOException, ClientOperationFailedException;
 
-    void followUser(String username) throws IOException, OperationFailedException;
+    void followUser(String username) throws IOException, ClientOperationFailedException;
 
-    void unfollowUser(String username) throws IOException, OperationFailedException;
+    void unfollowUser(String username) throws IOException, ClientOperationFailedException;
 
-    Post[] viewBlog() throws IOException, OperationFailedException;
+    Post[] viewBlog() throws IOException, ClientOperationFailedException;
 
-    Post createPost(String title, String content) throws IOException, OperationFailedException;
+    Post createPost(String title, String content) throws IOException, ClientOperationFailedException;
 
-    Post[] showFeed() throws IOException, OperationFailedException;
+    Post[] showFeed() throws IOException, ClientOperationFailedException;
 
-    Post showPost(UUID postId) throws IOException, OperationFailedException;
+    Post showPost(UUID postId) throws IOException, ClientOperationFailedException;
 
-    void deletePost(UUID postId) throws IOException, OperationFailedException;
+    void deletePost(UUID postId) throws IOException, ClientOperationFailedException;
 
-    Post rewinPost(UUID postId) throws IOException, OperationFailedException;
+    Post rewinPost(UUID postId) throws IOException, ClientOperationFailedException;
 
-    void ratePost(UUID postId, int value) throws IOException, OperationFailedException;
+    void ratePost(UUID postId, int value) throws IOException, ClientOperationFailedException;
 
-    void addComment(UUID postId, String comment);
+    void addComment(UUID postId, String comment) throws IOException, ClientOperationFailedException;
 
     // WalletData getWallet();
 
