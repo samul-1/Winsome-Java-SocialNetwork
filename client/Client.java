@@ -139,7 +139,7 @@ public class Client implements IClient {
                                     renderedResponseData = new PostRenderer().render(feed);
                                     break;
                                 case "post":
-                                    postId = this.getUUIDArgument(commandArguments, 0);
+                                    postId = this.getUUIDArgument(commandArguments, 1);
                                     Post post = this.showPost(postId);
                                     renderedResponseData = new PostRenderer().render(post);
                                     break;
@@ -176,15 +176,15 @@ public class Client implements IClient {
                     System.out.println(renderedResponseData);
                 } catch (InvalidClientArgumentsException e) {
                     System.out.println(this.clientMessages.get("invalid_operation_arguments") + e.getMessage());
+                } catch (ClientOperationFailedException e) {
+                    System.out.println("OPERATION FAILED!");
+                    e.printStackTrace();
                 }
             }
             this.sktChan.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
-        } catch (ClientOperationFailedException e) {
-            System.out.println("OPERATION FAILED!");
-            e.printStackTrace();
         }
     }
 
@@ -242,7 +242,7 @@ public class Client implements IClient {
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 
-        this.requestHeaders.put("Authorization", new AuthenticationToken(response.getBody()).toString());
+        this.requestHeaders.put("Authorization", "Bearer " + new AuthenticationToken(response.getBody()).getToken());
     }
 
     @Override
@@ -282,7 +282,8 @@ public class Client implements IClient {
 
     @Override
     public void unfollowUser(String username) throws IOException, ClientOperationFailedException {
-        this.receiveResponse(new RestRequest("/users/following", HttpMethod.PUT, this.getRequestHeaders(), username));
+        this.receiveResponse(
+                new RestRequest("/users/following", HttpMethod.DELETE, this.getRequestHeaders(), username));
     }
 
     @Override

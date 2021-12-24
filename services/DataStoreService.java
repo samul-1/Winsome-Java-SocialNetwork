@@ -116,18 +116,19 @@ public class DataStoreService {
     }
 
     public Set<String> getUserFollowers(String username) {
+        // TODO convert to set of users
         return this.followers.get(username);
     }
 
-    public Set<String> getUserFollowing(String username) {
-        Set<String> following = new HashSet<String>();
+    public Set<User> getUserFollowing(String username) {
+        Set<User> following = new HashSet<>();
 
         this.followers.forEach((user, followerSet) -> {
             if (followerSet.contains(username)) {
                 // if the requested username (A) is in the user's (B) follower
                 // set, then this user is followed by the requested username
                 // (A follows B)
-                following.add(user);
+                following.add(this.getUser(user));
             }
         });
 

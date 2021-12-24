@@ -68,21 +68,23 @@ public class SocialNetworkService {
     }
 
     public RestResponse followingListHandler(AuthenticatedRestRequest request) {
-        Set<String> users = this.store.getUserFollowing(request.getUser().getUsername());
-        String body = new Serializer<String[]>()
-                .serialize((String[]) ((users == null ? new HashSet<String>() : users).toArray(new String[0])));
+        Set<User> users = this.store.getUserFollowing(request.getUser().getUsername());
+        String body = new Serializer<User[]>()
+                .serialize((User[]) ((users == null ? new HashSet<User>() : users).toArray(new User[0])));
         return new RestResponse(200, body);
     }
 
     public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
-        if (this.store.addFollower(request.getRequest().getBody(), request.getUser().getUsername())) {
+        if (this.store.addFollower(request.getRequest().getBody().trim(),
+                request.getUser().getUsername())) {
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();
     }
 
     public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
-        if (this.store.removeFollower(request.getRequest().getBody(), request.getUser().getUsername())) {
+        if (this.store.removeFollower(request.getRequest().getBody().trim(),
+                request.getUser().getUsername())) {
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();

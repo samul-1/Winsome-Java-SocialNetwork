@@ -11,7 +11,7 @@ public class RestRequest {
     private final String path;
     private final UUID pathParameter;
     private final HttpMethod method;
-    private final Map<String, String> headers;
+    private Map<String, String> headers = new HashMap<>();
     private final String body;
 
     private final String URI_PARAMETER_TOKEN = "<id>";
@@ -26,8 +26,8 @@ public class RestRequest {
         this.path = pathAndParameter[0];
         this.pathParameter = pathAndParameter[1] == null ? null : UUID.fromString(pathAndParameter[1]);
         this.method = method;
-        this.headers = headers;
-        this.body = body;
+        this.headers = headers == null ? new HashMap<>() : headers;
+        this.body = body == null ? "" : body;
     }
 
     private String[] getParsedRequestPath(String requestPath) {

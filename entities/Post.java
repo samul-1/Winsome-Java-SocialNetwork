@@ -4,15 +4,20 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Post {
     private final UUID id;
-    private String authorUsername;
+    private String author;
     private final String title;
     private final String content;
     private final Set<Comment> comments = new HashSet<Comment>();
+
+    @JsonIgnore
     private final Set<Reaction> reactions = new HashSet<Reaction>();
+    @JsonIgnore
     private Post originalPost; // for retwin feature
 
     public Post(String author, String title, String content) {
@@ -20,12 +25,13 @@ public class Post {
                 || content.length() == 0) {
             throw new IllegalArgumentException();
         }
-        this.authorUsername = author;
+        this.author = author;
         this.title = title;
         this.content = content;
         this.id = UUID.randomUUID();
     }
 
+    @JsonCreator
     public Post(
             @JsonProperty("title") String title,
             @JsonProperty("content") String content) {
@@ -36,7 +42,7 @@ public class Post {
     }
 
     public Post(String retwiner, Post retwinedPost) {
-        this.authorUsername = retwiner;
+        this.author = retwiner;
         this.title = "";
         this.content = "";
         this.originalPost = retwinedPost;
@@ -48,11 +54,11 @@ public class Post {
     }
 
     public void setAuthor(String username) {
-        this.authorUsername = username;
+        this.author = username;
     }
 
     public String getAuthor() {
-        return this.authorUsername;
+        return this.author;
     }
 
     public String getTitle() {
@@ -63,10 +69,12 @@ public class Post {
         return this.content;
     }
 
+    @JsonIgnore
     public int getUpVotesCount() {
         return -1;
     }
 
+    @JsonIgnore
     public int getDownVotesCount() {
         return -1;
     }
@@ -83,10 +91,12 @@ public class Post {
         return this.comments;
     }
 
+    @JsonIgnore
     public Post getRewinedPost() {
         return this.originalPost;
     }
 
+    @JsonIgnore
     public boolean isRewin() {
         return this.originalPost != null;
     }
