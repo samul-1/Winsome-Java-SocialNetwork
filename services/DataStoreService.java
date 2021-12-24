@@ -61,7 +61,8 @@ public class DataStoreService {
          * false if the username is already taken
          * 
          */
-        if (this.users.putIfAbsent(username, new User(username, tags, password)) != null) {
+        User newUser = new User(username, tags, password);
+        if (this.users.putIfAbsent(username, newUser) != null) {
             return false;
         }
         // The above operation is atomic - it's now safe to do the two following

@@ -9,7 +9,7 @@ public class PostRenderer implements IRenderer<Post> {
     public String render(Post data) {
         String ret;
 
-        ret = "Title: " + data.getTitle() + "(ID: " + data.getId().toString() + ")\n";
+        ret = "Title: " + data.getTitle() + " (ID: " + data.getId().toString() + ")\n";
         ret += "Content:\n" + data.getContent() + "\n\n";
         ret += "Upvotes: " + data.getUpVotesCount() + ", downvotes: " + data.getDownVotesCount() + "\n";
         ret += "Comments: " + (data.getComments().size() == 0 ? "no comments" : "\n");

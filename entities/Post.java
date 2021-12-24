@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+// TODO fix the issues with jsonignore, particularly the fact that you can't use "originalPost" and the upvote and downvote counts
 public class Post {
     private final UUID id;
     private String author;
@@ -71,6 +72,7 @@ public class Post {
 
     @JsonIgnore
     public int getUpVotesCount() {
+        // TODO implement
         return -1;
     }
 

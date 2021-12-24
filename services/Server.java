@@ -12,6 +12,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Iterator;
 
 import auth.AuthenticationMiddleware;
@@ -34,6 +38,7 @@ public class Server {
 
     private ApiRouter router;
     private final SocialNetworkService service;
+    UserRegistrationService registrationService;
     private final AuthenticationMiddleware authMiddleware;
     private ServerConfig config;
     private Selector selector;
@@ -45,6 +50,7 @@ public class Server {
         DataStoreService store = new DataStoreService(this.config.getStorageLocation());
         this.service = new SocialNetworkService(store);
         this.authMiddleware = new AuthenticationMiddleware(store);
+        this.registrationService = new UserRegistrationService(store);
     }
 
     private void loadConfig(File config) throws IOException {
@@ -71,6 +77,21 @@ public class Server {
             System.out.println("Server address: " + this.config.getServerAddr());
             System.out.println("Listening on port " + this.config.getTcpPort() + "...");
         } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // export RMI object to expose user registration service
+        UserRegistrationInterface userRegistrationStub;
+        Registry registry;
+
+        try {
+            userRegistrationStub = (UserRegistrationInterface) UnicastRemoteObject
+                    .exportObject(this.registrationService, this.config.getRegistryPort());
+            LocateRegistry.createRegistry(this.config.getRegistryPort());
+            registry = LocateRegistry.getRegistry(this.config.getRegistryPort());
+            registry.rebind("USER-REGISTRATION-SERVICE", userRegistrationStub);
+        } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(1);
         }
