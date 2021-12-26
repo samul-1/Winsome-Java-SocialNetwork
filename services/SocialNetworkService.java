@@ -10,9 +10,7 @@ import exceptions.ResourceNotFoundException;
 import protocol.AuthenticatedRestRequest;
 import protocol.RestResponse;
 
-import java.rmi.RemoteException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import auth.AuthenticationToken;
 import auth.Password;
 
-public class SocialNetworkService implements UserRegistrationInterface {
+public class SocialNetworkService {
     private final DataStoreService store;
 
     public SocialNetworkService(DataStoreService store) {

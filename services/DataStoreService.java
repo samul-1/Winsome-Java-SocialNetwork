@@ -53,7 +53,7 @@ public class DataStoreService {
         this.setUserToken(this.getUser("admin"), new AuthenticationToken("aaa"));
     }
 
-    public boolean registerUser(String username, Set<String> tags, Password password) {
+    public User registerUser(String username, Set<String> tags, Password password) {
         /**
          * Attempts to associate a new user to the given username.
          * 
@@ -63,7 +63,7 @@ public class DataStoreService {
          */
         User newUser = new User(username, tags, password);
         if (this.users.putIfAbsent(username, newUser) != null) {
-            return false;
+            return null;
         }
         // The above operation is atomic - it's now safe to do the two following
         // operations because even if more threads attempted to register a user
@@ -72,7 +72,7 @@ public class DataStoreService {
         this.userPosts.put(username, new HashSet<Post>());
         this.followers.put(username, new HashSet<String>());
 
-        return true;
+        return newUser;
     }
 
     public void setUserToken(User user, AuthenticationToken token) {

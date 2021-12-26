@@ -4,8 +4,7 @@ import java.rmi.RemoteException;
 import java.util.Set;
 
 import auth.Password;
-import exceptions.BadRequestException;
-import exceptions.PermissionDeniedException;
+import entities.User;
 import protocol.RestResponse;
 
 public class UserRegistrationService implements UserRegistrationInterface {
@@ -17,14 +16,15 @@ public class UserRegistrationService implements UserRegistrationInterface {
 
     @Override
     public RestResponse registerUserHandler(String username, String password, Set<String> tags)
-            throws RemoteException, BadRequestException, PermissionDeniedException {
-        if (username.trim().length() == 0 || password.length() == 0 || tags.size() > 5) {
-            throw new BadRequestException();
+            throws RemoteException {
+        if (username.trim().length() == 0 || password.length() == 0 || tags.size() > 5 || tags.size() == 0) {
+            return new RestResponse(400);
         }
-        if (!this.store.registerUser(username, tags, new Password(password))) {
+        User newUser = this.store.registerUser(username, tags, new Password(password));
+        if (newUser == null) {
             // username already taken
-            throw new PermissionDeniedException();
+            return new RestResponse(403);
         }
-        return new RestResponse(201);
+        return new RestResponse(201, new Serializer<User>().serialize(newUser));
     }
 }

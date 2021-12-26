@@ -2,14 +2,13 @@ package protocol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class RestResponse {
+public class RestResponse implements Serializable {
     private final int code;
     private final String body;
     private final Map<String, String> headers;

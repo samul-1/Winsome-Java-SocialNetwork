@@ -7,11 +7,17 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.UUID;
 
 import auth.AuthenticationToken;
@@ -25,10 +31,12 @@ import protocol.RestRequest;
 import protocol.RestResponse;
 import services.Serializer;
 import services.ServerConfig;
+import services.UserRegistrationInterface;
 
 public class Client implements IClient {
     private final int BUF_CAPACITY = 4096 * 4096;
     private final ServerConfig config;
+    private UserRegistrationInterface registrationService = null;
 
     private Map<String, String> requestHeaders = new HashMap<>();
 
@@ -44,7 +52,9 @@ public class Client implements IClient {
         map.put("cannot_log_out", "You can't log out using this username.");
         map.put("unknown_operation", "Unknown operation: ");
         map.put("invalid_operation_arguments", "Invalid arguments. ");
-        // map.put(401, "401 UNAUTHORIZED");
+        map.put("welcome_message", "Connected to server!\nTo start, type\n" +
+                "register <username> <password> <tags> (at least one tag is REQUIRED)" +
+                " or, if you already have an account,\nlogin <username> <password>");
         // map.put(403, "403 FORBIDDEN");
         // map.put(404, "404 NOT FOUND");
         // map.put(405, "405 METHOD NOT SUPPORTED");
@@ -57,12 +67,19 @@ public class Client implements IClient {
     }
 
     public void start() {
-        System.out.println("Starting client...");
+        try {
+            Registry registry = LocateRegistry.getRegistry(this.config.getRegistryPort());
+            registrationService = (UserRegistrationInterface) registry.lookup("USER-REGISTRATION-SERVICE");
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         SocketAddress sktAddr = new InetSocketAddress(this.config.getServerAddr(), this.config.getTcpPort());
         try (
                 Scanner scanner = new Scanner(System.in)) {
             this.sktChan = SocketChannel.open(sktAddr);
-            System.out.println("Connected!");
+            System.out.println(this.clientMessages.get("welcome_message"));
 
             while (true) {
                 System.out.println("Waiting for message...");
@@ -84,6 +101,10 @@ public class Client implements IClient {
                 System.out.println(instructionLine);
                 try {
                     switch (command) {
+                        case "register":
+                            User newUser = this.register(commandArguments);
+                            renderedResponseData = new UserRenderer().render(newUser);
+                            break;
                         case "login":
                             username = this.getStringArgument(commandArguments, 0);
                             password = this.getStringArgument(commandArguments, 1);
@@ -235,6 +256,45 @@ public class Client implements IClient {
         }
 
         return response;
+    }
+
+    public User register(String[] args)
+            throws InvalidClientArgumentsException, ClientOperationFailedException, IOException {
+        String username = this.getStringArgument(args, 0);
+        String password = this.getStringArgument(args, 1);
+        Set<String> tags = new HashSet<>();
+
+        // at least one tag is mandatory
+        String tag1 = this.getStringArgument(args, 2);
+        tags.add(tag1);
+
+        // get the remaining optional tags (up to 4 more)
+        for (int i = 0; i < 4; i++) {
+            try {
+                String nextTag = this.getStringArgument(args, i + 3);
+                tags.add(nextTag);
+            } catch (InvalidClientArgumentsException e) {
+                // no more tags
+                break;
+            }
+        }
+
+        RestResponse response = null;
+
+        try {
+            response = this.registrationService.registerUserHandler(username, password, tags);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        if (response.isClientErrorResponse() || response.isServerErrorResponse()) {
+            throw new ClientOperationFailedException(null, response);
+        }
+
+        System.out.println(response.getBody());
+        return new Serializer<User>().parse(response.getBody(), User.class);
+
     }
 
     @Override

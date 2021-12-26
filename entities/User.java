@@ -23,6 +23,7 @@ public class User {
     public User(String username, Set<String> tags, Password password) {
         // TODO validate input
         this.username = username;
+        // TODO save tags lowercase
         this.tags = tags;
         this.password = password;
     }
