@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 import auth.AuthenticationToken;
 import auth.Password;
@@ -136,6 +135,10 @@ public class DataStoreService {
         });
 
         return following;
+    }
+
+    public Set<String> getUsernames() {
+        return this.users.keySet();
     }
 
     public Set<Post> getUserPosts(String username) {

@@ -1,8 +1,10 @@
 package entities;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +17,7 @@ public class Post {
     private final String title;
     private final String content;
     private final Set<Comment> comments = new HashSet<Comment>();
+    private final Date timestamp = new Date();
 
     @JsonIgnore
     private final Set<Reaction> reactions = new HashSet<Reaction>();
@@ -70,10 +73,13 @@ public class Post {
         return this.content;
     }
 
+    public Date getTimestamp() {
+        return this.timestamp;
+    }
+
     @JsonIgnore
     public int getUpVotesCount() {
-        // TODO implement
-        return -1;
+        return this.getUpvotes().size();
     }
 
     @JsonIgnore
@@ -91,6 +97,10 @@ public class Post {
 
     public Set<Comment> getComments() {
         return this.comments;
+    }
+
+    public Set<Reaction> getUpvotes() {
+        return this.reactions.stream().filter(reaction -> reaction.getValue() == 1).collect(Collectors.toSet());
     }
 
     @JsonIgnore

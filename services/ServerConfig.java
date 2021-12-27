@@ -12,6 +12,24 @@ public class ServerConfig {
     private int registryPort = 7777;
     private int sktTimeout = 100000;
     private String storageLocation = "db.json";
+    private long timeInBetweenRewards = 10; // in seconds
+    private double authorRewardPercentage = 70.0;
+
+    public long getTimeInBetweenRewards() {
+        return this.timeInBetweenRewards;
+    }
+
+    public double getAuthorRewardPercentage() {
+        return this.authorRewardPercentage;
+    }
+
+    public void setTimeInBetweenRewards(long time) {
+        this.timeInBetweenRewards = time;
+    }
+
+    public void setAuthorRewardPercentage(double pct) {
+        this.authorRewardPercentage = pct;
+    }
 
     public InetAddress getServerAddr() {
         return this.serverAddr;

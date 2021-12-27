@@ -51,6 +51,9 @@ public class Server {
         this.service = new SocialNetworkService(store);
         this.authMiddleware = new AuthenticationMiddleware(store);
         this.registrationService = new UserRegistrationService(store);
+
+        new Thread(new RewardIssuer(store, this.config.getTimeInBetweenRewards(),
+                this.config.getAuthorRewardPercentage())).start();
     }
 
     private void loadConfig(File config) throws IOException {

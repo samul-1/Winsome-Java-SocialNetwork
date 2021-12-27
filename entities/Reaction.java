@@ -1,8 +1,11 @@
 package entities;
 
+import java.util.Date;
+
 public class Reaction {
-    private String voterUsername;
+    private String username;
     private final int value;
+    private final Date timestamp = new Date();
 
     public Reaction(int value) {
         // this(null, value);
@@ -21,11 +24,24 @@ public class Reaction {
     // throw new IllegalArgumentException("Vote value must either be 1 or -1");
     // }
 
-    // this.voterUsername = username;
+    // this.username = username;
     // this.value = value;
     // }
 
     public void setUser(String username) {
-        this.voterUsername = username;
+        this.username = username;
     }
+
+    public Date getTimestamp() {
+        return this.timestamp;
+    }
+
+    public int getValue() {
+        return this.value;
+    }
+
+    public String getUser() {
+        return this.username;
+    }
+
 }

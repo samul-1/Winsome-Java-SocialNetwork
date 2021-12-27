@@ -1,11 +1,14 @@
 package entities;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Comment {
     private String authorUsername;
     private final String content;
+    private final Date timestamp = new Date();
 
     @JsonCreator
     public Comment(@JsonProperty("authorUsername") String username, @JsonProperty("content") String content) {
@@ -28,5 +31,9 @@ public class Comment {
 
     public String getContent() {
         return this.content;
+    }
+
+    public Date getTimestamp() {
+        return this.timestamp;
     }
 }
