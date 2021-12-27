@@ -1,17 +1,22 @@
 package services;
 
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import entities.Comment;
 import entities.Post;
+import entities.Reaction;
 
 public class RewardIssuer implements Runnable {
     private final DataStoreService store;
-    private Date lastUpdate = null;
+    private Date lastUpdate = new Date(0L); // guard value
     private long timeInBetween;
     private double authorPercentage;
+    private final HashMap<UUID, Integer> postIterations = new HashMap<>();
+    private final HashMap<String, Integer> userCommentsCount = new HashMap<>();
 
     public RewardIssuer(DataStoreService store, long timeInBetween, double authorPercentage) {
         this.timeInBetween = timeInBetween;
@@ -19,41 +24,90 @@ public class RewardIssuer implements Runnable {
         this.store = store;
     }
 
-    public double getPostReward(Post post, Date since) {
-        return 0;
+    private double getPostReward(Post post, PostRewardData contributors) {
+        double ret = 0.0;
+
+        int reactionScore = 0;
+        for (Reaction reaction : contributors.newReactions) {
+            reactionScore += reaction.getValue();
+        }
+
+        double commentScore = 0.0;
+        for (Comment comment : contributors.newComments) {
+            int commenterCount = this.userCommentsCount.computeIfAbsent(comment.getUser(),
+                    (username) -> this.store.getUserCommentCount(username));
+
+            commentScore += 2 / (1 + Math.exp(-commenterCount - 1));
+        }
+
+        ret = Math.log(Math.max(reactionScore, 0) + 1) + Math.log(commentScore + 1);
+
+        return ret / this.postIterations.get(post.getId());
     }
 
-    public void commitUserWalletBalanceChange(String username, double delta) {
+    private void commitUserWalletBalanceChange(String username, double delta) {
         this.store.updateUserWallet(username, delta);
     }
 
-    public Set<String> getRecentContributors(Post post, Date since) {
-        Set<String> contributors = new HashSet<>();
+    private class PostRewardData {
+        /**
+         * Convenience class that encapsulates the "stakeholders" related to a post
+         * inside of an iteration of rewards. Contains data about who the
+         * "contributors" of a post are, and what entities (upvotes and comments)
+         * made them contributors
+         * 
+         */
+        Set<String> upvoters;
+        Set<String> commenters;
+        Set<Reaction> newReactions;
+        Set<Comment> newComments;
 
-        // add all commenters
-        contributors.addAll(
-                post.getComments().stream().filter(comment -> comment.getTimestamp().compareTo(since) > 0)
-                        .map(comment -> comment.getUser()).collect(Collectors.toSet()));
+        PostRewardData(Post post, Date since) {
+            this.newComments = (post.getComments().stream()
+                    .filter(comment -> comment.getTimestamp().compareTo(since) > 0)
+                    .collect(Collectors.toSet()));
+            this.commenters = (this.newComments.stream()
+                    .map(comment -> comment.getUser())
+                    .collect(Collectors.toSet()));
+            this.newReactions = (post.getReactions().stream()
+                    .filter(reaction -> reaction.getTimestamp().compareTo(since) > 0)
+                    .collect(Collectors.toSet()));
+            this.upvoters = (post.getUpvotes().stream().filter(upvote -> upvote.getTimestamp().compareTo(since) > 0)
+                    .map(upvote -> upvote.getUser())
+                    .collect(Collectors.toSet()));
+        }
 
-        // add all upvoters
-        contributors.addAll(
-                post.getUpvotes().stream().filter(upvote -> upvote.getTimestamp().compareTo(since) > 0)
-                        .map(upvote -> upvote.getUser()).collect(Collectors.toSet()));
+        Set<String> getContributors() {
+            Set<String> ret = Set.copyOf(this.commenters);
+            ret.addAll(this.upvoters);
+            return ret;
+        }
 
-        return contributors;
     }
 
-    public void computeUserWalletUpdates(String username) {
+    private PostRewardData getPostRewardData(Post post, Date since) {
+        return new PostRewardData(post, since);
+    }
+
+    private void computeUserWalletUpdates(String username) {
         Set<Post> postSet = this.store.getUserPosts(username);
         double balanceDelta = 0.0;
         for (Post post : postSet) {
-            double postReward = this.getPostReward(post, this.lastUpdate);
+            // initialize post iteration count if this is the first iteration for this post
+            this.postIterations.computeIfAbsent(post.getId(), (__) -> 1);
+
+            PostRewardData rewardData = this.getPostRewardData(post, this.lastUpdate);
+            Set<String> contributors = rewardData.getContributors();
+
+            double postReward = this.getPostReward(post, rewardData);
+
             balanceDelta += postReward * this.authorPercentage;
-            Set<String> contributors = this.getRecentContributors(post, this.lastUpdate);
             double contributorPostReward = (postReward * (1 - this.authorPercentage)) / contributors.size();
             for (String contributor : contributors) {
                 this.commitUserWalletBalanceChange(contributor, contributorPostReward);
             }
+
+            this.postIterations.compute(post.getId(), (__, count) -> count + 1);
         }
         this.commitUserWalletBalanceChange(username, balanceDelta);
     }

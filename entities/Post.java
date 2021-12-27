@@ -99,6 +99,10 @@ public class Post {
         return this.comments;
     }
 
+    public Set<Reaction> getReactions() {
+        return this.reactions;
+    }
+
     public Set<Reaction> getUpvotes() {
         return this.reactions.stream().filter(reaction -> reaction.getValue() == 1).collect(Collectors.toSet());
     }

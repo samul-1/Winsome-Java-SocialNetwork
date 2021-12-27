@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import auth.AuthenticationToken;
 import auth.Password;
@@ -143,6 +144,21 @@ public class DataStoreService {
 
     public Set<Post> getUserPosts(String username) {
         return this.userPosts.get(username);
+    }
+
+    public int getUserCommentCount(String username) {
+        Set<Post> commentedPosts = new HashSet<>();
+        this.posts.forEach((__, post) -> {
+            Set<Comment> postComments = post.getComments();
+            if (postComments
+                    .stream()
+                    .filter(comment -> comment.getUser().equals(username))
+                    .findAny()
+                    .isPresent()) {
+                commentedPosts.add(post);
+            }
+        });
+        return commentedPosts.size();
     }
 
     public boolean addFollower(String username, String newFollower) {

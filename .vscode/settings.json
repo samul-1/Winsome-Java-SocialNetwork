@@ -1,5 +1,11 @@
 {
-  "cSpell.words": ["unfollow"],
+  "cSpell.words": [
+    "commenters",
+    "unfollow",
+    "upvote",
+    "upvoters",
+    "upvotes"
+  ],
   "java.project.referencedLibraries": [
     "lib/**/*.jar",
     "libs/jackson-annotations-2.13.0.jar",
