@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 import auth.AuthenticationToken;
 import auth.Password;
@@ -19,6 +20,7 @@ public class DataStoreService {
     private final ConcurrentHashMap<AuthenticationToken, User> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
 
     public DataStoreService(String storageFilename) {
         // TODO implement loading the state from a file and periodically saving to it
@@ -65,13 +67,13 @@ public class DataStoreService {
         if (this.users.putIfAbsent(username, newUser) != null) {
             return null;
         }
-        // The above operation is atomic - it's now safe to do the two following
+        // The above operation is atomic - it's now safe to do the three following
         // operations because even if more threads attempted to register a user
         // with the same username at the same time, at this point all but one
         // of them have returned false
         this.userPosts.put(username, new HashSet<Post>());
         this.followers.put(username, new HashSet<String>());
-
+        this.wallets.put(username, 0.0);
         return newUser;
     }
 
@@ -211,10 +213,13 @@ public class DataStoreService {
 
     public boolean addPostComment(UUID postId, Comment comment) {
         return this.posts.computeIfPresent(postId, (__, post) -> {
-            System.out.println("Adding comment");
             post.addComment(comment);
             return post;
         }) != null;
+    }
+
+    public double updateUserWallet(String username, double delta) {
+        return this.wallets.computeIfPresent(username, (__, balance) -> balance + delta);
     }
 
 }

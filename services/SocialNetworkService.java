@@ -46,6 +46,8 @@ public class SocialNetworkService {
             // correct password, create and return a
             // new authentication token for this user
             AuthenticationToken token = new AuthenticationToken();
+            // TODO return boolean false in setUserToken if user already has token, and here
+            // send 403 if store returned false
             this.store.setUserToken(authenticatingUser, token);
             // client will use this new token to authenticate subsequent requests
             return new RestResponse(200, token.getToken());
@@ -167,6 +169,8 @@ public class SocialNetworkService {
         }
         reaction.setUser(request.getUser().getUsername());
 
+        // TODO prevent rating posts more than once
+        // TODO prevent author rating their own post, prevent rating if not in user feed
         if (this.store.addPostReaction(request.getRequest().getPathParameter(), reaction)) {
             return new RestResponse(200);
         }
@@ -184,6 +188,8 @@ public class SocialNetworkService {
         }
         comment.setUser(request.getUser().getUsername());
 
+        // TODO prevent author commenting their own post
+        // TODO prevent commenting if not in user feed
         if (this.store.addPostComment(request.getRequest().getPathParameter(), comment)) {
             return new RestResponse(201, new Serializer<Comment>().serialize(comment));
         }
