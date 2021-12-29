@@ -87,8 +87,8 @@ public class DataStoreService {
         this.sessions.put(token, user);
     }
 
-    public void deleteUserToken(AuthenticationToken token) {
-        this.sessions.remove(token);
+    public boolean deleteUserToken(AuthenticationToken token) {
+        return this.sessions.remove(token) != null;
     }
 
     public User getUserFromToken(AuthenticationToken token) {

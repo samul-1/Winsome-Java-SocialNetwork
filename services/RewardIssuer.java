@@ -2,6 +2,7 @@ package services;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ public class RewardIssuer implements Runnable {
 
         double commentScore = 0.0;
         for (Comment comment : contributors.newComments) {
+            // TODO count comments made to THIS post by this commenter, not to all posts!
             int commenterCount = this.userCommentsCount.computeIfAbsent(comment.getUser(),
                     (username) -> this.store.getUserCommentCount(username));
 
@@ -78,7 +80,7 @@ public class RewardIssuer implements Runnable {
         }
 
         Set<String> getContributors() {
-            Set<String> ret = Set.copyOf(this.commenters);
+            Set<String> ret = new HashSet<>(this.commenters);
             ret.addAll(this.upvoters);
             return ret;
         }

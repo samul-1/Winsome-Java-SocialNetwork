@@ -57,9 +57,12 @@ public class SocialNetworkService {
         throw new PermissionDeniedException();
     }
 
-    public RestResponse logoutHandler(AuthenticatedRestRequest request) {
-        this.store.deleteUserToken(new AuthenticationToken(request.getRequest().getHeader("Authorization")));
-        return new RestResponse(204);
+    public RestResponse logoutHandler(AuthenticatedRestRequest request) throws PermissionDeniedException {
+        if (this.store.deleteUserToken(new AuthenticationToken(
+                request.getRequest().getHeader("Authorization").substring("Bearer ".length())))) {
+            return new RestResponse(204);
+        }
+        throw new PermissionDeniedException();
     }
 
     public RestResponse userListHandler(AuthenticatedRestRequest request) {

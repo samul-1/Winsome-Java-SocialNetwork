@@ -147,8 +147,8 @@ public class Client implements IClient {
                             renderedResponseData = new PostRenderer().render(blog);
                             break;
                         case "post":
-                            title = this.getStringArgument(commandArguments, 0);
-                            content = this.getStringArgument(commandArguments, 1);
+                            title = this.getStringArgument(commandArguments, 0, true);
+                            content = this.getStringArgument(commandArguments, title.split(" ").length, true);
                             Post newPost = this.createPost(title, content);
                             renderedResponseData = new PostRenderer().render(newPost);
                             break;
@@ -185,7 +185,7 @@ public class Client implements IClient {
                             break;
                         case "comment":
                             postId = this.getUUIDArgument(commandArguments, 0);
-                            comment = this.getStringArgument(commandArguments, 1);
+                            comment = this.getStringArgument(commandArguments, 1, true);
                             this.addComment(postId, comment);
                             break;
                         case "wallet":
@@ -224,12 +224,37 @@ public class Client implements IClient {
         }
     }
 
-    private String getStringArgument(String[] arguments, int at) throws InvalidClientArgumentsException {
+    private String getStringArgument(String[] arguments, int at)
+            throws InvalidClientArgumentsException {
+        return this.getStringArgument(arguments, at, false);
+    }
+
+    private String getStringArgument(String[] arguments, int at, boolean allowMultipleWords)
+            throws InvalidClientArgumentsException {
+        String firstToken;
         try {
-            return arguments[at];
+            firstToken = arguments[at];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new InvalidClientArgumentsException("string");
         }
+        if (firstToken.charAt(0) != '"' || !allowMultipleWords || firstToken.charAt(firstToken.length() - 1) == '"') {
+            return firstToken; // single-word, non-quoted string
+        }
+        String ret = firstToken;
+        for (int i = at + 1;; i++) {
+            // continue until encounter another " or the line ends
+            try {
+                ret += " " + arguments[i];
+                if (arguments[i].contains("\"")) {
+                    break;
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                break;
+            }
+        }
+        System.out.println("ARG: " + ret);
+        return ret;
+
     }
 
     private int getIntArgument(String[] arguments, int at) throws InvalidClientArgumentsException {
