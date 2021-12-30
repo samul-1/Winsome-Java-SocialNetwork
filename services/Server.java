@@ -47,11 +47,15 @@ public class Server {
         this.loadConfig(config);
         this.loadRouter(apiSchema);
 
-        DataStoreService store = new DataStoreService(this.config.getStorageLocation());
+        // restore previously existing data if a valid storage file is supplied;
+        // otherwise initialize a new empty data store
+        DataStoreService store = DataStoreService.restoreOrCreate(this.config.getStorageLocation());
+
         this.service = new SocialNetworkService(store);
         this.authMiddleware = new AuthenticationMiddleware(store);
         this.registrationService = new UserRegistrationService(store);
 
+        // start rewards service in a separate thread
         new Thread(new RewardIssuer(store, this.config.getTimeInBetweenRewards(),
                 this.config.getAuthorRewardPercentage())).start();
     }
@@ -77,6 +81,7 @@ public class Server {
             skt.bind(new InetSocketAddress(this.config.getServerAddr(), this.config.getTcpPort()));
             srvSktChan.configureBlocking(false);
             srvSktChan.register(selector, SelectionKey.OP_ACCEPT);
+
             System.out.println("Server address: " + this.config.getServerAddr());
             System.out.println("Listening on port " + this.config.getTcpPort() + "...");
         } catch (IOException e) {
@@ -101,9 +106,7 @@ public class Server {
 
         while (true) {
             try {
-                // System.out.println("ready to accept...");
                 this.selector.select();
-                // System.out.println("accepted...");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -118,10 +121,8 @@ public class Server {
                         this.acceptKey(currKey);
                         System.out.println("A client connected");
                     } else if (currKey.isReadable()) {
-                        // System.out.println("A client is readable");
                         this.readFromKey(currKey);
                     } else if (currKey.isWritable()) {
-                        // System.out.println("A client is writable");
                         this.writeToKey(currKey);
                     }
                 } catch (IOException e) {
@@ -153,7 +154,6 @@ public class Server {
 
         // get previously stored response to be written to client
         RestResponse response = ((ClientConnectionState) key.attachment()).pendingResponse;
-        System.out.println("Response: " + response);
         ByteBuffer buf = ByteBuffer.wrap(response.toString().getBytes("UTF-8"));
         System.out.println("Written:\n" + response.toString());
         clientSkt.write(buf);
@@ -175,8 +175,6 @@ public class Server {
         }
         buf.flip();
 
-        // System.out.println("Read:\n" +
-        // StandardCharsets.UTF_8.decode(buf).toString());
         String reqString = StandardCharsets.UTF_8.decode(buf).toString();
         System.out.println("request: " + reqString);
         RestRequest request;
@@ -226,8 +224,6 @@ public class Server {
         // resolve route to get the handler method for this request
         try {
             handler = this.router.getRequestHandler(request);
-            System.out.println("got handler" + handler.getName());
-
         } catch (RouteNotFoundException e) {
             return new RestResponse(404);
         } catch (MethodNotSupportedException e) {
@@ -241,13 +237,11 @@ public class Server {
         } catch (NoAuthenticationProvidedException e) {
             return new RestResponse(401);
         } catch (InvalidTokenException e) {
-            System.out.println("invalid token");
             return new RestResponse(400);
         }
         // invoke handler to execute the request and get
         // response to write back to client
         try {
-            System.out.println("About to invoke: " + handler.getName());
             response = (RestResponse) handler.invoke(this.service, authenticatedRequest);
         } catch (IllegalAccessException | IllegalArgumentException e) {
             e.printStackTrace();
@@ -263,7 +257,6 @@ public class Server {
                     throw (Exception) e.getCause();
                 }
             } catch (BadRequestException e1) {
-                System.out.println("Raised bad request");
                 return new RestResponse(400);
             } catch (PermissionDeniedException e1) {
                 return new RestResponse(403);

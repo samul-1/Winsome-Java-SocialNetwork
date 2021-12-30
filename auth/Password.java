@@ -1,7 +1,17 @@
 package auth;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
+
 public class Password {
-    private final String encryptedPassword;
+    private String encryptedPassword;
+
+    @JsonCreator
+    public Password() {
+    }
 
     public Password(String password) {
         if (password == null || password.length() == 0) {

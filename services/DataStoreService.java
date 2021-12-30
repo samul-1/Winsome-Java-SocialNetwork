@@ -1,11 +1,20 @@
 package services;
 
 import java.util.Set;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import auth.AuthenticationToken;
 import auth.Password;
@@ -14,6 +23,8 @@ import entities.Post;
 import entities.Reaction;
 import entities.User;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
+
 public class DataStoreService {
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<>();
@@ -21,12 +32,63 @@ public class DataStoreService {
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
+    private String storageFileName = "";
+
+    public static DataStoreService restoreOrCreate(String source) {
+        /**
+         * Attempts to restore the state saved to a json file. If no
+         * valid file is provided, initializes an empty store and returns
+         * it.
+         * 
+         */
+        try {
+            File sourceFile = new File(source);
+            return new Serializer<DataStoreService>().parse(sourceFile, DataStoreService.class);
+        } catch (IOException e) {
+            e.printStackTrace(); // TODO remove
+            // file not found or invalid file content
+            return new DataStoreService(source);
+        }
+    }
+
+    @JsonCreator
+    public DataStoreService() {
+    }
 
     public DataStoreService(String storageFilename) {
-        // TODO implement loading the state from a file and periodically saving to it
-
         // dummy data for testing the web interface
-        loadFakeData();
+        // loadFakeData();
+        this.storageFileName = storageFilename;
+
+        // start anonymous thread that periodically persists store state
+        new Thread(() -> {
+            while (true) {
+                try {
+                    // in a real-world app this delay would be much longer
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    ;
+                }
+                this.persistStoreState();
+            }
+        }).start();
+    }
+
+    private void persistStoreState() {
+        /**
+         * Serializes the current state of the data store and writes
+         * it to file specified in the storageFileName field.
+         * 
+         */
+        String serializedState = new Serializer<DataStoreService>().serialize(this);
+
+        try (PrintWriter writer = new PrintWriter(this.storageFileName, "UTF-8")) {
+            writer.println(serializedState);
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void loadFakeData() {
@@ -83,7 +145,6 @@ public class DataStoreService {
          * token.
          * 
          */
-        System.out.println("set token " + token.getToken() + " for user " + user.getUsername());
         this.sessions.put(token, user);
     }
 
@@ -138,6 +199,7 @@ public class DataStoreService {
         return following;
     }
 
+    @JsonIgnore
     public Set<String> getUsernames() {
         return this.users.keySet();
     }
@@ -146,6 +208,7 @@ public class DataStoreService {
         return this.userPosts.get(username);
     }
 
+    // TODO remove as you won't need this when you correct the formula
     public int getUserCommentCount(String username) {
         Set<Post> commentedPosts = new HashSet<>();
         this.posts.forEach((__, post) -> {
@@ -215,8 +278,8 @@ public class DataStoreService {
                     return postSet;
                 });
             } catch (RuntimeException e) {
-                // don't delete the post since the removal from the user's
-                // post set failed
+                // don't delete the post since the removal from
+                // the user's post set failed
                 return post;
             }
             return null;
@@ -240,5 +303,4 @@ public class DataStoreService {
     public double updateUserWallet(String username, double delta) {
         return this.wallets.computeIfPresent(username, (__, balance) -> balance + delta);
     }
-
 }

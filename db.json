@@ -1,0 +1,171 @@
+{
+  "users": {
+    "admin123": {
+      "username": "admin",
+      "tags": [
+        "CS",
+        "Crypto",
+        "C++",
+        "JavaScript",
+        "Python"
+      ],
+      "password": {
+        "encryptedPassword": "p"
+      }
+    },
+    "admin2": {
+      "username": "admin2",
+      "tags": [
+        "CS",
+        "C",
+        "OCaml",
+        "Python"
+      ],
+      "password": {
+        "encryptedPassword": "password"
+      }
+    },
+    "admin3": {
+      "username": "admin3",
+      "tags": [
+        "Unix",
+        "CS",
+        "Java",
+        "C++",
+        "JavaScript"
+      ],
+      "password": {
+        "encryptedPassword": "password"
+      }
+    }
+  },
+  "userPosts": {
+    "admin": [
+      {
+        "title": "Test post 2",
+        "content": "Test post2 content abc abc abc",
+        "id": "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff",
+        "author": "admin",
+        "comments": [],
+        "timestamp": 1640863966399,
+        "upvotes": []
+      },
+      {
+        "title": "Test post 1",
+        "content": "Test post1 content abc abc abc",
+        "id": "91ddba66-9cfa-45c1-8405-51629e47aa4f",
+        "author": "admin",
+        "comments": [
+          {
+            "authorUsername": "admin2",
+            "content": "comment1",
+            "timestamp": 1640863966401,
+            "user": "admin2"
+          },
+          {
+            "authorUsername": "admin",
+            "content": "comment2",
+            "timestamp": 1640863966401,
+            "user": "admin"
+          },
+          {
+            "authorUsername": "admin3",
+            "content": "comment3",
+            "timestamp": 1640863966401,
+            "user": "admin3"
+          }
+        ],
+        "timestamp": 1640863966388,
+        "upvotes": []
+      }
+    ],
+    "admin2": [
+      {
+        "title": "Test post 3",
+        "content": "Test post3 content abc abc abc",
+        "id": "1199fe07-6e54-4b2b-90ee-8c52ba45145b",
+        "author": "admin2",
+        "comments": [],
+        "timestamp": 1640863966399,
+        "upvotes": []
+      }
+    ],
+    "admin3": []
+  },
+  "sessions": {
+    "auth.AuthenticationToken@17841": {
+      "username": "admin",
+      "tags": [
+        "CS",
+        "Crypto",
+        "C++",
+        "JavaScript",
+        "Python"
+      ],
+      "password": {
+        "encryptedPassword": "p"
+      }
+    }
+  },
+  "posts": {
+    "1199fe07-6e54-4b2b-90ee-8c52ba45145b": {
+      "title": "Test post 3",
+      "content": "Test post3 content abc abc abc",
+      "id": "1199fe07-6e54-4b2b-90ee-8c52ba45145b",
+      "author": "admin2",
+      "comments": [],
+      "timestamp": 1640863966399,
+      "upvotes": []
+    },
+    "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff": {
+      "title": "Test post 2",
+      "content": "Test post2 content abc abc abc",
+      "id": "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff",
+      "author": "admin",
+      "comments": [],
+      "timestamp": 1640863966399,
+      "upvotes": []
+    },
+    "91ddba66-9cfa-45c1-8405-51629e47aa4f": {
+      "title": "Test post 1",
+      "content": "Test post1 content abc abc abc",
+      "id": "91ddba66-9cfa-45c1-8405-51629e47aa4f",
+      "author": "admin",
+      "comments": [
+        {
+          "authorUsername": "admin2",
+          "content": "comment1",
+          "timestamp": 1640863966401,
+          "user": "admin2"
+        },
+        {
+          "authorUsername": "admin",
+          "content": "comment2",
+          "timestamp": 1640863966401,
+          "user": "admin"
+        },
+        {
+          "authorUsername": "admin3",
+          "content": "comment3",
+          "timestamp": 1640863966401,
+          "user": "admin3"
+        }
+      ],
+      "timestamp": 1640863966388,
+      "upvotes": []
+    }
+  },
+  "followers": {
+    "admin": [],
+    "admin2": [
+      "admin"
+    ],
+    "admin3": []
+  },
+  "wallets": {
+    "admin": 0.0,
+    "admin2": 0.0,
+    "admin3": 0.0
+  },
+  "storageFileName": "db.json"
+}

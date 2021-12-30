@@ -47,7 +47,7 @@ public class SocialNetworkService {
             // new authentication token for this user
             AuthenticationToken token = new AuthenticationToken();
             // TODO return boolean false in setUserToken if user already has token, and here
-            // send 403 if store returned false
+            // TODO send 403 if store returned false
             this.store.setUserToken(authenticatingUser, token);
             // client will use this new token to authenticate subsequent requests
             return new RestResponse(200, token.getToken());
