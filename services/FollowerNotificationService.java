@@ -2,7 +2,6 @@ package services;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import auth.AuthenticationToken;
 import client.IClientFollowerNotificationService;
@@ -22,8 +21,7 @@ public class FollowerNotificationService extends RemoteServer implements Followe
         }
 
         User requestingUser = this.store.getUser(token);
-        System.out.println("!!! Token" + token);
-        // TODO this is returning null
+
         if (requestingUser == null) {
             throw new IllegalArgumentException();
         }
@@ -34,7 +32,9 @@ public class FollowerNotificationService extends RemoteServer implements Followe
     public void notifyUser(String username) {
         IClientFollowerNotificationService callbackRef = this.store.getUserCallbackReference(username);
         try {
-            callbackRef.updateFollowerList(this.store.getUserFollowers(username));
+            if (callbackRef != null) {
+                callbackRef.updateFollowerList(this.store.getUserFollowers(username));
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }

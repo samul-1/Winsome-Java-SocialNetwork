@@ -42,6 +42,7 @@ public class Client implements IClient {
     private final ServerConfig config;
     private UserRegistrationInterface registrationService = null;
     private FollowerNotificationServiceInterface notificationService = null;
+    private final Set<User> localFollowers = new HashSet<>();
 
     private Map<String, String> requestHeaders = new HashMap<>();
 
@@ -347,14 +348,14 @@ public class Client implements IClient {
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 
-        AuthenticationToken authToken = new AuthenticationToken(response.getBody());
+        AuthenticationToken authToken = new AuthenticationToken(response.getBody().trim());
 
         // include received token in future requests to server
         this.requestHeaders.put("Authorization", "Bearer " + authToken.getToken());
 
         // subscribe to follower updates service
         IClientFollowerNotificationService callbackStub = (IClientFollowerNotificationService) UnicastRemoteObject
-                .exportObject(new ClientFollowerNotificationService(), 0);
+                .exportObject(new ClientFollowerNotificationService(this.localFollowers), 0);
         this.notificationService.subscribe(callbackStub, authToken);
     }
 

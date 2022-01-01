@@ -31,4 +31,9 @@ public class AuthenticationToken implements Serializable {
     public int hashCode() {
         return this.token.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "Token: " + this.token;
+    }
 }

@@ -143,19 +143,19 @@ public class RewardIssuer implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                Thread.sleep(this.timeInBetween * 1000);
-                System.out.println("Running!");
-                this.updateUsersWallets();
-                this.lastUpdate = new Date();
-                this.notifyWalletUpdates();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        // while (true) {
+        // try {
+        // Thread.sleep(this.timeInBetween * 1000);
+        // System.out.println("Running!");
+        // this.updateUsersWallets();
+        // this.lastUpdate = new Date();
+        // this.notifyWalletUpdates();
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // } catch (IOException e) {
+        // e.printStackTrace();
+        // }
+        // }
     }
 
 }

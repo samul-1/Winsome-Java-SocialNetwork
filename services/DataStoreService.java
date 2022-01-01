@@ -169,6 +169,7 @@ public class DataStoreService {
     public Set<User> getCompatibleUsers(String requestingUsername) {
         Set<User> ret = new HashSet<>();
         User requestingUser = this.getUser(requestingUsername);
+        System.out.println("REQUESTING USER " + requestingUsername + ", user " + requestingUser);
 
         this.users.forEach((_username, user) -> {
             if (user.isCompatibleWith(requestingUser)) {
