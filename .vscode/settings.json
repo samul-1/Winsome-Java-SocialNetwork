@@ -4,7 +4,8 @@
     "unfollow",
     "upvote",
     "upvoters",
-    "upvotes"
+    "upvotes",
+    "wlan"
   ],
   "java.project.referencedLibraries": [
     "lib/**/*.jar",

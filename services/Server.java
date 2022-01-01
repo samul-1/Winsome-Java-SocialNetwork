@@ -39,6 +39,7 @@ public class Server {
     private ApiRouter router;
     private final SocialNetworkService service;
     UserRegistrationService registrationService;
+    FollowerNotificationService notificationService;
     private final AuthenticationMiddleware authMiddleware;
     private ServerConfig config;
     private Selector selector;
@@ -51,13 +52,14 @@ public class Server {
         // otherwise initialize a new empty data store
         DataStoreService store = DataStoreService.restoreOrCreate(this.config.getStorageLocation());
 
-        this.service = new SocialNetworkService(store);
+        this.notificationService = new FollowerNotificationService(store);
+        this.service = new SocialNetworkService(store, this.notificationService);
         this.authMiddleware = new AuthenticationMiddleware(store);
         this.registrationService = new UserRegistrationService(store);
 
         // start rewards service in a separate thread
         new Thread(new RewardIssuer(store, this.config.getTimeInBetweenRewards(),
-                this.config.getAuthorRewardPercentage())).start();
+                this.config.getAuthorRewardPercentage(), this.config)).start();
     }
 
     private void loadConfig(File config) throws IOException {
@@ -91,14 +93,21 @@ public class Server {
 
         // export RMI object to expose user registration service
         UserRegistrationInterface userRegistrationStub;
+        FollowerNotificationServiceInterface followerNotificationStub;
         Registry registry;
 
         try {
+            // expose RMI services
             userRegistrationStub = (UserRegistrationInterface) UnicastRemoteObject
                     .exportObject(this.registrationService, this.config.getRegistryPort());
+            followerNotificationStub = (FollowerNotificationServiceInterface) UnicastRemoteObject
+                    .exportObject(this.notificationService, this.config.getRegistryPort());
+
             LocateRegistry.createRegistry(this.config.getRegistryPort());
             registry = LocateRegistry.getRegistry(this.config.getRegistryPort());
+
             registry.rebind("USER-REGISTRATION-SERVICE", userRegistrationStub);
+            registry.rebind("FOLLOWER-NOTIFICATION-SERVICE", followerNotificationStub);
         } catch (RemoteException e) {
             e.printStackTrace();
             System.exit(1);

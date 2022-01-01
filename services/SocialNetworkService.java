@@ -20,9 +20,11 @@ import auth.Password;
 
 public class SocialNetworkService {
     private final DataStoreService store;
+    private final FollowerNotificationService followerService;
 
-    public SocialNetworkService(DataStoreService store) {
+    public SocialNetworkService(DataStoreService store, FollowerNotificationService followerService) {
         this.store = store;
+        this.followerService = followerService;
     }
 
     public RestResponse loginHandler(AuthenticatedRestRequest request)
@@ -82,6 +84,8 @@ public class SocialNetworkService {
     public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
         if (this.store.addFollower(request.getRequest().getBody().trim(),
                 request.getUser().getUsername())) {
+            // send RMI notification to user who just acquired a follower
+            this.followerService.notifyUser(request.getRequest().getBody().trim());
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();
@@ -90,6 +94,8 @@ public class SocialNetworkService {
     public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
         if (this.store.removeFollower(request.getRequest().getBody().trim(),
                 request.getUser().getUsername())) {
+            // send RMI notification to user who just lost a follower
+            this.followerService.notifyUser(request.getRequest().getBody().trim());
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();

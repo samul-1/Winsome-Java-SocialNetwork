@@ -1,6 +1,8 @@
 package auth;
 
-public class AuthenticationToken {
+import java.io.Serializable;
+
+public class AuthenticationToken implements Serializable {
     private final String token;
 
     public AuthenticationToken(String token) {

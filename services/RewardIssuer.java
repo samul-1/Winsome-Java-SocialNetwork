@@ -1,5 +1,9 @@
 package services;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,11 +22,21 @@ public class RewardIssuer implements Runnable {
     private double authorPercentage;
     private final HashMap<UUID, Integer> postIterations = new HashMap<>();
     private final HashMap<String, Integer> userCommentsCount = new HashMap<>();
+    private final ServerConfig config;
+    private DatagramSocket skt;
 
-    public RewardIssuer(DataStoreService store, long timeInBetween, double authorPercentage) {
+    public RewardIssuer(DataStoreService store, long timeInBetween, double authorPercentage, ServerConfig config) {
         this.timeInBetween = timeInBetween;
         this.authorPercentage = authorPercentage;
         this.store = store;
+        this.config = config;
+        // TODO how to close
+        try {
+            this.skt = new DatagramSocket(5555);
+        } catch (SocketException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     private double getPostReward(Post post, PostRewardData contributors) {
@@ -120,6 +134,13 @@ public class RewardIssuer implements Runnable {
         }
     }
 
+    private void notifyWalletUpdates() throws IOException {
+        byte[] buf = "WALLETS_UPDATED".getBytes();
+        DatagramPacket pkt = new DatagramPacket(buf, buf.length, this.config.getMulticastAddr(),
+                this.config.getMulticastPort());
+        this.skt.send(pkt);
+    }
+
     @Override
     public void run() {
         while (true) {
@@ -128,7 +149,10 @@ public class RewardIssuer implements Runnable {
                 System.out.println("Running!");
                 this.updateUsersWallets();
                 this.lastUpdate = new Date();
+                this.notifyWalletUpdates();
             } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import auth.AuthenticationToken;
 import auth.Password;
+import client.IClientFollowerNotificationService;
 import entities.Comment;
 import entities.Post;
 import entities.Reaction;
@@ -32,6 +33,7 @@ public class DataStoreService {
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, IClientFollowerNotificationService> notificationCallbacks = new ConcurrentHashMap<>();
     private String storageFileName = "";
 
     public static DataStoreService restoreOrCreate(String source) {
@@ -179,9 +181,10 @@ public class DataStoreService {
         return ret;
     }
 
-    public Set<String> getUserFollowers(String username) {
-        // TODO convert to set of users
-        return this.followers.get(username);
+    public Set<User> getUserFollowers(String username) {
+        Set<User> ret = new HashSet<>();
+        this.followers.get(username).forEach(user -> ret.add(this.getUser(user)));
+        return ret;
     }
 
     public Set<User> getUserFollowing(String username) {
@@ -302,5 +305,13 @@ public class DataStoreService {
 
     public double updateUserWallet(String username, double delta) {
         return this.wallets.computeIfPresent(username, (__, balance) -> balance + delta);
+    }
+
+    public IClientFollowerNotificationService getUserCallbackReference(String username) {
+        return this.notificationCallbacks.get(username);
+    }
+
+    public void setUserCallbackReference(String username, IClientFollowerNotificationService ref) {
+        this.notificationCallbacks.put(username, ref);
     }
 }

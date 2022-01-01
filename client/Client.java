@@ -3,6 +3,8 @@ package client;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -11,6 +13,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +32,7 @@ import exceptions.InvalidClientArgumentsException;
 import protocol.HttpMethod;
 import protocol.RestRequest;
 import protocol.RestResponse;
+import services.FollowerNotificationServiceInterface;
 import services.Serializer;
 import services.ServerConfig;
 import services.UserRegistrationInterface;
@@ -37,6 +41,7 @@ public class Client implements IClient {
     private final int BUF_CAPACITY = 4096 * 4096;
     private final ServerConfig config;
     private UserRegistrationInterface registrationService = null;
+    private FollowerNotificationServiceInterface notificationService = null;
 
     private Map<String, String> requestHeaders = new HashMap<>();
 
@@ -69,16 +74,31 @@ public class Client implements IClient {
     public void start() {
         try {
             Registry registry = LocateRegistry.getRegistry(this.config.getRegistryPort());
-            registrationService = (UserRegistrationInterface) registry.lookup("USER-REGISTRATION-SERVICE");
+            // get RMI user registration service
+            this.registrationService = (UserRegistrationInterface) registry.lookup("USER-REGISTRATION-SERVICE");
+            // get RMI notification callback service
+            this.notificationService = (FollowerNotificationServiceInterface) registry
+                    .lookup("FOLLOWER-NOTIFICATION-SERVICE");
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
         SocketAddress sktAddr = new InetSocketAddress(this.config.getServerAddr(), this.config.getTcpPort());
-        try (
-                Scanner scanner = new Scanner(System.in)) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            // start TCP connection
             this.sktChan = SocketChannel.open(sktAddr);
+
+            // join multicast group
+            MulticastSocket multicastSkt = new MulticastSocket(this.config.getMulticastPort());
+            InetSocketAddress multicastGroup = new InetSocketAddress(this.config.getMulticastAddr(),
+                    this.config.getMulticastPort());
+            NetworkInterface netIf = NetworkInterface.getByName("wlan1");
+            // TODO fix below
+            // multicastSkt.joinGroup(multicastGroup, netIf);
+
+            // TODO spawn thread for multicast stuff
+
             System.out.println(this.clientMessages.get("welcome_message"));
 
             while (true) {
@@ -327,7 +347,15 @@ public class Client implements IClient {
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 
-        this.requestHeaders.put("Authorization", "Bearer " + new AuthenticationToken(response.getBody()).getToken());
+        AuthenticationToken authToken = new AuthenticationToken(response.getBody());
+
+        // include received token in future requests to server
+        this.requestHeaders.put("Authorization", "Bearer " + authToken.getToken());
+
+        // subscribe to follower updates service
+        IClientFollowerNotificationService callbackStub = (IClientFollowerNotificationService) UnicastRemoteObject
+                .exportObject(new ClientFollowerNotificationService(), 0);
+        this.notificationService.subscribe(callbackStub, authToken);
     }
 
     @Override
