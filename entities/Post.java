@@ -45,12 +45,13 @@ public class Post {
 
     }
 
-    public Post(String retwiner, Post retwinedPost) {
-        this.author = retwiner;
+    public Post(String rewiner, Post rewinedPost) {
+        this.author = rewiner;
         this.title = "";
         this.content = "";
-        this.originalPost = retwinedPost;
         this.id = UUID.randomUUID();
+
+        this.originalPost = rewinedPost.isRewin() ? rewinedPost.getRewinedPost() : rewinedPost;
     }
 
     public UUID getId() {

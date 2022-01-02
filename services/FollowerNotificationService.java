@@ -30,14 +30,19 @@ public class FollowerNotificationService extends RemoteServer implements Followe
     }
 
     public void notifyUser(String username) {
+        System.out.println("about to notify " + username);
         IClientFollowerNotificationService callbackRef = this.store.getUserCallbackReference(username);
         try {
             if (callbackRef != null) {
                 callbackRef.updateFollowerList(this.store.getUserFollowers(username));
+                System.out.println("notified " + username);
+            } else {
+                System.out.println("ref for " + username + "is null");
             }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        System.out.println("exiting from notification method for " + username);
     }
 
 }

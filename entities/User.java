@@ -1,16 +1,16 @@
 package entities;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import auth.Password;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
-public class User {
+public class User implements Serializable {
     private final String username;
     private final Set<String> tags;
     private final Password password;

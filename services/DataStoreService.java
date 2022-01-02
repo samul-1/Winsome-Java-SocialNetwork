@@ -33,6 +33,8 @@ public class DataStoreService {
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
+
+    @JsonIgnore
     private final ConcurrentHashMap<String, IClientFollowerNotificationService> notificationCallbacks = new ConcurrentHashMap<>();
     private String storageFileName = "";
 
@@ -45,8 +47,10 @@ public class DataStoreService {
          */
         try {
             File sourceFile = new File(source);
-            return new Serializer<DataStoreService>().parse(sourceFile, DataStoreService.class);
-        } catch (IOException e) {
+            DataStoreService ret = new Serializer<DataStoreService>().parse(sourceFile, DataStoreService.class);
+            ret.startStatePersistenceThread();
+            return ret;
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace(); // TODO remove
             // file not found or invalid file content
             return new DataStoreService(source);
@@ -61,15 +65,20 @@ public class DataStoreService {
         // dummy data for testing the web interface
         // loadFakeData();
         this.storageFileName = storageFilename;
+        System.out.println("starting thread");
+        this.startStatePersistenceThread();
+    }
 
+    public void startStatePersistenceThread() {
         // start anonymous thread that periodically persists store state
         new Thread(() -> {
+            System.out.println("thread started");
             while (true) {
                 try {
                     // in a real-world app this delay would be much longer
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
-                    ;
+                    e.printStackTrace();
                 }
                 this.persistStoreState();
             }
@@ -83,10 +92,11 @@ public class DataStoreService {
          * 
          */
         String serializedState = new Serializer<DataStoreService>().serialize(this);
-
+        System.out.println("About to write state");
         try (PrintWriter writer = new PrintWriter(this.storageFileName, "UTF-8")) {
             writer.println(serializedState);
             writer.close();
+            System.out.println("Written state");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }

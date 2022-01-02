@@ -231,9 +231,6 @@ public class Client implements IClient {
     }
 
     private Map<String, String> getRequestHeaders() {
-        // Map<String, String> ret = new HashMap<>();
-        // ret.put("Authorization", "Bearer aaa");
-        // return ret;
         return this.requestHeaders;
     }
 
@@ -376,8 +373,7 @@ public class Client implements IClient {
 
     @Override
     public User[] listFollowers() {
-        // TODO Auto-generated method stub
-        return null;
+        return (User[]) this.localFollowers.toArray(new User[0]);
     }
 
     @Override

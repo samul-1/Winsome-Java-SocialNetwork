@@ -1,171 +1,129 @@
 {
-  "users": {
-    "admin": {
-      "username": "admin",
-      "tags": [
-        "CS",
-        "Crypto",
-        "C++",
-        "JavaScript",
-        "Python"
-      ],
-      "password": {
-        "encryptedPassword": "p"
+  "users" : {
+    "admin1" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
       }
     },
-    "admin2": {
-      "username": "admin2",
-      "tags": [
-        "CS",
-        "C",
-        "OCaml",
-        "Python"
-      ],
-      "password": {
-        "encryptedPassword": "password"
-      }
-    },
-    "admin3": {
-      "username": "admin3",
-      "tags": [
-        "Unix",
-        "CS",
-        "Java",
-        "C++",
-        "JavaScript"
-      ],
-      "password": {
-        "encryptedPassword": "password"
+    "admin2" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
       }
     }
   },
-  "userPosts": {
-    "admin": [
-      {
-        "title": "Test post 2",
-        "content": "Test post2 content abc abc abc",
-        "id": "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff",
-        "author": "admin",
-        "comments": [],
-        "timestamp": 1640863966399,
-        "upvotes": []
-      },
-      {
-        "title": "Test post 1",
-        "content": "Test post1 content abc abc abc",
-        "id": "91ddba66-9cfa-45c1-8405-51629e47aa4f",
-        "author": "admin",
-        "comments": [
-          {
-            "authorUsername": "admin2",
-            "content": "comment1",
-            "timestamp": 1640863966401,
-            "user": "admin2"
-          },
-          {
-            "authorUsername": "admin",
-            "content": "comment2",
-            "timestamp": 1640863966401,
-            "user": "admin"
-          },
-          {
-            "authorUsername": "admin3",
-            "content": "comment3",
-            "timestamp": 1640863966401,
-            "user": "admin3"
-          }
-        ],
-        "timestamp": 1640863966388,
-        "upvotes": []
-      }
-    ],
-    "admin2": [
-      {
-        "title": "Test post 3",
-        "content": "Test post3 content abc abc abc",
-        "id": "1199fe07-6e54-4b2b-90ee-8c52ba45145b",
-        "author": "admin2",
-        "comments": [],
-        "timestamp": 1640863966399,
-        "upvotes": []
-      }
-    ],
-    "admin3": []
+  "userPosts" : {
+    "admin1" : [ {
+      "title" : "a",
+      "content" : "b",
+      "id" : "cfa86821-c6b9-4cbd-abfd-595a019dd3c7",
+      "author" : "admin1",
+      "comments" : [ ],
+      "timestamp" : 1641128018887,
+      "upvotes" : [ ]
+    } ],
+    "admin2" : [ ]
   },
-  "sessions": {
-    "auth.AuthenticationToken@17841": {
-      "username": "admin",
-      "tags": [
-        "CS",
-        "Crypto",
-        "C++",
-        "JavaScript",
-        "Python"
-      ],
-      "password": {
-        "encryptedPassword": "p"
+  "sessions" : {
+    "Token: Token: Token: Token: cqLuKzxI6UN31oGKiMZQWOY7cFMJan8Q2gWcCb5rF0l37la7xohS66xGpMYsFmDRkeCCko2gcvp2CwNp39lKAjEoPCoIKFzHGotCyOfcIMKo1xMtBRbwBYWBff3SVTA3" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: Token: vCsNSTfubXNrYgAYrZgKIoWqai5bT5D6D3T9C0zUkeMHOUHAlUtNr1JNTisEpepejC5ZGlxZuTnwlqQ6mWEfjI2EEfj4YHeM5KaiDB6hFlch6h7tSJ29D7Tnoac3rA6u" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: bGuUVTqs29HhjppR50SXadiwR8gjUD6BPMlbZM4fD24tsSdjQPgd24XhHtyDj7GBZ5lhwxade7cEn8k8HnC4QzuR3O2ovboxze5gibKY4g85uflBDlbMKxTa8tr0B7iT" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: pelmN3UNsKARBeeU8lbauFxX1srL740rOgnH0S0OsZBfAvV5vXF6PFYjarJuz3o32KtWj4sDzWRp62JUtkeZt2zG1I7sd2EQ2W7eNba07VFu0Od2IIitHPLnHhhUb2ay" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Oxt5yx2LrE4OiZi3Xy8ICUC7cucvqh3JlLmbpyYLs8qSFSSqIcW6yovEV7NmaoAUAEN8G3dkpkamklpWhlUdjO7Gbpa0mAFMQU6zihBSeP8UoyAl96GpmnJMngjygiJc" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: RUGPfhmGPkcaEtQ1n98YhYNK72wm39ugovfHO7kiDKEQfcY3DodWuvMZqz4pAnwCmVLRgnZSZwwS4MGeN6f0aTZG5uqxVHTn7kGX24LWrQtm1Gryj4KHPljfnOhhTZMH" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: uVnB2NTCgr7m2z5b2BsIVQ3vS5rZYcFVqYkLIBArpA4EkRUJYYNhkAuyEI7jRyPshKYgdWFRtv9ToEpIKrjNDWOIQwCbV1oZNa9GoT0sUQg0EFsWi1zRDX6uPwvLdcA0" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: Token: Token: yJAgnyxALlx9gbMdd0Mct6Bvd986XWgxTuecWUrNc8uzhsEJwbR0l9ULvjUoTLO1bZmTeiaGx8I9HJOTEKx2hRGWvJh2dga7flLlexd3DZdqdJPl8bxC59fByUG05gaF" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: Token: Token: dA9Q6mDJFjoJ5WpO1XiAPjA5V0CoaGOr6OKPWG0a5kJxlXz8JykLQbk8S1G0BsZgKYD1j7NXe1uC3Qx0E4zXWnVZuxT8pL59sGiXNQ6xQvIxmwDTvjRslI4RTY6AbUfs" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: CZIU4u0vpRAiY94gvrAndLVGMgdyiObwJbvZd9wnbetdaW4TuUwCaGoLjc3TAwvTX7pGQzi2QCm6p5zE5q49eTVbpzoahmRAeULSVyUmYnpKEcDYfWdiwY7jdFPrIztY" : {
+      "username" : "admin2",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
+      }
+    },
+    "Token: Token: Token: Token: V9SIvnJjNzUjmF9XAM2p3HfvEmLSekomlFOkAJSii6MiRq5WFSpoqmQEeY4pRzU5e2W4iEtlXHjKYR21XF8cGHkXGoCopgK2nD3XFDZgzQlnA0ef7MUbODZpyePGWLIo" : {
+      "username" : "admin1",
+      "tags" : [ "a" ],
+      "password" : {
+        "encryptedPassword" : "p"
       }
     }
   },
-  "posts": {
-    "1199fe07-6e54-4b2b-90ee-8c52ba45145b": {
-      "title": "Test post 3",
-      "content": "Test post3 content abc abc abc",
-      "id": "1199fe07-6e54-4b2b-90ee-8c52ba45145b",
-      "author": "admin2",
-      "comments": [],
-      "timestamp": 1640863966399,
-      "upvotes": []
-    },
-    "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff": {
-      "title": "Test post 2",
-      "content": "Test post2 content abc abc abc",
-      "id": "9bb3fce5-35cd-4ce0-9a24-8ba6e42cfdff",
-      "author": "admin",
-      "comments": [],
-      "timestamp": 1640863966399,
-      "upvotes": []
-    },
-    "91ddba66-9cfa-45c1-8405-51629e47aa4f": {
-      "title": "Test post 1",
-      "content": "Test post1 content abc abc abc",
-      "id": "91ddba66-9cfa-45c1-8405-51629e47aa4f",
-      "author": "admin",
-      "comments": [
-        {
-          "authorUsername": "admin2",
-          "content": "comment1",
-          "timestamp": 1640863966401,
-          "user": "admin2"
-        },
-        {
-          "authorUsername": "admin",
-          "content": "comment2",
-          "timestamp": 1640863966401,
-          "user": "admin"
-        },
-        {
-          "authorUsername": "admin3",
-          "content": "comment3",
-          "timestamp": 1640863966401,
-          "user": "admin3"
-        }
-      ],
-      "timestamp": 1640863966388,
-      "upvotes": []
+  "posts" : {
+    "cfa86821-c6b9-4cbd-abfd-595a019dd3c7" : {
+      "title" : "a",
+      "content" : "b",
+      "id" : "cfa86821-c6b9-4cbd-abfd-595a019dd3c7",
+      "author" : "admin1",
+      "comments" : [ ],
+      "timestamp" : 1641128018887,
+      "upvotes" : [ ]
     }
   },
-  "followers": {
-    "admin": [],
-    "admin2": [
-      "admin"
-    ],
-    "admin3": []
+  "followers" : {
+    "admin1" : [ ],
+    "admin2" : [ ]
   },
-  "wallets": {
-    "admin": 0.0,
-    "admin2": 0.0,
-    "admin3": 0.0
+  "wallets" : {
+    "admin1" : 0.0,
+    "admin2" : 0.0
   },
-  "storageFileName": "db.json"
+  "storageFileName" : "db.json"
 }

@@ -84,7 +84,9 @@ public class SocialNetworkService {
     public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
         if (this.store.addFollower(request.getRequest().getBody().trim(),
                 request.getUser().getUsername())) {
+            // TODO prevent (un)following themselves
             // send RMI notification to user who just acquired a follower
+            System.out.println("notifying " + request.getRequest().getBody().trim());
             this.followerService.notifyUser(request.getRequest().getBody().trim());
             return new RestResponse(204);
         }
