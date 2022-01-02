@@ -20,7 +20,7 @@ public class Post implements Comparable<Post> {
     private final Date timestamp = new Date();
 
     private Post originalPost; // for rewin feature
-    private final Set<Reaction> reactions = new HashSet<Reaction>();
+    private final Set<Reaction> reactions = new TreeSet<Reaction>();
 
     public Post(String author, String title, String content) {
         if (author == null || author.length() == 0 || title == null || title.length() == 0 || content == null

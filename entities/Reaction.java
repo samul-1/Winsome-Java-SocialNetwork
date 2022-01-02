@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 
-public class Reaction {
+public class Reaction implements Comparable<Reaction> {
     private String username;
     private int value;
     private final Date timestamp = new Date();
@@ -54,4 +54,8 @@ public class Reaction {
         return this.username;
     }
 
+    @Override
+    public int compareTo(Reaction o) {
+        return this.timestamp.compareTo(o.getTimestamp());
+    }
 }
