@@ -15,7 +15,7 @@ public class PostRenderer implements IRenderer<Post> {
 
         ret = "Title: " + data.getTitle() + " (ID: " + data.getId().toString() + ")\n";
         ret += "Content:\n" + data.getContent() + "\n\n";
-        ret += "Upvotes: " + data.getUpVotesCount() + ", downvotes: " + data.getDownVotesCount() + "\n";
+        ret += "Upvotes: " + data.getUpvotesCount() + ", downvotes: " + data.getDownvotesCount() + "\n";
         ret += "Comments: " + (data.getComments().size() == 0 ? "no comments" : "\n");
         for (Comment comment : data.getComments()) {
             ret += comment.getUser() + ": " + comment.getContent() + "\n";

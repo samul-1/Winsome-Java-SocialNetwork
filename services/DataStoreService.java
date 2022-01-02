@@ -1,6 +1,7 @@
 package services;
 
 import java.util.Set;
+import java.util.TreeSet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -145,7 +146,7 @@ public class DataStoreService {
         // operations because even if more threads attempted to register a user
         // with the same username at the same time, at this point all but one
         // of them have returned false
-        this.userPosts.put(username, new HashSet<Post>());
+        this.userPosts.put(username, new TreeSet<Post>());
         this.followers.put(username, new HashSet<String>());
         this.wallets.put(username, 0.0);
         return newUser;

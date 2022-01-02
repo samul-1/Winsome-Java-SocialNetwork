@@ -5,7 +5,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Comment {
+public class Comment implements Comparable<Comment> {
     private String authorUsername;
     private final String content;
     private final Date timestamp = new Date();
@@ -35,5 +35,10 @@ public class Comment {
 
     public Date getTimestamp() {
         return this.timestamp;
+    }
+
+    @Override
+    public int compareTo(Comment o) {
+        return this.timestamp.compareTo(o.getTimestamp());
     }
 }

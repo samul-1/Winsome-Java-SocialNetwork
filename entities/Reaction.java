@@ -2,10 +2,20 @@ package entities;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
+
 public class Reaction {
     private String username;
-    private final int value;
+    private int value;
     private final Date timestamp = new Date();
+
+    @JsonCreator
+    public Reaction() {
+    }
 
     public Reaction(int value) {
         // this(null, value);
