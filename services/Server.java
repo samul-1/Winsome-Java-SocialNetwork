@@ -241,6 +241,7 @@ public class Server {
 
         // check request headers to authenticate the request
         try {
+            // TODO prevent logging in if request contains authorization header
             authenticatedRequest = requireAuth ? this.authMiddleware.authenticateRequest(request)
                     : this.authMiddleware.getAnonymousRestRequest(request);
         } catch (NoAuthenticationProvidedException e) {
