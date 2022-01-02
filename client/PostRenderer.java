@@ -1,5 +1,9 @@
 package client;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import entities.Comment;
 import entities.Post;
 
@@ -22,13 +26,59 @@ public class PostRenderer implements IRenderer<Post> {
 
     @Override
     public String render(Post[] data) {
-        String ret = "ID \t\t\t | Author \t\t\t | Title\n --------------------------- \n";
+        if (data.length == 0) {
+            return "No posts to show.";
+        }
+        String ret = "ID"; // \t\t\t | Author \t\t\t | Title\n --------------------------- \n";
+        for (int i = 0; i < data[0].getId().toString().length() - 1; i++) {
+            ret += " ";
+        }
+
+        ret += "| Author";
+
+        int longestAuthorLength = this.getLongestAuthorLength(data);
+        int longestTitleLength = this.getLongestTitleLength(data);
+
+        for (int i = 0; i < Math.max(longestAuthorLength - "Author".length(), 0); i++) {
+            ret += " ";
+        }
+
+        ret += " | Title\n";
+
+        for (int i = 0; i < data[0].getId().toString().length() + longestAuthorLength + longestTitleLength
+                + "ID".length() + "Author".length()
+                + "Title".length() + 6; i++) {
+            ret += "-";
+        }
+
+        ret += "\n";
 
         for (Post post : data) {
-            ret += post.getId().toString() + " | " + post.getAuthor() + "\t\t | " + post.getContent() + "\n";
+            ret += post.getId().toString();
+            ret += " | " + post.getAuthor();
+            for (int i = 0; i < longestAuthorLength - post.getAuthor().length(); i++) {
+                ret += " ";
+            }
+            ret += " | " + post.getTitle() + "\n";
         }
 
         return ret;
+    }
+
+    private int getLongestTitleLength(Post[] data) {
+        return Collections.max(
+                Arrays.asList(data)
+                        .stream()
+                        .map(post -> post.getTitle().length())
+                        .collect(Collectors.toList()));
+    }
+
+    private int getLongestAuthorLength(Post[] data) {
+        return Collections.max(
+                Arrays.asList(data)
+                        .stream()
+                        .map(post -> post.getAuthor().length())
+                        .collect(Collectors.toList()));
     }
 
 }
