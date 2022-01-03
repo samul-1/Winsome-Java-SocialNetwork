@@ -34,7 +34,6 @@ public class DataStoreService {
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
-
     @JsonIgnore
     private final ConcurrentHashMap<String, IClientFollowerNotificationService> notificationCallbacks = new ConcurrentHashMap<>();
     private String storageFileName = "";
@@ -180,7 +179,6 @@ public class DataStoreService {
     public Set<User> getCompatibleUsers(String requestingUsername) {
         Set<User> ret = new HashSet<>();
         User requestingUser = this.getUser(requestingUsername);
-        System.out.println("REQUESTING USER " + requestingUsername + ", user " + requestingUser);
 
         this.users.forEach((_username, user) -> {
             if (user.isCompatibleWith(requestingUser)) {
@@ -221,22 +219,6 @@ public class DataStoreService {
 
     public Set<Post> getUserPosts(String username) {
         return this.userPosts.get(username);
-    }
-
-    // TODO remove as you won't need this when you correct the formula
-    public int getUserCommentCount(String username) {
-        Set<Post> commentedPosts = new HashSet<>();
-        this.posts.forEach((__, post) -> {
-            Set<Comment> postComments = post.getComments();
-            if (postComments
-                    .stream()
-                    .filter(comment -> comment.getUser().equals(username))
-                    .findAny()
-                    .isPresent()) {
-                commentedPosts.add(post);
-            }
-        });
-        return commentedPosts.size();
     }
 
     public boolean addFollower(String username, String newFollower) {

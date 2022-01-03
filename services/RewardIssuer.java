@@ -49,9 +49,11 @@ public class RewardIssuer implements Runnable {
 
         double commentScore = 0.0;
         for (Comment comment : contributors.newComments) {
-            // TODO count comments made to THIS post by this commenter, not to all posts!
-            int commenterCount = this.userCommentsCount.computeIfAbsent(comment.getUser(),
-                    (username) -> this.store.getUserCommentCount(username));
+            long commenterCount = post
+                    .getComments()
+                    .stream()
+                    .filter(c -> c.getUser().equals(comment.getUser()))
+                    .count();
 
             commentScore += 2 / (1 + Math.exp(-commenterCount - 1));
         }
@@ -117,8 +119,8 @@ public class RewardIssuer implements Runnable {
 
             double postReward = this.getPostReward(post, rewardData);
 
-            balanceDelta += postReward * this.authorPercentage;
-            double contributorPostReward = (postReward * (1 - this.authorPercentage)) / contributors.size();
+            balanceDelta += postReward * this.authorPercentage / 100;
+            double contributorPostReward = (postReward * (100 - this.authorPercentage) / 100) / contributors.size();
             for (String contributor : contributors) {
                 this.commitUserWalletBalanceChange(contributor, contributorPostReward);
             }
