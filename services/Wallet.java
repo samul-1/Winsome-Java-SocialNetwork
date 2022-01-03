@@ -46,4 +46,8 @@ public class Wallet {
     public void addTransaction(double delta) {
         this.transactions.add(new WalletTransaction(delta));
     }
+
+    public List<WalletTransaction> getTransactions() {
+        return this.transactions;
+    }
 }

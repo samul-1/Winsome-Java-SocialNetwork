@@ -199,7 +199,6 @@ public class SocialNetworkService {
         }
         reaction.setUser(request.getUser().getUsername());
 
-        // TODO prevent rating if not in user feed
         OperationStatus outcome = this.store.addPostReaction(request.getRequest().getPathParameter(), reaction);
         if (outcome.status == Status.OK) {
             return new RestResponse(200);
@@ -220,7 +219,6 @@ public class SocialNetworkService {
         }
         comment.setUser(request.getUser().getUsername());
 
-        // TODO prevent commenting if not in user feed
         OperationStatus outcome = this.store.addPostComment(request.getRequest().getPathParameter(), comment);
         if (outcome.status == Status.NOT_FOUND) {
             throw new ResourceNotFoundException();

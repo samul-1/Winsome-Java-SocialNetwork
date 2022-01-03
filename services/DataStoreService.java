@@ -300,12 +300,12 @@ public class DataStoreService {
                     return postSet;
                 });
             } catch (RuntimeException e) {
-                // don't delete the post since the removal from
-                // the user's post set failed
-
                 // report appropriate error depending on whether the post attempted to be
                 // deleted doesn't exist or the user who tried to delete it isn't its author
                 status.status = this.posts.get(id) == null ? Status.NOT_FOUND : Status.ILLEGAL_OPERATION;
+
+                // don't delete the post since the removal from
+                // the user's post set failed
                 return toDelete;
             }
 
@@ -331,7 +331,9 @@ public class DataStoreService {
     public OperationStatus addPostReaction(UUID postId, Reaction reaction) {
         OperationStatus status = new OperationStatus();
         if (this.posts.computeIfPresent(postId, (__, post) -> {
-            if (!post.addReaction(reaction)) {
+            if (!this.getUserFeed(reaction.getUser()).contains(post)) {
+                status.status = Status.NOT_FOUND;
+            } else if (!post.addReaction(reaction)) {
                 status.status = Status.ILLEGAL_OPERATION;
             }
             return post;
@@ -344,11 +346,13 @@ public class DataStoreService {
     public OperationStatus addPostComment(UUID postId, Comment comment) {
         OperationStatus status = new OperationStatus();
         if (this.posts.computeIfPresent(postId, (__, post) -> {
-            if (!post.addComment(comment)) {
+            if (!this.getUserFeed(comment.getUser()).contains(post)) {
+                status.status = Status.NOT_FOUND;
+            } else if (!post.addComment(comment)) {
                 status.status = Status.ILLEGAL_OPERATION;
             }
             return post;
-        }) != null) {
+        }) == null) {
             status.status = Status.NOT_FOUND;
         }
         return status;

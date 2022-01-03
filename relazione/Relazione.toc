@@ -1,0 +1,10 @@
+\babel@toc {italian}{}
+\babel@toc {italian}{}
+\contentsline {section}{\numberline {1}Architettura di massima del progetto}{1}{section.1}%
+\contentsline {section}{\numberline {2}Le entità di dominio}{1}{section.2}%
+\contentsline {section}{\numberline {3}Il data store}{1}{section.3}%
+\contentsline {section}{\numberline {4}Il service layer}{2}{section.4}%
+\contentsline {section}{\numberline {5}L'API e il router}{2}{section.5}%
+\contentsline {section}{\numberline {6}Il server}{2}{section.6}%
+\contentsline {section}{\numberline {7}Il client CLI}{2}{section.7}%
+\contentsline {section}{\numberline {8}Il client GUI}{2}{section.8}%

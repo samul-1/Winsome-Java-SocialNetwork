@@ -1,0 +1,118 @@
+\documentclass[a4paper,8pt]{article} % Prepara un documento per carta A4, con un font di dimensione 12pt
+
+\usepackage[italian]{babel} % Adatta LaTeX alle convenzioni tipografiche italiane,
+% e ridefinisce alcuni titoli in italiano, come "Capitolo" al posto di "Chapter",
+% se il vostro documento è in italiano
+% l'opzione  linguistica 'french' è necessaria per l'abilitazione della
+% successiva istruzione <<\frenchspacing>> 
+\usepackage[T1]{fontenc} % Riga da togliere se si compila con PDFLaTeX
+\usepackage[utf8]{inputenc} % Consente l'uso caratteri accentati italiani
+\usepackage{amsthm}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{hyperref}
+
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+}
+
+\lstset{style=mystyle}
+
+
+\def\code#1{\texttt{#1}}
+\title{Progetto di laboratorio di reti} % \LaTeX è una macro che compone il logo "LaTeX"
+% I commenti (introdotti da %) vengono ignorati
+
+\author{Samuele Bonini}
+\date{}
+% in alternativa a \date il comando \today introduce la data di sistema.
+
+\begin{document}
+\maketitle % Genera il titolo sulle istruzioni  \title, \author e \date
+
+
+
+\tableofcontents % Prepara l'indice generale
+\begin{flushleft}
+
+    \section{Architettura di massima del progetto} %
+    \textbf{Suddivisione in layer.}\quad \\ (img)\\
+    ... Questo documento è strutturato in maniera tale da illustrare, come prima cosa, le caratteristiche delle entità
+    di dominio e quali sono le operazioni primitive a esse associate, per poi spostarsi progressivamente sui layer
+    più esterni dell'architettura, dando un'idea di come le classi appartenenti allo strato della business logic sono
+    implementate, chiarendo infine come viene realizzata, agli atti, la comunicazione tra il server e il client.\\
+    \textbf{Protocollo applicazione.}\quad (rest, token authentication)\\
+
+
+    \section{Le entità di dominio}
+    \textbf{Gli utenti.}\quad \\
+    \textbf{Post, commenti, reazioni.}\quad \\
+    \textbf{Classi richiesta e risposta.}\quad \\
+    \textbf{Serializer.}\quad \\
+
+
+    \section{Il data store}
+    Introduzione\\
+    \textbf{Strutture dati.}\quad \\
+    \textbf{Persistenza dello stato.}\quad \\
+
+
+    \section{Il service layer}
+    Introduzione\\
+    \textbf{La classe SocialNetworkService.}\quad \\
+    \textbf{La classe RewardIssuer.}\quad \\
+    \textbf{La classe WalletConversionService.}\quad \\
+    \textbf{I servizi di registrazione utente e notifica.}\quad \\
+
+
+
+
+    \section{L'API e il router}
+
+    \textbf{La classe ApiRoute.}\quad \\
+    \textbf{La classe ApiRouter.}\quad \\
+    \textbf{Gestione di una richiesta HTTP.}\quad \\
+    (img)\\
+
+    \section{Il server}
+
+    \textbf{Gestione delle connessioni.}\quad \\
+    \textbf{La classe ServerConfig.}\quad \\
+
+    \section{Il client CLI}
+
+    \textbf{Gestione di una richiesta al server.}\quad \\
+    \textbf{Rendering dei dati.}\quad \\
+    \textbf{Gestione dei messaggi.}\quad \\
+
+    \section{Il client GUI}
+
+    \textbf{Realizzazione.}\quad \\
+    \textbf{Limitazioni.}\quad \\
+
+
+\end{flushleft}
+\end{document}

@@ -68,7 +68,9 @@ public class Client implements IClient {
                 "You can type 'exit' at any time to exit the program.\n");
         map.put("btc_wallet", "Your wallet balance converted to BitCoins is: btc ");
         map.put("waiting_for_command", "Your command: ");
-        // map.put(403, "403 FORBIDDEN");
+        map.put("post_constraint_failed",
+                "Titles can only be 20 characters long and the content of the" +
+                        "post can be up to 500 characters long.");
         // map.put(404, "404 NOT FOUND");
         // map.put(405, "405 METHOD NOT SUPPORTED");
         // map.put(500, "500 INTERNAL SERVER ERROR");
@@ -232,6 +234,7 @@ public class Client implements IClient {
                     System.out.println(this.clientMessages.get("invalid_operation_arguments") + e.getMessage());
                 } catch (ClientOperationFailedException e) {
                     System.out.println("OPERATION FAILED!");
+                    System.out.println(this.getOperationFailedMessage(e));
                     e.printStackTrace();
                 }
             }
@@ -241,6 +244,12 @@ public class Client implements IClient {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private String getOperationFailedMessage(ClientOperationFailedException exc) {
+        // TODO implement - if the exc has a message, print that one, otherwise lookup
+        // TODO the pair <request path, error code> from a map
+        return null;
     }
 
     private Map<String, String> getRequestHeaders() {
@@ -268,7 +277,7 @@ public class Client implements IClient {
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new InvalidClientArgumentsException("string");
         }
-        if (firstToken.charAt(0) != '"' || !allowMultipleWords || firstToken.charAt(firstToken.length() - 1) == '"') {
+        if (!allowMultipleWords || firstToken.charAt(0) != '"' || firstToken.charAt(firstToken.length() - 1) == '"') {
             return firstToken; // single-word, non-quoted string
         }
         String ret = firstToken;
@@ -443,7 +452,12 @@ public class Client implements IClient {
 
     @Override
     public Post createPost(String title, String content) throws IOException, ClientOperationFailedException {
-        String requestData = new Serializer<Post>().serialize(new Post(title, content));
+        String requestData;
+        try {
+            requestData = new Serializer<Post>().serialize(new Post(title, content));
+        } catch (IllegalArgumentException e) {
+            throw new ClientOperationFailedException(this.clientMessages.get("post_constraint_failed"));
+        }
         RestResponse response = this
                 .receiveResponse(new RestRequest("/posts", HttpMethod.POST, this.getRequestHeaders(), requestData));
 

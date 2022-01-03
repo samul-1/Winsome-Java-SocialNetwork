@@ -13,6 +13,41 @@
       "password" : {
         "encryptedPassword" : "f1290186a5d0b1ceab27f4e77c0c5d68"
       }
+    },
+    "qwert" : {
+      "username" : "qwert",
+      "tags" : [ "r", "y" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
+    "test" : {
+      "username" : "test",
+      "tags" : [ "b", "c" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
+    "u" : {
+      "username" : "u",
+      "tags" : [ "ab", "c" ],
+      "password" : {
+        "encryptedPassword" : "98552c3920478741b107f357eaddfe95"
+      }
+    },
+    "test1" : {
+      "username" : "test1",
+      "tags" : [ "f", "g" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
+    "t1" : {
+      "username" : "t1",
+      "tags" : [ "b", "c" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
     }
   },
   "userPosts" : {
@@ -28,7 +63,12 @@
       "upvotes" : 0,
       "downvotes" : 0
     } ],
-    "q" : [ ]
+    "q" : [ ],
+    "qwert" : [ ],
+    "test" : [ ],
+    "u" : [ ],
+    "test1" : [ ],
+    "t1" : [ ]
   },
   "posts" : {
     "6b3241fc-c322-4b40-825b-d2b6cc2f929e" : {
@@ -46,7 +86,12 @@
   },
   "followers" : {
     "a" : [ ],
-    "q" : [ ]
+    "q" : [ ],
+    "qwert" : [ ],
+    "test" : [ ],
+    "u" : [ ],
+    "test1" : [ ],
+    "t1" : [ ]
   },
   "wallets" : {
     "a" : {
@@ -63,6 +108,26 @@
       "balance" : 3.0
     },
     "q" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "qwert" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "test" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "u" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "test1" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "t1" : {
       "transactions" : [ ],
       "balance" : 0.0
     }
