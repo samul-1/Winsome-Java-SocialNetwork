@@ -147,7 +147,7 @@ public class DataStoreService {
         // with the same username at the same time, at this point all but one
         // of them have returned false
         this.userPosts.put(username, new TreeSet<Post>());
-        this.followers.put(username, new HashSet<String>());
+        this.followers.put(username, new TreeSet<String>());
         this.wallets.put(username, 0.0);
         return newUser;
     }
@@ -254,7 +254,7 @@ public class DataStoreService {
     }
 
     public Set<Post> getUserFeed(String username) {
-        Set<Post> feed = new HashSet<>();
+        Set<Post> feed = new TreeSet<>();
 
         this.followers.forEach((user, followerSet) -> {
             if (followerSet.contains(username)) {
@@ -280,14 +280,16 @@ public class DataStoreService {
     }
 
     public boolean deletePost(UUID id, String fromUser) {
-        return this.posts.computeIfPresent(id, (__, post) -> {
+        Set<Post> chainedDeletionSet = new HashSet<>();
+
+        boolean ret = this.posts.computeIfPresent(id, (__, toDelete) -> {
             try {
                 // first try to remove post from the user's post set:
                 // this will fail if the post doesn't belong to the user
                 this.userPosts.computeIfPresent(fromUser, (user, postSet) -> {
-                    if (!postSet.remove(post)) {
+                    if (!postSet.remove(toDelete)) {
                         // the user who requested the deletion isn't
-                        // the author of the specified post
+                        // the author of the specified toDelete
                         throw new RuntimeException();
                     }
                     return postSet;
@@ -295,10 +297,26 @@ public class DataStoreService {
             } catch (RuntimeException e) {
                 // don't delete the post since the removal from
                 // the user's post set failed
-                return post;
+                return toDelete;
             }
+
+            // existence and ownership of the post were verified - now
+            // mark all rewins of that post for deletion
+            this.posts.forEach((postId, p) -> {
+                if (p.isRewin() && p.getRewinedPost().equals(toDelete)) {
+                    chainedDeletionSet.add(p);
+                }
+            });
+            // returning null removes the mapping for this post from posts map
             return null;
         }) == null;
+
+        // finally delete the rewins
+        for (Post rewin : chainedDeletionSet) {
+            this.deletePost(rewin.getId(), rewin.getAuthor());
+        }
+
+        return ret;
     }
 
     public boolean addPostReaction(UUID postId, Reaction reaction) {
