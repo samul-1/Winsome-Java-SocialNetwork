@@ -2,6 +2,7 @@ package entities;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,17 +18,20 @@ public class User implements Serializable {
 
     public User(@JsonProperty("username") String username,
             @JsonProperty("tags") Set<String> tags) {
-        // TODO validate input
-        this.username = username;
-        this.tags = tags;
-        this.password = null;
+        this(username, tags, null);
     }
 
     public User(String username, Set<String> tags, Password password) {
-        // TODO validate input
+        if (username == null || username.trim().length() == 0
+                || tags == null || tags.size() == 0 || tags.size() > 5) {
+            throw new IllegalArgumentException();
+        }
         this.username = username;
-        // TODO save tags lowercase
-        this.tags = tags;
+        Set<String> lowercaseTags = tags
+                .stream()
+                .map(tag -> tag.toLowerCase())
+                .collect(Collectors.toSet());
+        this.tags = lowercaseTags;
         this.password = password;
     }
 
@@ -39,13 +43,12 @@ public class User implements Serializable {
         return this.tags;
     }
 
-    // @JsonIgnore
     public Password getPassword() {
         return this.password;
     }
 
-    public boolean isCompatibleWith(User user) {
-        for (String tag : user.getTags()) {
+    public boolean isCompatibleWith(User anotherUser) {
+        for (String tag : anotherUser.getTags()) {
             if (this.tags.contains(tag)) {
                 return true;
             }

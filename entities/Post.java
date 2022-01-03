@@ -22,25 +22,22 @@ public class Post implements Comparable<Post> {
     private Post originalPost; // for rewin feature
     private final Set<Reaction> reactions = new TreeSet<Reaction>();
 
-    public Post(String author, String title, String content) {
-        if (author == null || author.length() == 0 || title == null || title.length() == 0 || content == null
-                || content.length() == 0) {
+    @JsonCreator
+    public Post(
+            @JsonProperty("title") String title,
+            @JsonProperty("content") String content) {
+        if (title == null || title.length() == 0 || content == null
+                || content.length() == 0 || title.length() > 20 || content.length() > 500) {
             throw new IllegalArgumentException();
         }
-        this.author = author;
         this.title = title;
         this.content = content;
         this.id = UUID.randomUUID();
     }
 
-    @JsonCreator
-    public Post(
-            @JsonProperty("title") String title,
-            @JsonProperty("content") String content) {
-        this.title = title;
-        this.content = content;
-        this.id = UUID.randomUUID();
-
+    public Post(String author, String title, String content) {
+        this(title, content);
+        this.author = author;
     }
 
     public Post(String rewiner, Post rewinedPost) {
