@@ -1,24 +1,13 @@
 package services;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
-import protocol.HttpMethod;
-import protocol.RestRequest;
-import protocol.RestResponse;
 
 public class WalletConversionService {
     private double cachedRate = 1.0;
@@ -28,7 +17,7 @@ public class WalletConversionService {
     private final int CIRCUIT_BREAKER_COOL_DOWN = 10 * 1000;
     private final int MAX_RETRIES = 5;
     private final int RETRY_BACK_OFF = 500;
-    private final int BUF_CAPACITY = 4096 * 4096;
+    private final int DECIMAL_PLACES = 2;
 
     public double getConversionRate() {
         synchronized (this) {
@@ -36,9 +25,9 @@ public class WalletConversionService {
                 if (this.hasCoolDownExpired()) {
                     this.circuitBreakerOn = false;
                 } else {
-                    // circuit breaker is on because the server has been down recently
-                    // return cached value instead of repeatedly contacting the remote
-                    // service, which is likely still down
+                    // circuit breaker is on because the remote service has been down
+                    // recently - return cached value instead of repeatedly contacting
+                    // the remote service, which is likely still down
                     return this.cachedRate;
                 }
             }
@@ -90,7 +79,7 @@ public class WalletConversionService {
                 "    \"params\": {\n" +
                 "        \"apiKey\": \"e536fefe-1137-4c02-88ac-49c10a8f1064\",\n" +
                 "       \"n\": 1,\n" +
-                "       \"decimalPlaces\": 2\n" +
+                "       \"decimalPlaces\": " + this.DECIMAL_PLACES + "\n" +
                 "   },\n" +
                 " \"id\": 123\n" +
                 "}";
@@ -99,60 +88,33 @@ public class WalletConversionService {
         connection.setRequestProperty("content-type", "application/json");
         connection.setRequestProperty("content-length", Integer.toString(postBody.length()));
         connection.setDoOutput(true);
+
         try (DataOutputStream writer = new DataOutputStream(connection.getOutputStream())) {
             writer.write(postBody.getBytes());
         }
-        // byte[] buf = new byte[this.BUF_CAPACITY];
-        // try (DataInputStream reader = new
-        // DataInputStream(connection.getInputStream())) {
-        // reader.readFully(buf);
-        // }
 
-        Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-        System.out.println("RESPONSE FROM RANDOM\n\n");
         StringBuilder sb = new StringBuilder();
-        for (int c; (c = in.read()) >= 0;)
-            sb.append((char) c);
+        try (Reader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+            for (int c; (c = reader.read()) >= 0;)
+                sb.append((char) c);
+        }
 
-        String generatedNumberData = sb.toString().split("\"data\":")[1].substring(1, 5);
+        System.out.println("RECEIVED: " + sb.toString());
 
-        // RestResponse response = RestResponse.fromString(sb.toString());
-        // if (response.isClientErrorResponse() || response.isServerErrorResponse()) {
-        // throw new IOException();
-        // }
-        // String generatedNumberData =
-        // response.getBody().split("\"data\":")[1].substring(1, 5);
-        // RestRequest request = new RestRequest("/json-rpc/4/invoke",
-        // HttpMethod.POST,
-        // null,
-        // "{\n" +
-        // " \"jsonrpc\": \"2.0\",\n" +
-        // " \"method\": \"generateDecimalFractions\",\n" +
-        // " \"params\": {\n" +
-        // " \"apiKey\": \"e536fefe-1137-4c02-88ac-49c10a8f1064\",\n" +
-        // " \"n\": 1,\n" +
-        // " \"decimalPlaces\": 2\n" +
-        // " },\n" +
-        // " \"id\": 123\n" +
-        // "}");
-        // InetAddress addr = InetAddress.getByName("api.random.org");
-        // SocketAddress sktAddr = new InetSocketAddress(addr, 443);
-        // SocketChannel sktChan = SocketChannel.open(sktAddr);
+        if (sb.toString().indexOf("error") != -1 || sb.toString().indexOf("data") == -1) {
+            // unsuccessful interaction with remote service
+            throw new IOException();
+        }
 
-        // System.out.println("REQUEST TO RANDOM: " + request.toString());
-        // sktChan.write(ByteBuffer.wrap(request.toString().getBytes()));
+        String generatedNumberData = sb
+                .toString()
+                .split("\"data\":")[1] // generated number immediately follows this string
+                        .trim()
+                        .substring(
+                                1, // discard leading '['
+                                this.DECIMAL_PLACES + 3 // leading digit + '.'
+                        );
 
-        // ByteBuffer buf = ByteBuffer.allocate(this.BUF_CAPACITY);
-        // sktChan.read(buf);
-        // buf.flip();
-
-        // String responseString = StandardCharsets.UTF_8.decode(buf).toString();
-        // System.out.println("RESPONSE:\n" + responseString);
-        // RestResponse response = RestResponse.fromString(responseString);
-
-        // System.out.println("RESPONSE FROM RANDOM: " + response.toString());
-
-        // sktChan.close();
         System.out.println("GENERATED " + generatedNumberData);
         return Double.parseDouble(generatedNumberData);
     }

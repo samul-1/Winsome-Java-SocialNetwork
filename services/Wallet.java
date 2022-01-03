@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Wallet {
-    public class WalletTransaction {
+    public static class WalletTransaction {
         public double delta;
         public Date timestamp;
 

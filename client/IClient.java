@@ -41,5 +41,5 @@ public interface IClient {
 
     Wallet getWallet() throws IOException, ClientOperationFailedException;
 
-    long getWalletInBitcoin() throws IOException, ClientOperationFailedException;
+    double getWalletInBitcoin() throws IOException, ClientOperationFailedException;
 }

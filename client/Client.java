@@ -221,7 +221,7 @@ public class Client implements IClient {
                             }
                             switch (parameter) {
                                 case "btc":
-                                    long btcValue = this.getWalletInBitcoin();
+                                    double btcValue = this.getWalletInBitcoin();
                                     renderedResponseData = this.clientMessages.get("btc_wallet") + btcValue;
                                     break;
                                 default:
@@ -491,11 +491,11 @@ public class Client implements IClient {
     }
 
     @Override
-    public long getWalletInBitcoin() throws IOException, ClientOperationFailedException {
+    public double getWalletInBitcoin() throws IOException, ClientOperationFailedException {
         RestResponse response = this
                 .receiveResponse(new RestRequest("/wallet/btc", HttpMethod.GET, this.getRequestHeaders()));
 
-        return Long.parseLong(response.getBody().trim());
+        return Double.parseDouble(response.getBody().trim());
     }
 
 }
