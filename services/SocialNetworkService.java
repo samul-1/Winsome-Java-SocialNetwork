@@ -9,6 +9,8 @@ import exceptions.PermissionDeniedException;
 import exceptions.ResourceNotFoundException;
 import protocol.AuthenticatedRestRequest;
 import protocol.RestResponse;
+import services.DataStoreService.OperationStatus;
+import services.DataStoreService.OperationStatus.Status;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -81,23 +83,28 @@ public class SocialNetworkService {
         return new RestResponse(200, body);
     }
 
-    public RestResponse followUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
-        if (this.store.addFollower(request.getRequest().getBody().trim(),
-                request.getUser().getUsername())) {
-            // TODO prevent (un)following themselves
+    public RestResponse followUserHandler(AuthenticatedRestRequest request)
+            throws ResourceNotFoundException, PermissionDeniedException {
+        String toFollow = request.getRequest().getBody().trim();
+        String newFollower = request.getUser().getUsername();
+
+        if (toFollow.equals(newFollower)) {
+            // cannot follow yourself
+            throw new PermissionDeniedException();
+        }
+        if (this.store.addFollower(toFollow, newFollower)) {
             // send RMI notification to user who just acquired a follower
-            System.out.println("notifying " + request.getRequest().getBody().trim());
-            this.followerService.notifyUser(request.getRequest().getBody().trim());
+            this.followerService.notifyUser(toFollow);
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();
     }
 
     public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
-        if (this.store.removeFollower(request.getRequest().getBody().trim(),
-                request.getUser().getUsername())) {
+        String target = request.getRequest().getBody().trim();
+        if (this.store.removeFollower(target, request.getUser().getUsername())) {
             // send RMI notification to user who just lost a follower
-            this.followerService.notifyUser(request.getRequest().getBody().trim());
+            this.followerService.notifyUser(target);
             return new RestResponse(204);
         }
         throw new ResourceNotFoundException();
@@ -145,9 +152,12 @@ public class SocialNetworkService {
 
     public RestResponse deletePostHandler(AuthenticatedRestRequest request)
             throws ResourceNotFoundException, PermissionDeniedException {
-        // TODO find a way to differentiate between post not found and permission error
-        if (!this.store.deletePost(request.getRequest().getPathParameter(), request.getUser().getUsername())) {
+        OperationStatus outcome = this.store.deletePost(request.getRequest().getPathParameter(),
+                request.getUser().getUsername());
+        if (outcome.status == Status.ILLEGAL_OPERATION) {
             throw new PermissionDeniedException();
+        } else if (outcome.status == Status.NOT_FOUND) {
+            throw new ResourceNotFoundException();
         }
 
         return new RestResponse(204);
@@ -170,7 +180,7 @@ public class SocialNetworkService {
     }
 
     public RestResponse ratePostHandler(AuthenticatedRestRequest request)
-            throws BadRequestException, ResourceNotFoundException {
+            throws BadRequestException, ResourceNotFoundException, PermissionDeniedException {
         Reaction reaction;
         try {
             reaction = new Serializer<Reaction>().parse(request.getRequest().getBody(), Reaction.class);
@@ -180,31 +190,36 @@ public class SocialNetworkService {
         }
         reaction.setUser(request.getUser().getUsername());
 
-        // TODO prevent rating posts more than once
-        // TODO prevent author rating their own post, prevent rating if not in user feed
-        if (this.store.addPostReaction(request.getRequest().getPathParameter(), reaction)) {
+        // TODO prevent rating if not in user feed
+        OperationStatus outcome = this.store.addPostReaction(request.getRequest().getPathParameter(), reaction);
+        if (outcome.status == Status.OK) {
             return new RestResponse(200);
+        } else if (outcome.status == Status.NOT_FOUND) {
+            throw new ResourceNotFoundException();
+        } else {
+            throw new PermissionDeniedException();
         }
-        throw new ResourceNotFoundException();
     }
 
     public RestResponse createCommentHandler(AuthenticatedRestRequest request)
-            throws BadRequestException, ResourceNotFoundException {
+            throws BadRequestException, ResourceNotFoundException, PermissionDeniedException {
         Comment comment;
         try {
             comment = new Serializer<Comment>().parse(request.getRequest().getBody(), Comment.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
             throw new BadRequestException();
         }
         comment.setUser(request.getUser().getUsername());
 
-        // TODO prevent author commenting their own post
         // TODO prevent commenting if not in user feed
-        if (this.store.addPostComment(request.getRequest().getPathParameter(), comment)) {
-            return new RestResponse(201, new Serializer<Comment>().serialize(comment));
+        OperationStatus outcome = this.store.addPostComment(request.getRequest().getPathParameter(), comment);
+        if (outcome.status == Status.NOT_FOUND) {
+            throw new ResourceNotFoundException();
+        } else if (outcome.status == Status.ILLEGAL_OPERATION) {
+            throw new PermissionDeniedException();
         }
-        throw new ResourceNotFoundException();
+
+        return new RestResponse(201, new Serializer<Comment>().serialize(comment));
     }
 
     // public RestResponse showWalletHandler(AuthenticatedRestRequest request) {

@@ -83,12 +83,26 @@ public class Post implements Comparable<Post> {
         return this.getDownvotes().size();
     }
 
-    public void addComment(Comment comment) {
+    public boolean addComment(Comment comment) {
+        if (comment.getUser().equals(this.author)) {
+            return false;
+        }
         this.comments.add(comment);
+        return true;
     }
 
-    public void addReaction(Reaction reaction) {
+    public boolean addReaction(Reaction reaction) {
+        // author of post adding reaction to their own post
+        if (reaction.getUser().equals(this.author)) {
+            return false;
+        }
+        // user adding more than one reaction to same post
+        if (this.reactions.stream().anyMatch(r -> r.getUser().equals(reaction.getUser()))) {
+            return false;
+        }
+
         this.reactions.add(reaction);
+        return true;
     }
 
     public Set<Comment> getComments() {

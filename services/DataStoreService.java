@@ -24,6 +24,7 @@ import entities.Comment;
 import entities.Post;
 import entities.Reaction;
 import entities.User;
+import services.DataStoreService.OperationStatus.Status;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
 
@@ -37,6 +38,26 @@ public class DataStoreService {
     @JsonIgnore
     private final ConcurrentHashMap<String, IClientFollowerNotificationService> notificationCallbacks = new ConcurrentHashMap<>();
     private String storageFileName = "";
+
+    public static class OperationStatus {
+        /**
+         * Helper class used as a wrapper around the Status enum.
+         * 
+         * The Status enum is used to enrich the information returned by an
+         * operation whose success value is boolean (success/failure) but
+         * the failure can happen for more than one reason, and the information
+         * about what caused the failure is to be retained for informational
+         * purposes
+         * 
+         */
+        public enum Status {
+            OK,
+            NOT_FOUND,
+            ILLEGAL_OPERATION
+        }
+
+        public Status status = Status.OK;
+    }
 
     public static DataStoreService restoreOrCreate(String source) {
         /**
@@ -261,10 +282,11 @@ public class DataStoreService {
         return this.posts.get(id);
     }
 
-    public boolean deletePost(UUID id, String fromUser) {
+    public OperationStatus deletePost(UUID id, String fromUser) {
+        OperationStatus status = new OperationStatus();
         Set<Post> chainedDeletionSet = new HashSet<>();
 
-        boolean ret = this.posts.computeIfPresent(id, (__, toDelete) -> {
+        this.posts.computeIfPresent(id, (__, toDelete) -> {
             try {
                 // first try to remove post from the user's post set:
                 // this will fail if the post doesn't belong to the user
@@ -279,6 +301,10 @@ public class DataStoreService {
             } catch (RuntimeException e) {
                 // don't delete the post since the removal from
                 // the user's post set failed
+
+                // report appropriate error depending on whether the post attempted to be
+                // deleted doesn't exist or the user who tried to delete it isn't its author
+                status.status = this.posts.get(id) == null ? Status.NOT_FOUND : Status.ILLEGAL_OPERATION;
                 return toDelete;
             }
 
@@ -291,28 +317,40 @@ public class DataStoreService {
             });
             // returning null removes the mapping for this post from posts map
             return null;
-        }) == null;
+        });
 
         // finally delete the rewins
         for (Post rewin : chainedDeletionSet) {
             this.deletePost(rewin.getId(), rewin.getAuthor());
         }
 
-        return ret;
+        return status;
     }
 
-    public boolean addPostReaction(UUID postId, Reaction reaction) {
-        return this.posts.computeIfPresent(postId, (__, post) -> {
-            post.addReaction(reaction);
+    public OperationStatus addPostReaction(UUID postId, Reaction reaction) {
+        OperationStatus status = new OperationStatus();
+        if (this.posts.computeIfPresent(postId, (__, post) -> {
+            if (!post.addReaction(reaction)) {
+                status.status = Status.ILLEGAL_OPERATION;
+            }
             return post;
-        }) != null;
+        }) == null) {
+            status.status = Status.NOT_FOUND;
+        }
+        return status;
     }
 
-    public boolean addPostComment(UUID postId, Comment comment) {
-        return this.posts.computeIfPresent(postId, (__, post) -> {
-            post.addComment(comment);
+    public OperationStatus addPostComment(UUID postId, Comment comment) {
+        OperationStatus status = new OperationStatus();
+        if (this.posts.computeIfPresent(postId, (__, post) -> {
+            if (!post.addComment(comment)) {
+                status.status = Status.ILLEGAL_OPERATION;
+            }
             return post;
-        }) != null;
+        }) != null) {
+            status.status = Status.NOT_FOUND;
+        }
+        return status;
     }
 
     public double updateUserWallet(String username, double delta) {
