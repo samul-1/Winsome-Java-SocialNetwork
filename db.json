@@ -1,279 +1,139 @@
 {
   "users" : {
-    "newer" : {
-      "username" : "newer",
-      "tags" : [ "b" ],
-      "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
-      }
-    },
     "a" : {
       "username" : "a",
       "tags" : [ "c" ],
       "password" : {
         "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
       }
-    },
-    "new" : {
-      "username" : "new",
-      "tags" : [ "p" ],
-      "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
-      }
     }
   },
   "userPosts" : {
-    "newer" : [ {
-      "title" : "second",
-      "content" : "abc",
-      "id" : "2c84f2a6-e08c-478b-b348-065b3b6942ae",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148823008,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }, {
-      "title" : "third",
-      "content" : "abc",
-      "id" : "660c4884-db45-4ab1-85bc-ec32707cfd82",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148825346,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }, {
-      "title" : "first",
-      "content" : "abc",
-      "id" : "914b2f26-a57b-4821-9e28-b09b8bb616b4",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148821095,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    } ],
-    "a" : [ {
-      "title" : "abc",
-      "content" : "def",
-      "id" : "b1c63087-f5e0-416d-936f-22fc69d72ce0",
-      "author" : "a",
-      "comments" : [ ],
-      "timestamp" : 1641148370414,
-      "originalPost" : null,
-      "reactions" : [ {
-        "username" : "a",
-        "value" : 1,
-        "timestamp" : 1641148384626
-      } ],
-      "upvotes" : 1,
-      "downvotes" : 0
-    } ],
-    "new" : [ {
-      "title" : "third",
-      "content" : "abc",
-      "id" : "fe315589-d06c-4639-b2de-3c0ff872b1b2",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148782230,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }, {
-      "title" : "first",
-      "content" : "abc",
-      "id" : "58cc4699-b0de-4ae1-9f15-d5d789624629",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148774086,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }, {
-      "title" : "second",
-      "content" : "abc",
-      "id" : "e6b6f930-7eb0-46e1-950d-001ee7982d12",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148778367,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }, {
-      "title" : "qwerty",
-      "content" : "gui",
-      "id" : "c43276f3-1089-4667-ba93-836568096015",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641149226018,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    } ]
+    "a" : [ ]
   },
   "sessions" : {
-    "Token: Token: Token: Token: Token: kS4lAtnYJP62MopJxlhYlD01wMp9W9oI61nwhgiBJ7T8FbvInKBRr1zc4Ux2QJchaDfU7ETKGoMQRmrmULlUZRtlJ31IjGL257jLLaEc3Z30rZpfLKCPKNvLhGYdSa6G" : {
-      "username" : "newer",
-      "tags" : [ "b" ],
-      "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
-      }
-    },
-    "Token: Token: Token: DM1NmvQiuNQ8x95hChdfEUNUz8eiO9eWzM5DQxyYgYcYDyKoPLraGPECzCITTU7IjnxeYFdviMaAQdDaPGqpddP3C2qOVIqoyweKQKKQ4qVdbWxPstYU5lWeSEoS1U0L" : {
-      "username" : "new",
-      "tags" : [ "p" ],
-      "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
-      }
-    },
-    "Token: Token: Token: Token: TKwbpAdJ2ZIUzYuE42cKrjV8RmAyYVxqTncgOj3xWIeempIvrgC5fkw8EkLoAvvIp7WfdizbXSBc6bP2cPO4huELVgoyOQfgd0yLph6vUOE3rbCIyGcDsF1DO4kpp0uM" : {
-      "username" : "new",
-      "tags" : [ "p" ],
-      "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
-      }
-    },
-    "Token: Token: Token: Token: Token: Token: Token: xtPreI7tV7FtkpMOlPgATtjseNifHtpccx2XqZ6K9XbWmSfGQJIlWTcA3Wq846WFSTdhWAujEMqK61Wg8qb5SItFGoSGfLn2mkDwX1b80b6x55ZLnYSlJ968SFzGZMxE" : {
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: kJF6oC8YScFyeHSf37kwO9Zu593ZkgKBCV9OWlTPxaw8bheEtaPhwn32gE58pLutFTNwxH3cqfgyLURpkOK58zHVCuK58xEvojtuSThN60um9boAAaWfn9aWMPZpsrDy" : {
       "username" : "a",
       "tags" : [ "c" ],
       "password" : {
         "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
       }
     },
-    "Token: Token: Token: Hl13Zhb5OXoaANJxRofp7asCiwstyRSXKOJaDdwfo5DxlDx2xMyF78Q0UHNoSDS4emMHGhCiDDYq75UgZb2EwEamVKVbH0Opx27kWQlhSMwjPAKT2Rpb2fp0XJk60Ror" : {
-      "username" : "new",
-      "tags" : [ "p" ],
+    "Token: Token: Token: Token: byNBXLdSvRJC2iP4Wumlk2goELhm0uWXw7bDKnNbVtBuiJw1nrDsZWokEPoy6A61Y1ywpTH5f4IYe1otUoB6Mqw28YVbUDpB8mxnwqu2qJTk0SWTS0cL1KIYuQP4Zb3E" : {
+      "username" : "a",
+      "tags" : [ "c" ],
       "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
       }
     },
-    "Token: Token: Token: Token: Token: Token: YcE2OEtDK8J0bcTRfG9eC5DGokKe5ebNAzWB2HvAg4n2gIf66xFXUCI25OPpISwFXsA20woyvImyhkVrakDCZAMvdGOkvBRuQF3LHBDM6bKokUktZQAXuoHWUhaBN1mn" : {
-      "username" : "new",
-      "tags" : [ "p" ],
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: EduOZr4VjECLyrdSjdThhzbMdmIF88zNkugJSLDGOwFPFq9tP2VdFKiMoCdLsAJlhQbLVdhSwRnmhtf1AacwljcVJZ6bVr5jxR8U7Bpe0Z0RpPJ27vNvy0nqvBK3RCJ9" : {
+      "username" : "a",
+      "tags" : [ "c" ],
       "password" : {
-        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Bikh7u8bp914tyGzMCFLBuycmjTDZ2yRLBOIaDhIXdsGiYccIsQmvGoBGUMmvbcAmWgnLRkHVl5b740JhhVtQfI8C0zI1KNozxGJ3nNgQTGvIp4es3WPSZo4rqfHJ1sm" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: h9ToYGmdxoAXCfRO48zs9Aa7VNdslTe1AQhPEhzRYIUikPThoaA8IIHFxZYolZntqvM35NfofmP20SHGphEpJcshjMCdyn3V6nFORbieswJYA1DsJWqTFAvoSSUj6fMq" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: CHnoveBdTh4jOAx83HtnoywWu71CRpxz8rJWcIyyuhafomMW8GsKcqixbQAiV7DeeTwskpf2CIHt6fDZFIT2neTwOkEHw5BLs3JJCNR3dUn5S34QXZ138h1BzW2J3XOP" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: 3546MrkVBgYJcm9hIvFSnb7H77tljhSLp2ovBKJ1LHb7Ad1JKBcCUM1MIY2ovo45uoqNtMUBxJMfCUn8lxbIOoIFbj9E0lymnyfbn1ih4hhdpzICisemhhkg22e1Xdeu" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: NLwlP82diTGKfmi4ljjrKZoMWMg4S7QeaEl8wMJ3GyvLYlVfvJjed59PvGmayaR4JFZ7tQN11PlUr8nX2DdwyForrvPvYyVTc8geCX0fBvsOR3JAlEvW0d1JxF6O7Bl8" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: eQPqPLn3jbylprck6EHecQDz2eDnSuxeccd2uf1ho6apAjfGGsXF4PgrdCBDgcbkarah8IFLNUFYj75dZqaZrk25YxeocdMD6IgUvq3KHPbsQNMYXvTmjXG0enVkPDLz" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: s0Wq4GyfOmuc6NgPMiXL55C1Jvufckul8a8JucJ8oEPmdKmjSGIjwT3oRIz0tuRQbnRYhjw5zHVWftoAk7V3JvTZfYVbNcpN1GgVckw67z5kTEngBRtY1RiqvgCS27al" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: ZUn8aR9l7dfgD0VYVTpNRlSYxczHEcxCzZ4fYgMehVoEFJuWeTpJnVWAU2oOmBhoOQXVWWRhWkd9eel63p0IZ3h6ycrrjdfe0A8N1OZwnFmIfuhnrSaDlv8OkXh9SxtD" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: wUepMnRrtdPKhkCBBnZS3LSBYjARQ4yDGtn4SMzJJNtanMKRliLEH7wktSSt6xpEU4Sj8xvSRn8xlat2wZt7NPz1BsEqKmUiPSc9g7Nz6VLgtB5mo9KEqwqaApt0RkjC" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: 6lc5IS07QtmOPr4l0uQLpwYVspVKcUVFsPTCtqBVU6qduUt5Gv8gB9vIJCseMgHUyiLZxfQjidoPNKBbhv5iJgxMBVPnntUlNjoIqodFn3XFWCQciXH4eejT9s6LpH7j" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: QDkCJFiemhnAC5gNRHIkZpaeC70rz56h7p7kgs1SY5DCDrdgqTuDHJlQwk67ZZBMWAehz6lVwfRCIyrKSKUw8Jan26vKj1Cx0musdgz0UgccTnUtFW7lbZVEJbpoRh8x" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: Token: XrYMPU12lBODnXVOIvlu66kfmsTNrtQz4egRESIOSjktXR31nLKlT088n0VmnsrFB9tPlRMDqjxOoXKPiQh9lo9vrLCFjHeuTGDRj922Ws7A8F7WGr733lo2RViwxcuR" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
+      }
+    },
+    "Token: z8IcHvsYUKnwGqliZhPXRmIINm5Vv9f10qNrTuVuIVoTVdo4iYwEUlGv3jZFyPGSdqAQFDC0dlXBqcGwNfPkzdLDA2D8orbd7HRwEtCixHt85WZYS4qJ6VjqlKJAQHvj" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
       }
     }
   },
-  "posts" : {
-    "2c84f2a6-e08c-478b-b348-065b3b6942ae" : {
-      "title" : "second",
-      "content" : "abc",
-      "id" : "2c84f2a6-e08c-478b-b348-065b3b6942ae",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148823008,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "58cc4699-b0de-4ae1-9f15-d5d789624629" : {
-      "title" : "first",
-      "content" : "abc",
-      "id" : "58cc4699-b0de-4ae1-9f15-d5d789624629",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148774086,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "c43276f3-1089-4667-ba93-836568096015" : {
-      "title" : "qwerty",
-      "content" : "gui",
-      "id" : "c43276f3-1089-4667-ba93-836568096015",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641149226018,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "914b2f26-a57b-4821-9e28-b09b8bb616b4" : {
-      "title" : "first",
-      "content" : "abc",
-      "id" : "914b2f26-a57b-4821-9e28-b09b8bb616b4",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148821095,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "b1c63087-f5e0-416d-936f-22fc69d72ce0" : {
-      "title" : "abc",
-      "content" : "def",
-      "id" : "b1c63087-f5e0-416d-936f-22fc69d72ce0",
-      "author" : "a",
-      "comments" : [ ],
-      "timestamp" : 1641148370414,
-      "originalPost" : null,
-      "reactions" : [ {
-        "username" : "a",
-        "value" : 1,
-        "timestamp" : 1641148384626
-      } ],
-      "upvotes" : 1,
-      "downvotes" : 0
-    },
-    "fe315589-d06c-4639-b2de-3c0ff872b1b2" : {
-      "title" : "third",
-      "content" : "abc",
-      "id" : "fe315589-d06c-4639-b2de-3c0ff872b1b2",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148782230,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "660c4884-db45-4ab1-85bc-ec32707cfd82" : {
-      "title" : "third",
-      "content" : "abc",
-      "id" : "660c4884-db45-4ab1-85bc-ec32707cfd82",
-      "author" : "newer",
-      "comments" : [ ],
-      "timestamp" : 1641148825346,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    },
-    "e6b6f930-7eb0-46e1-950d-001ee7982d12" : {
-      "title" : "second",
-      "content" : "abc",
-      "id" : "e6b6f930-7eb0-46e1-950d-001ee7982d12",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641148778367,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    }
-  },
+  "posts" : { },
   "followers" : {
-    "newer" : [ ],
-    "a" : [ ],
-    "new" : [ ]
+    "a" : [ ]
   },
   "wallets" : {
-    "newer" : 4200.0,
-    "a" : 710.0,
-    "new" : 5600.0
+    "a" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    }
   },
   "storageFileName" : "db.json"
 }

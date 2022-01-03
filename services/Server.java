@@ -20,6 +20,7 @@ import java.util.Iterator;
 
 import auth.AuthenticationMiddleware;
 import exceptions.BadRequestException;
+import exceptions.InternalServerErrorException;
 import exceptions.InvalidTokenException;
 import exceptions.MethodNotSupportedException;
 import exceptions.NoAuthenticationProvidedException;
@@ -53,7 +54,10 @@ public class Server {
         DataStoreService store = DataStoreService.restoreOrCreate(this.config.getStorageLocation());
 
         this.notificationService = new FollowerNotificationService(store);
-        this.service = new SocialNetworkService(store, this.notificationService);
+        this.service = new SocialNetworkService(
+                store,
+                this.notificationService,
+                new WalletConversionService());
         this.authMiddleware = new AuthenticationMiddleware(store);
         this.registrationService = new UserRegistrationService(store);
 
@@ -272,6 +276,8 @@ public class Server {
                 return new RestResponse(403);
             } catch (ResourceNotFoundException e1) {
                 return new RestResponse(404);
+            } catch (InternalServerErrorException e1) {
+                return new RestResponse(500);
             } catch (Exception e1) {
                 assert false; // never reached
             }

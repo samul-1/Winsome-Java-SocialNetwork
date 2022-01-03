@@ -34,7 +34,7 @@ public class DataStoreService {
     private final ConcurrentHashMap<AuthenticationToken, User> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Double> wallets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Wallet> wallets = new ConcurrentHashMap<>();
     @JsonIgnore
     private final ConcurrentHashMap<String, IClientFollowerNotificationService> notificationCallbacks = new ConcurrentHashMap<>();
     private String storageFileName = "";
@@ -168,7 +168,7 @@ public class DataStoreService {
         // of them have returned false
         this.userPosts.put(username, new TreeSet<Post>());
         this.followers.put(username, new TreeSet<String>());
-        this.wallets.put(username, 0.0);
+        this.wallets.put(username, new Wallet());
         return newUser;
     }
 
@@ -353,8 +353,15 @@ public class DataStoreService {
         return status;
     }
 
-    public double updateUserWallet(String username, double delta) {
-        return this.wallets.computeIfPresent(username, (__, balance) -> balance + delta);
+    public Wallet getUserWallet(String username) {
+        return this.wallets.get(username);
+    }
+
+    public void updateUserWallet(String username, double delta) {
+        this.wallets.computeIfPresent(username, (__, wallet) -> {
+            wallet.addTransaction(delta);
+            return wallet;
+        });
     }
 
     public IClientFollowerNotificationService getUserCallbackReference(String username) {

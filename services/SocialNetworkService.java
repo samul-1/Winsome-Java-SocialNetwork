@@ -5,6 +5,7 @@ import entities.Post;
 import entities.Reaction;
 import entities.User;
 import exceptions.BadRequestException;
+import exceptions.InternalServerErrorException;
 import exceptions.PermissionDeniedException;
 import exceptions.ResourceNotFoundException;
 import protocol.AuthenticatedRestRequest;
@@ -23,10 +24,13 @@ import auth.Password;
 public class SocialNetworkService {
     private final DataStoreService store;
     private final FollowerNotificationService followerService;
+    private final WalletConversionService walletService;
 
-    public SocialNetworkService(DataStoreService store, FollowerNotificationService followerService) {
+    public SocialNetworkService(DataStoreService store, FollowerNotificationService followerService,
+            WalletConversionService walletService) {
         this.store = store;
         this.followerService = followerService;
+        this.walletService = walletService;
     }
 
     public RestResponse loginHandler(AuthenticatedRestRequest request)
@@ -222,12 +226,20 @@ public class SocialNetworkService {
         return new RestResponse(201, new Serializer<Comment>().serialize(comment));
     }
 
-    // public RestResponse showWalletHandler(AuthenticatedRestRequest request) {
+    public RestResponse showWalletHandler(AuthenticatedRestRequest request) {
+        String body = new Serializer<Wallet>().serialize(this.store.getUserWallet(request.getUser().getUsername()));
+        return new RestResponse(200, body);
+    }
 
-    // }
+    public RestResponse showWalletInBitcoinHandler(AuthenticatedRestRequest request)
+            throws InternalServerErrorException {
+        Wallet wallet = this.store.getUserWallet(request.getUser().getUsername());
+        double conversionValue = this.walletService.getConversionRate();
+        if (conversionValue == 0.0) {
+            throw new InternalServerErrorException();
+        }
 
-    // public RestResponse showWalletInBitcoinHandler(AuthenticatedRestRequest
-    // request) {
-
-    // }
+        String body = Double.toString(wallet.getBalance() * conversionValue);
+        return new RestResponse(200, body);
+    }
 }

@@ -36,6 +36,7 @@ import services.FollowerNotificationServiceInterface;
 import services.Serializer;
 import services.ServerConfig;
 import services.UserRegistrationInterface;
+import services.Wallet;
 
 public class Client implements IClient {
     private final int BUF_CAPACITY = 4096 * 4096;
@@ -61,6 +62,7 @@ public class Client implements IClient {
         map.put("welcome_message", "Connected to server!\nTo start, type\n" +
                 "register <username> <password> <tags> (at least one tag is REQUIRED)" +
                 " or, if you already have an account,\nlogin <username> <password>");
+        map.put("btc_wallet", "Your wallet balance converted to BitCoins is: btc ");
         // map.put(403, "403 FORBIDDEN");
         // map.put(404, "404 NOT FOUND");
         // map.put(405, "405 METHOD NOT SUPPORTED");
@@ -210,7 +212,22 @@ public class Client implements IClient {
                             this.addComment(postId, comment);
                             break;
                         case "wallet":
-                            // TODO handle "wallet" and "wallet btc"
+                            try {
+                                parameter = instructionLineTokens[1];
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                Wallet wallet = this.getWallet();
+                                renderedResponseData = new WalletRenderer().render(wallet);
+                                break;
+                            }
+                            switch (parameter) {
+                                case "btc":
+                                    long btcValue = this.getWalletInBitcoin();
+                                    renderedResponseData = this.clientMessages.get("btc_wallet") + btcValue;
+                                    break;
+                                default:
+                                    System.out.println(
+                                            this.clientMessages.get("unknown_operation") + "wallet " + parameter);
+                            }
                             break;
                         default:
                             System.out.println(this.clientMessages.get("unknown_operation") + command);
@@ -463,6 +480,22 @@ public class Client implements IClient {
         String requestData = new Serializer<Comment>().serialize(new Comment(comment));
         this.receiveResponse(new RestRequest("/posts/" + postId.toString() + "/comments", HttpMethod.POST,
                 this.getRequestHeaders(), requestData));
+    }
+
+    @Override
+    public Wallet getWallet() throws IOException, ClientOperationFailedException {
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/wallet", HttpMethod.GET, this.getRequestHeaders()));
+
+        return new Serializer<Wallet>().parse(response.getBody(), Wallet.class);
+    }
+
+    @Override
+    public long getWalletInBitcoin() throws IOException, ClientOperationFailedException {
+        RestResponse response = this
+                .receiveResponse(new RestRequest("/wallet/btc", HttpMethod.GET, this.getRequestHeaders()));
+
+        return Long.parseLong(response.getBody().trim());
     }
 
 }

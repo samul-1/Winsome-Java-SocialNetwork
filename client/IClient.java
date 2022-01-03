@@ -6,6 +6,7 @@ import java.util.UUID;
 import entities.Post;
 import entities.User;
 import exceptions.ClientOperationFailedException;
+import services.Wallet;
 
 public interface IClient {
     void login(String username, String password) throws IOException, ClientOperationFailedException;
@@ -38,7 +39,7 @@ public interface IClient {
 
     void addComment(UUID postId, String comment) throws IOException, ClientOperationFailedException;
 
-    // WalletData getWallet();
+    Wallet getWallet() throws IOException, ClientOperationFailedException;
 
-    // long getWalletInBitcoin();
+    long getWalletInBitcoin() throws IOException, ClientOperationFailedException;
 }

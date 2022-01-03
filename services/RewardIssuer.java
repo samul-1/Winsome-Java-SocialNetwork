@@ -64,7 +64,9 @@ public class RewardIssuer implements Runnable {
     }
 
     private void commitUserWalletBalanceChange(String username, double delta) {
-        this.store.updateUserWallet(username, delta);
+        if (delta != 0.0) {
+            this.store.updateUserWallet(username, delta);
+        }
     }
 
     private class PostRewardData {

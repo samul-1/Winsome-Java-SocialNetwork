@@ -64,7 +64,8 @@ public class RestResponse implements Serializable {
             }
 
             // trim leading "HTTP/1.1 " and tailing "\r\n"
-            String verboseResponseCode = responseLine.substring("HTTP/1.1 ".length(), responseLine.length());
+            String verboseResponseCode = responseLine.substring("HTTP/1.1 ".length(), responseLine.length())
+                    .toUpperCase();
             System.out.println("verbose " + verboseResponseCode + "!");
             Integer code = RestResponse.verboseCodes
                     .entrySet()
