@@ -153,14 +153,12 @@ public class RewardIssuer implements Runnable {
                 System.out.println("Running!");
                 this.updateUsersWallets();
                 this.lastUpdate = new Date();
-                // TODO uncomment
-                // this.notifyWalletUpdates();
+                this.notifyWalletUpdates();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            // catch (IOException e) {
-            // e.printStackTrace();
-            // }
         }
     }
 

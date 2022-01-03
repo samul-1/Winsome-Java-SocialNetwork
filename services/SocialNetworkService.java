@@ -25,12 +25,14 @@ public class SocialNetworkService {
     private final DataStoreService store;
     private final FollowerNotificationService followerService;
     private final WalletConversionService walletService;
+    private final ServerConfig config;
 
     public SocialNetworkService(DataStoreService store, FollowerNotificationService followerService,
-            WalletConversionService walletService) {
+            WalletConversionService walletService, ServerConfig config) {
         this.store = store;
         this.followerService = followerService;
         this.walletService = walletService;
+        this.config = config;
     }
 
     public RestResponse loginHandler(AuthenticatedRestRequest request)
@@ -58,7 +60,10 @@ public class SocialNetworkService {
             // TODO send 403 if store returned false
             this.store.setUserToken(authenticatingUser, token);
             // client will use this new token to authenticate subsequent requests
-            return new RestResponse(200, token.getToken());
+            return new RestResponse(200,
+                    token.getToken() + "\n" + // also send IP address and port of multicast group
+                            this.config.getMulticastAddr().toString() + "\n"
+                            + this.config.getMulticastPort());
         }
 
         // incorrect password

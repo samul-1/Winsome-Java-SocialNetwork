@@ -2,6 +2,8 @@ package client;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
@@ -44,6 +46,7 @@ public class Client implements IClient {
     private UserRegistrationInterface registrationService = null;
     private FollowerNotificationServiceInterface notificationService = null;
     private final Set<User> localFollowers = new HashSet<>();
+    private MulticastSocket multicastSkt = null;
 
     private Map<String, String> requestHeaders = new HashMap<>();
 
@@ -59,10 +62,12 @@ public class Client implements IClient {
         map.put("cannot_log_out", "You can't log out using this username.");
         map.put("unknown_operation", "Unknown operation: ");
         map.put("invalid_operation_arguments", "Invalid arguments. ");
-        map.put("welcome_message", "Connected to server!\nTo start, type\n" +
+        map.put("welcome_message", "Connected to server!\nTo start, type" +
                 "register <username> <password> <tags> (at least one tag is REQUIRED)" +
-                " or, if you already have an account,\nlogin <username> <password>");
+                " or, if you already have an account, login <username> <password>\n" +
+                "You can type 'exit' at any time to exit the program.\n");
         map.put("btc_wallet", "Your wallet balance converted to BitCoins is: btc ");
+        map.put("waiting_for_command", "Your command: ");
         // map.put(403, "403 FORBIDDEN");
         // map.put(404, "404 NOT FOUND");
         // map.put(405, "405 METHOD NOT SUPPORTED");
@@ -92,20 +97,10 @@ public class Client implements IClient {
             // start TCP connection
             this.sktChan = SocketChannel.open(sktAddr);
 
-            // join multicast group
-            MulticastSocket multicastSkt = new MulticastSocket(this.config.getMulticastPort());
-            InetSocketAddress multicastGroup = new InetSocketAddress(this.config.getMulticastAddr(),
-                    this.config.getMulticastPort());
-            NetworkInterface netIf = NetworkInterface.getByName("wlan1");
-            // TODO fix below
-            // multicastSkt.joinGroup(multicastGroup, netIf);
-
-            // TODO spawn thread for multicast stuff
-
             System.out.println(this.clientMessages.get("welcome_message"));
 
             while (true) {
-                System.out.println("Waiting for message...");
+                System.out.print(this.clientMessages.get("waiting_for_command"));
 
                 String instructionLine = scanner.nextLine();
                 String[] instructionLineTokens = instructionLine.split(" ");
@@ -241,6 +236,7 @@ public class Client implements IClient {
                 }
             }
             this.sktChan.close();
+            this.multicastSkt.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -362,7 +358,7 @@ public class Client implements IClient {
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 
-        AuthenticationToken authToken = new AuthenticationToken(response.getBody().trim());
+        AuthenticationToken authToken = new AuthenticationToken(response.getBody().split("\n")[0].trim());
 
         // include received token in future requests to server
         this.requestHeaders.put("Authorization", "Bearer " + authToken.getToken());
@@ -371,6 +367,29 @@ public class Client implements IClient {
         IClientFollowerNotificationService callbackStub = (IClientFollowerNotificationService) UnicastRemoteObject
                 .exportObject(new ClientFollowerNotificationService(this.localFollowers), 0);
         this.notificationService.subscribe(callbackStub, authToken);
+
+        // join multicast group
+        InetAddress multicastAddr = InetAddress.getByName(response.getBody().split("\n")[1].substring(1));
+        int multicastPort = Integer.parseInt(response.getBody().split("\n")[2]);
+
+        this.multicastSkt = new MulticastSocket(multicastPort);
+        InetSocketAddress multicastGroup = new InetSocketAddress(multicastAddr, multicastPort);
+        NetworkInterface netIf = NetworkInterface.getByName("wlan1");
+        multicastSkt.joinGroup(multicastGroup, netIf);
+
+        new Thread(() -> {
+            byte[] buf = new byte[this.BUF_CAPACITY];
+            while (true) {
+                DatagramPacket pkt = new DatagramPacket(buf, buf.length);
+                try {
+                    this.multicastSkt.receive(pkt);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                assert new String(pkt.getData()).equals("WALLETS_UPDATED");
+                // System.out.println(new String(pkt.getData()));
+            }
+        }).start();
     }
 
     @Override

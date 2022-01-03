@@ -57,7 +57,8 @@ public class Server {
         this.service = new SocialNetworkService(
                 store,
                 this.notificationService,
-                new WalletConversionService());
+                new WalletConversionService(),
+                this.config);
         this.authMiddleware = new AuthenticationMiddleware(store);
         this.registrationService = new UserRegistrationService(store);
 

@@ -31,6 +31,7 @@ import services.DataStoreService.OperationStatus.Status;
 public class DataStoreService {
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<Post>> userPosts = new ConcurrentHashMap<>();
+    @JsonIgnore
     private final ConcurrentHashMap<AuthenticationToken, User> sessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Post> posts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> followers = new ConcurrentHashMap<>();
