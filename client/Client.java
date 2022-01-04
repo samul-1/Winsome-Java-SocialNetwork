@@ -364,6 +364,7 @@ public class Client implements IClient {
 
     @Override
     public void login(String username, String password) throws IOException, ClientOperationFailedException {
+        // TODO error if already logged in
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 

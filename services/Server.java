@@ -36,7 +36,7 @@ import routing.ApiRoute;
 import routing.ApiRouter;
 
 public class Server {
-    private final int BUF_CAPACITY = 4096 * 4096;
+    private final int BUF_CAPACITY = 4096 * 2;
 
     private ApiRouter router;
     private final SocialNetworkService service;
@@ -170,7 +170,6 @@ public class Server {
         // get previously stored response to be written to client
         RestResponse response = ((ClientConnectionState) key.attachment()).pendingResponse;
         ByteBuffer buf = ByteBuffer.wrap(response.toString().getBytes("UTF-8"));
-        System.out.println("Written:\n" + response.toString());
         clientSkt.write(buf);
 
         // remove OP_WRITE from the interest set and replace it with OP_READ
@@ -185,41 +184,34 @@ public class Server {
         int readCount = clientSkt.read(buf);
         if (readCount == -1) { // no data was read, client closed connection
             // the caller will catch this and remove the key from the readset
-            // System.out.println("nothing to read");
             throw new IOException();
         }
         buf.flip();
 
         String reqString = StandardCharsets.UTF_8.decode(buf).toString();
-        System.out.println("request: " + reqString);
         RestRequest request;
-        // RestResponse response;
 
         try {
             System.out.println(reqString);
             request = RestRequest.parseRequestString(reqString);
 
-            if (request.getMethod() == HttpMethod.OPTIONS) {
-                // ignore OPTION requests sent from browsers
-                ((ClientConnectionState) key.attachment()).pendingResponse = new RestResponse(200);
-                key.interestOps(SelectionKey.OP_WRITE);
-            } else {
-                CompletableFuture
-                        .supplyAsync(() -> handleRequest(request))
-                        .thenAccept((response) -> {
-                            // store the pending response so it can be written as soon
-                            // as the client becomes writable
-                            ((ClientConnectionState) key.attachment()).pendingResponse = response;
+            CompletableFuture
+                    // submit task to internally-managed thread pool
+                    .supplyAsync(() -> handleRequest(request))
+                    // run callback on task completion
+                    .thenAccept((response) -> {
+                        // store the pending response so it can be written as soon
+                        // as the client becomes writable
+                        ((ClientConnectionState) key.attachment()).pendingResponse = response;
 
-                            // remove OP_READ from the interest set and replace it with OP_WRITE
-                            // as there isn't anything to be read from the client, but we now
-                            // have a response to write to it
-                            key.interestOps(SelectionKey.OP_WRITE);
+                        // remove OP_READ from the interest set and replace it with OP_WRITE
+                        // as there isn't anything to be read from the client, but we now
+                        // have a response to write to it
+                        key.interestOps(SelectionKey.OP_WRITE);
 
-                            // wake up selector from async handler
-                            this.selector.wakeup();
-                        });
-            }
+                        // wake up selector from async callback
+                        this.selector.wakeup();
+                    });
         } catch (IllegalArgumentException e) {
             // a malformed HTTP request was sent
             ((ClientConnectionState) key.attachment()).pendingResponse = new RestResponse(400);
@@ -244,6 +236,11 @@ public class Server {
         AuthenticatedRestRequest authenticatedRequest;
         boolean requireAuth = !request.isLoginRequest();
 
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            // ignore OPTION requests sent from browsers
+            return new RestResponse(200);
+        }
+
         // resolve route to get the handler method for this request
         try {
             handler = this.router.getRequestHandler(request);
@@ -262,16 +259,17 @@ public class Server {
         } catch (InvalidTokenException e) {
             return new RestResponse(400);
         }
-        // invoke handler to execute the request and get
-        // response to write back to client
+
+        // invoke handler for this request and get response to write back to client
         try {
             response = (RestResponse) handler.invoke(this.service, authenticatedRequest);
         } catch (IllegalAccessException | IllegalArgumentException e) {
+            // something went wrong on the server side
             e.printStackTrace();
             return new RestResponse(500);
         } catch (InvocationTargetException e) {
+            // there's an error with the client request
             try {
-                e.printStackTrace();
                 // InvocationTargetException is thrown if the method called via
                 // `invoke()` throws an exception; in order to get the original
                 // exception, use exception chaining, so the correct HTTP error

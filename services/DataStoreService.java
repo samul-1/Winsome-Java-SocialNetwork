@@ -73,7 +73,6 @@ public class DataStoreService {
             ret.startStatePersistenceThread();
             return ret;
         } catch (IOException | NullPointerException e) {
-            e.printStackTrace(); // TODO remove
             // file not found or invalid file content
             return new DataStoreService(source);
         }
