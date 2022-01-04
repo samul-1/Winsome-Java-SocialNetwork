@@ -8,9 +8,10 @@
 \usepackage[T1]{fontenc} % Riga da togliere se si compila con PDFLaTeX
 \usepackage[utf8]{inputenc} % Consente l'uso caratteri accentati italiani
 \usepackage{amsthm}
-\usepackage[margin=1.2in]{geometry}
+\usepackage[margin=1.1in]{geometry}
 \usepackage{hyperref}
-
+\usepackage{ragged2e}
+\RaggedRight
 
 \usepackage{listings}
 \usepackage{xcolor}
@@ -39,8 +40,8 @@
     tabsize=2,
 }
 
-\lstset{style=mystyle}
 
+\lstset{style=mystyle}
 
 \def\code#1{\texttt{#1}}
 \title{Progetto di laboratorio di reti} % \LaTeX è una macro che compone il logo "LaTeX"
@@ -51,68 +52,136 @@
 % in alternativa a \date il comando \today introduce la data di sistema.
 
 \begin{document}
+
+
 \maketitle % Genera il titolo sulle istruzioni  \title, \author e \date
 
 
 
 \tableofcontents % Prepara l'indice generale
-\begin{flushleft}
+\setlength{\parskip}{0.5em}
 
-    \section{Architettura di massima del progetto} %
-    \textbf{Suddivisione in layer.}\quad \\ (img)\\
-    ... Questo documento è strutturato in maniera tale da illustrare, come prima cosa, le caratteristiche delle entità
-    di dominio e quali sono le operazioni primitive a esse associate, per poi spostarsi progressivamente sui layer
-    più esterni dell'architettura, dando un'idea di come le classi appartenenti allo strato della business logic sono
-    implementate, chiarendo infine come viene realizzata, agli atti, la comunicazione tra il server e il client.\\
-    \textbf{Protocollo applicazione.}\quad (rest, token authentication)\\
+\section{Architettura di massima del progetto} %
+\subsection{Suddivisione in layer}
+Nella realizzazione del software in oggetto, si è scelto di utilizzare un'architettura a strati, suddividendo le classi in gioco
+all'interno di insiemi disgiunti in base alle responsabilità e alle dipendenze. Lo scopo di utilizzare layer ben distinti è quello
+di ottenere un basso grado di accoppiamento tra le componenti del sistema, mantenendo altresì una buona  \emph{separation of concerns}.
+Avere un basso grado di accoppiamento tra le classi implica la possibilità di sviluppare in maniera quanto più indipendente
+le varie componenti, modificandole (o anche riscrivendole da zero) all'occorrenza, oltre che un vantaggio nelle fasi di testing e debugging, ove è
+più facile isolare eventuali fault.
+\par
+In seguito all'analisi dei requisiti, in fase di progettazione sono stati definiti i seguenti layer:
+\begin{itemize}
+    \item \textbf{Entità}: sono le classi che rappresentano il dominio dell'applicazione e incarnano l'universo delineato dal progetto
+    \item \textbf{Data store}: espone le entità al mondo esterno attraverso un'interfaccia controllata e definisce le operazioni primitive sulle stesse
+    \item \textbf{Business logic}: implementa operazioni più complesse servendosi dalle primitive esposte dallo store e, talvolta, dalle entità stesse;
+          aggiunge controlli di vario tipo (permessi, \emph{well-formedness} delle richieste, ecc.); fornisce all'esterno un'API più ricca per interagire con le entità
+    \item \textbf{Server}: gestisce la connessione logica coi client, espone un'API per accedere ai layer sottostanti secondo le regole di business, si occupa della
+          formattazione e presentazione dei dati in entrata e in uscita
+\end{itemize}
+La regola generale è che le classi di un layer hanno dipendenze solo da classi dello stasso layer o di layer più interni (\emph{inward dependency principle}).
+Si noti infine che i nomi dei layer sopracitati non sono in corrispondenza biunivoca coi package Java utilizzati nel progetto, i quali sono stati
+identificati con un criterio differente e più legato ai dettagli implementativi.
+\par(img)
 
-
-    \section{Le entità di dominio}
-    \textbf{Gli utenti.}\quad \\
-    \textbf{Post, commenti, reazioni.}\quad \\
-    \textbf{Classi richiesta e risposta.}\quad \\
-    \textbf{Serializer.}\quad \\
-
-
-    \section{Il data store}
-    Introduzione\\
-    \textbf{Strutture dati.}\quad \\
-    \textbf{Persistenza dello stato.}\quad \\
-
-
-    \section{Il service layer}
-    Introduzione\\
-    \textbf{La classe SocialNetworkService.}\quad \\
-    \textbf{La classe RewardIssuer.}\quad \\
-    \textbf{La classe WalletConversionService.}\quad \\
-    \textbf{I servizi di registrazione utente e notifica.}\quad \\
-
-
-
-
-    \section{L'API e il router}
-
-    \textbf{La classe ApiRoute.}\quad \\
-    \textbf{La classe ApiRouter.}\quad \\
-    \textbf{Gestione di una richiesta HTTP.}\quad \\
-    (img)\\
-
-    \section{Il server}
-
-    \textbf{Gestione delle connessioni.}\quad \\
-    \textbf{La classe ServerConfig.}\quad \\
-
-    \section{Il client CLI}
-
-    \textbf{Gestione di una richiesta al server.}\quad \\
-    \textbf{Rendering dei dati.}\quad \\
-    \textbf{Gestione dei messaggi.}\quad \\
-
-    \section{Il client GUI}
-
-    \textbf{Realizzazione.}\quad \\
-    \textbf{Limitazioni.}\quad \\
+\par Questo documento è strutturato in maniera tale da illustrare, come prima cosa, le caratteristiche delle entità
+di dominio e quali sono le operazioni primitive a esse associate, per poi spostarsi progressivamente sui layer
+più esterni dell'architettura, dando un'idea di come le classi appartenenti allo strato della business logic sono
+implementate, chiarendo infine come viene realizzata, agli atti, la comunicazione tra il server e il client.\\
+\subsection{Protocollo applicazione}
+Il protocollo utilizzato a livello applicativo è HTTP. Il server espone un'API di tipo REST misto a RPC. Le richieste e le risposte HTTP vengono
+rispettivamente incarnate dalle classi \code{RestRequest} e \code{RestResponse}, che dispongono di metodi per convertirle da (risp. in) stringhe, consentendone
+la (de)serializzazione e lettura (risp. scrittura) mediante socket.
+\par L'autenticazione utilizza il protocollo \textbf{bearer token}, schema definito nell'\href{https://datatracker.ietf.org/doc/html/rfc6750}{RFC 6750}.
+Il protcollo prevede che le richieste vengano autenticate inserendo un header (\code{authorization}) contenente un token di 128 bit.
+La classe \code{AuthenticationMiddleware} (spiegata più nel dettaglio in seguito), responsabile della verifica delle credenziali nelle richieste HTTP,
+controlla la presenza e la validità di questo header.
+\par Il token viene ottenuto per la prima volta dal client in fase di login: la password fornita dall'utente all'atto della registrazione, che viene mantenuta
+nel database criptata utilizzando l'algoritmo \href{https://en.wikipedia.org/wiki/MD5}{MD5}, viene confrontata con quella inviata durante il login (dopo aver
+cifrato anch'essa); in caso di esito positivo, il server emette un token che l'utente utilizzerà nelle successive richieste (fino al logout).
 
 
-\end{flushleft}
+\section{Le entità di dominio}
+\subsection{Gli utenti}
+La classe \code{User} rappresenta un utente registrato a Winsome. A esso è associato uno username, una password (criptata come descritto nel capitolo precedente) e un \code{Set} di tag,
+rappresentati da stringhe \emph{lowercase}. L'univocità dello username non è gestita a livello entità ma nello store.
+\subsection{Post, commenti, reazioni}
+La classe \code{Post} rappresenta un post all'interno di Winsome. Contiene informazioni circa il titolo, il contenuto e il timestamp di creazione. L'identificativo del post è uno UUID.
+\par Il post contiene una stringa che si riferisce allo username del suo autore. La scelta di utilizzare una stringa anziché un riferimento a un oggetto \code{User} deriva dalla volontà
+di gestire l'integrità referenziale a livello di store anziché all'interno delle entità stesse: si è scelto, in altre parole, di non utilizzare l'\textbf{active record pattern}, in favore
+della presenza di un layer dedicato all'accesso ai dati.
+\par I commenti e le reazioni (upvote o downvote) ai post vengono aggregati all'interno di due insiemi presenti nella classe. La scelta di utilizzare un \code{TreeSet} per entrambi deriva
+dalla necessità di mantenere l'ordine temporale di inserimento.
+\par Infine, i post contengono opzionalmente un riferimento a un altro post: ciò viene utilizzato per implementare la feature di \textbf{rewin}. Questo permette, in principio (anche se non
+presente in quanto fuori dai limiti delle specifiche), di effettuare il \emph{rewinning} di un post aggiungendo anche un testo come contenuto del post, come un "commento in evidenza" (feature presente,
+per esempio, nei retweet, a cui il rewin si ispira).
+\subsection{Classi richiesta e risposta}\quad \\
+\subsection{Serializer}\quad \\
+
+
+\section{Il data store}
+La classe \code{DataStoreService} implementa il data access layer. Essa costituisce un'astrazione posta sopra al sistema di storage sottostante, qualunque esso sia
+(in questo caso, come richiesto dalla specifica, si utilizza il filesystem e file in formato JSON, ma la presenza di questo layer permetterebbe, se necessario, di cambiare lo storage system
+utilizzando, per esempio, un DBMS, senza alterare il resto del progetto).
+\par Lo store gestisce gran parte della concorrenza all'interno del progetto: incapsulando l'accesso concorrente ai dati in una sola classe,
+è possibile sviluppare il layer della business logic in maniera prevalentemente \textbf{thread-unaware}, il che semplifica fortemente l'implementazione e suddivide meglio le responsabilità.
+\subsection{Strutture dati}
+La scelta delle strutture dati segue il criterio di \textbf{indicizzazione} dei dati per consentire una migliore performance nei lookup e nelle scritture. Questo significa che la \emph{ratio} dietro
+la presenza di strutture dati che apprentemente portano a ridondanza (e talvolta a una riduzione del grado di normalizzazione dei dati) è quella di ottimizzare le operazioni sui dati più comuni.
+\par Lo strumento principale per gestire la concorrenza è l'utilizzo della \code{ConcurrentHashMap} di Java. L'utilizzo delle varianti del metodo \code{compute} della struttura in questione garantisce l'atomicità
+delle operazioni e pertanto la consitenza dei dati. In pochi casi (come la cancellazione di un post, in seguito alla quale è necessario cancellare anche eventuali rewin del post), viene ammessa una breve finestra
+all'interno della quale la consistenza è compromessa: questo pattern è conosciuto come \emph{eventual consistency} e trova ragion d'essere nell'obiettivo di compromettere la performance il meno possibile, specialmente
+in operazioni dove la temporanea perdita di consistenza non appare avere effetti negativi rilevanti sul modo in cui l'utente percepisce lo stato del sistema.
+
+\par All'interno dello store si trovano le seguenti mappe:
+\begin{itemize}
+    \item \code{users}: mappa username su istanze della classe \code{User}; è il metodo principale per reperire un utente
+    \item \code{userPosts}: mappa username su insiemi di post (viene utilizzato un \code{TreeSet} per garantire l'ordinamento cronologico consistente); utilizzata per avere un accesso rapido ai post quando vengono cercati per autore
+    \item \code{sessions}: mappa token di autenticazione su utenti; utilizzata per autenticare gli utenti in base al valore del campo header \code{authorization}
+    \item \code{posts}: mappa UUID su istanze di \code{Post}; utilizzata per cercare post per ID
+    \item \code{followers}: mappa username su insiemi di username; mantiene le relazioni di follower tra gli utenti
+    \item \code{wallets}: mappa username su portafogli (si veda il paragrafo sulla classe \code{Wallet})
+    \item \code{notificationCallbacks}: mappa username su \code{IClientFollowerNotificationService}; utilizzata per reperire l'istanza del client per il servizio di notifica dei follower via RMI callback
+\end{itemize}
+\subsection{Persistenza dello stato}
+Al momento dell'istanziazione, la classe \code{DataStoreService} inizializza un thread demone che, periodicamente, effettua il salvataggio dello stato dello store.
+Il salvataggio avviene mediante una serializzazione dell'istanza dello store e successiva scrittura su un file indicato al momento della creazione dell'istanza.
+La classe espone altresì il metodo statico \code{restoreOrCreate} che, passato il nome di un file JSON, tenta di ripristinare lo stato a partire da quel file, deserializzandolo e, in caso
+di impossibilità di completare l'operazione (file inesistnete o malformato), restituisce una nuova istanza dello store.
+
+
+\section{Il service layer}
+Introduzione\\
+\subsection{La classe SocialNetworkService}\quad \\
+\subsection{La classe RewardIssuer}\quad \\
+\subsection{La classe WalletConversionService}\quad \\
+\subsection{I servizi di registrazione utente e notifica}\quad \\
+
+
+
+
+\section{L'API e il router}
+
+\subsection{La classe ApiRoute.}\quad \\
+\subsection{La classe ApiRouter.}\quad \\
+\subsection{Gestione di una richiesta HTTP.}\quad \\
+(img)\\
+
+\section{Il server}
+
+\subsection{Gestione delle connessioni.}\quad \\
+\subsection{La classe ServerConfig.}\quad \\
+
+\section{Il client CLI}
+
+\subsection{Gestione di una richiesta al server.}\quad \\
+\subsection{Rendering dei dati.}\quad \\
+\subsection{Gestione dei messaggi.}\quad \\
+
+\section{Il client GUI}
+
+\subsection{Realizzazione.}\quad \\
+\subsection{Limitazioni.}\quad \\
+
+
 \end{document}
