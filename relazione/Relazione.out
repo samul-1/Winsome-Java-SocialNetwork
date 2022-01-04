@@ -9,22 +9,22 @@
 \BOOKMARK [1][-]{section.3}{Il data store}{}% 9
 \BOOKMARK [2][-]{subsection.3.1}{Strutture dati}{section.3}% 10
 \BOOKMARK [2][-]{subsection.3.2}{Persistenza dello stato}{section.3}% 11
-\BOOKMARK [1][-]{section.4}{Il service layer}{}% 12
+\BOOKMARK [1][-]{section.4}{Il business logic layer}{}% 12
 \BOOKMARK [2][-]{subsection.4.1}{La classe SocialNetworkService}{section.4}% 13
 \BOOKMARK [2][-]{subsection.4.2}{La classe RewardIssuer}{section.4}% 14
 \BOOKMARK [2][-]{subsection.4.3}{La classe WalletConversionService}{section.4}% 15
 \BOOKMARK [2][-]{subsection.4.4}{I servizi di registrazione utente e notifica}{section.4}% 16
 \BOOKMARK [1][-]{section.5}{L'API e il router}{}% 17
-\BOOKMARK [2][-]{subsection.5.1}{La classe ApiRoute.}{section.5}% 18
-\BOOKMARK [2][-]{subsection.5.2}{La classe ApiRouter.}{section.5}% 19
-\BOOKMARK [2][-]{subsection.5.3}{Gestione di una richiesta HTTP.}{section.5}% 20
+\BOOKMARK [2][-]{subsection.5.1}{La classe ApiRoute}{section.5}% 18
+\BOOKMARK [2][-]{subsection.5.2}{La classe ApiRouter}{section.5}% 19
+\BOOKMARK [2][-]{subsection.5.3}{Gestione di una richiesta HTTP}{section.5}% 20
 \BOOKMARK [1][-]{section.6}{Il server}{}% 21
-\BOOKMARK [2][-]{subsection.6.1}{Gestione delle connessioni.}{section.6}% 22
-\BOOKMARK [2][-]{subsection.6.2}{La classe ServerConfig.}{section.6}% 23
+\BOOKMARK [2][-]{subsection.6.1}{Gestione delle connessioni}{section.6}% 22
+\BOOKMARK [2][-]{subsection.6.2}{La classe ServerConfig}{section.6}% 23
 \BOOKMARK [1][-]{section.7}{Il client CLI}{}% 24
-\BOOKMARK [2][-]{subsection.7.1}{Gestione di una richiesta al server.}{section.7}% 25
-\BOOKMARK [2][-]{subsection.7.2}{Rendering dei dati.}{section.7}% 26
-\BOOKMARK [2][-]{subsection.7.3}{Gestione dei messaggi.}{section.7}% 27
+\BOOKMARK [2][-]{subsection.7.1}{Gestione di una richiesta al server}{section.7}% 25
+\BOOKMARK [2][-]{subsection.7.2}{Rendering dei dati}{section.7}% 26
+\BOOKMARK [2][-]{subsection.7.3}{Gestione dei messaggi}{section.7}% 27
 \BOOKMARK [1][-]{section.8}{Il client GUI}{}% 28
 \BOOKMARK [2][-]{subsection.8.1}{Realizzazione.}{section.8}% 29
 \BOOKMARK [2][-]{subsection.8.2}{Limitazioni.}{section.8}% 30

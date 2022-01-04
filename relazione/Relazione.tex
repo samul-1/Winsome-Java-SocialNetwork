@@ -147,12 +147,13 @@ in operazioni dove la temporanea perdita di consistenza non appare avere effetti
 Al momento dell'istanziazione, la classe \code{DataStoreService} inizializza un thread demone che, periodicamente, effettua il salvataggio dello stato dello store.
 Il salvataggio avviene mediante una serializzazione dell'istanza dello store e successiva scrittura su un file indicato al momento della creazione dell'istanza.
 La classe espone altresì il metodo statico \code{restoreOrCreate} che, passato il nome di un file JSON, tenta di ripristinare lo stato a partire da quel file, deserializzandolo e, in caso
-di impossibilità di completare l'operazione (file inesistnete o malformato), restituisce una nuova istanza dello store.
+di impossibilità di completare l'operazione (file inesistente o malformato), restituisce una nuova istanza dello store.
 
 
-\section{Il service layer}
-Introduzione\\
-\subsection{La classe SocialNetworkService}\quad \\
+\section{Il business logic layer}
+Lo strato dei servizi/business logic fornisce all'esterno un'interfaccia mediante la quale implementa tutte le operazioni che devono essere esposte all'utente.
+\subsection{La classe SocialNetworkService}
+La classe \code{SocialNetworkService}
 \subsection{La classe RewardIssuer}\quad \\
 \subsection{La classe WalletConversionService}\quad \\
 \subsection{I servizi di registrazione utente e notifica}\quad \\
@@ -162,21 +163,21 @@ Introduzione\\
 
 \section{L'API e il router}
 
-\subsection{La classe ApiRoute.}\quad \\
-\subsection{La classe ApiRouter.}\quad \\
-\subsection{Gestione di una richiesta HTTP.}\quad \\
+\subsection{La classe ApiRoute}\quad \\
+\subsection{La classe ApiRouter}\quad \\
+\subsection{Gestione di una richiesta HTTP}\quad \\
 (img)\\
 
 \section{Il server}
 
-\subsection{Gestione delle connessioni.}\quad \\
-\subsection{La classe ServerConfig.}\quad \\
+\subsection{Gestione delle connessioni}\quad \\
+\subsection{La classe ServerConfig}\quad \\
 
 \section{Il client CLI}
 
-\subsection{Gestione di una richiesta al server.}\quad \\
-\subsection{Rendering dei dati.}\quad \\
-\subsection{Gestione dei messaggi.}\quad \\
+\subsection{Gestione di una richiesta al server}\quad \\
+\subsection{Rendering dei dati}\quad \\
+\subsection{Gestione dei messaggi}\quad \\
 
 \section{Il client GUI}
 
