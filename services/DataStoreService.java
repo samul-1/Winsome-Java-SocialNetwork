@@ -94,7 +94,6 @@ public class DataStoreService {
     public void startStatePersistenceThread() {
         // start anonymous thread that periodically persists store state
         new Thread(() -> {
-            System.out.println("thread started");
             while (true) {
                 try {
                     // in a real-world app this delay would be much longer
@@ -114,11 +113,9 @@ public class DataStoreService {
          * 
          */
         String serializedState = new Serializer<DataStoreService>().serialize(this);
-        System.out.println("About to write state");
         try (PrintWriter writer = new PrintWriter(this.storageFileName, "UTF-8")) {
             writer.println(serializedState);
             writer.close();
-            System.out.println("Written state");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }

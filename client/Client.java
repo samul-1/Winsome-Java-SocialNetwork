@@ -387,6 +387,7 @@ public class Client implements IClient {
         multicastSkt.joinGroup(multicastGroup, netIf);
 
         new Thread(() -> {
+            // TODO make interruptable
             byte[] buf = new byte[this.BUF_CAPACITY];
             while (true) {
                 DatagramPacket pkt = new DatagramPacket(buf, buf.length);

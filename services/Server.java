@@ -17,6 +17,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
 import auth.AuthenticationMiddleware;
 import exceptions.BadRequestException;
@@ -192,7 +193,7 @@ public class Server {
         String reqString = StandardCharsets.UTF_8.decode(buf).toString();
         System.out.println("request: " + reqString);
         RestRequest request;
-        RestResponse response;
+        // RestResponse response;
 
         try {
             System.out.println(reqString);
@@ -200,22 +201,30 @@ public class Server {
 
             if (request.getMethod() == HttpMethod.OPTIONS) {
                 // ignore OPTION requests sent from browsers
-                response = new RestResponse(200);
+                ((ClientConnectionState) key.attachment()).pendingResponse = new RestResponse(200);
+                key.interestOps(SelectionKey.OP_WRITE);
             } else {
-                response = handleRequest(request);
+                CompletableFuture
+                        .supplyAsync(() -> handleRequest(request))
+                        .thenAccept((response) -> {
+                            // store the pending response so it can be written as soon
+                            // as the client becomes writable
+                            ((ClientConnectionState) key.attachment()).pendingResponse = response;
+
+                            // remove OP_READ from the interest set and replace it with OP_WRITE
+                            // as there isn't anything to be read from the client, but we now
+                            // have a response to write to it
+                            key.interestOps(SelectionKey.OP_WRITE);
+
+                            // wake up selector from async handler
+                            this.selector.wakeup();
+                        });
             }
         } catch (IllegalArgumentException e) {
             // a malformed HTTP request was sent
-            response = new RestResponse(400);
+            ((ClientConnectionState) key.attachment()).pendingResponse = new RestResponse(400);
+            key.interestOps(SelectionKey.OP_WRITE);
         }
-
-        // remove OP_READ from the interest set and replace it with OP_WRITE
-        // as there isn't anything to be read from the client, but we now
-        // have a response to write to it
-        key.interestOps(SelectionKey.OP_WRITE);
-        // store the pending response so it can be written as soon
-        // as the client becomes writable
-        ((ClientConnectionState) key.attachment()).pendingResponse = response;
     }
 
     private RestResponse handleRequest(RestRequest request) {
@@ -246,7 +255,6 @@ public class Server {
 
         // check request headers to authenticate the request
         try {
-            // TODO prevent logging in if request contains authorization header
             authenticatedRequest = requireAuth ? this.authMiddleware.authenticateRequest(request)
                     : this.authMiddleware.getAnonymousRestRequest(request);
         } catch (NoAuthenticationProvidedException e) {

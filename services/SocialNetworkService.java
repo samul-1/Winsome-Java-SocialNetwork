@@ -101,20 +101,24 @@ public class SocialNetworkService {
             // cannot follow yourself
             throw new PermissionDeniedException();
         }
-        if (this.store.addFollower(toFollow, newFollower)) {
-            // send RMI notification to user who just acquired a follower
-            this.followerService.notifyUser(toFollow);
-            return new RestResponse(204);
+        synchronized (this) {
+            if (this.store.addFollower(toFollow, newFollower)) {
+                // send RMI notification to user who just acquired a follower
+                this.followerService.notifyUser(toFollow);
+                return new RestResponse(204);
+            }
         }
         throw new ResourceNotFoundException();
     }
 
     public RestResponse unfollowUserHandler(AuthenticatedRestRequest request) throws ResourceNotFoundException {
         String target = request.getRequest().getBody().trim();
-        if (this.store.removeFollower(target, request.getUser().getUsername())) {
-            // send RMI notification to user who just lost a follower
-            this.followerService.notifyUser(target);
-            return new RestResponse(204);
+        synchronized (this) {
+            if (this.store.removeFollower(target, request.getUser().getUsername())) {
+                // send RMI notification to user who just lost a follower
+                this.followerService.notifyUser(target);
+                return new RestResponse(204);
+            }
         }
         throw new ResourceNotFoundException();
     }

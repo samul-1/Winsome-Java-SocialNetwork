@@ -35,6 +35,13 @@
         "encryptedPassword" : "98552c3920478741b107f357eaddfe95"
       }
     },
+    "u1" : {
+      "username" : "u1",
+      "tags" : [ "b" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
     "test1" : {
       "username" : "test1",
       "tags" : [ "f", "g" ],
@@ -45,6 +52,13 @@
     "t1" : {
       "username" : "t1",
       "tags" : [ "b", "c" ],
+      "password" : {
+        "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
+    "u2" : {
+      "username" : "u2",
+      "tags" : [ "b" ],
       "password" : {
         "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
       }
@@ -67,8 +81,21 @@
     "qwert" : [ ],
     "test" : [ ],
     "u" : [ ],
+    "u1" : [ {
+      "title" : "riwoqej",
+      "content" : "ewr",
+      "id" : "cca0e116-c45c-4336-98bd-d6a98644f1f6",
+      "author" : "u1",
+      "comments" : [ ],
+      "timestamp" : 1641309173893,
+      "originalPost" : null,
+      "reactions" : [ ],
+      "upvotes" : 0,
+      "downvotes" : 0
+    } ],
     "test1" : [ ],
-    "t1" : [ ]
+    "t1" : [ ],
+    "u2" : [ ]
   },
   "posts" : {
     "6b3241fc-c322-4b40-825b-d2b6cc2f929e" : {
@@ -82,6 +109,18 @@
       "reactions" : [ ],
       "upvotes" : 0,
       "downvotes" : 0
+    },
+    "cca0e116-c45c-4336-98bd-d6a98644f1f6" : {
+      "title" : "riwoqej",
+      "content" : "ewr",
+      "id" : "cca0e116-c45c-4336-98bd-d6a98644f1f6",
+      "author" : "u1",
+      "comments" : [ ],
+      "timestamp" : 1641309173893,
+      "originalPost" : null,
+      "reactions" : [ ],
+      "upvotes" : 0,
+      "downvotes" : 0
     }
   },
   "followers" : {
@@ -90,8 +129,10 @@
     "qwert" : [ ],
     "test" : [ ],
     "u" : [ ],
+    "u1" : [ "u2" ],
     "test1" : [ ],
-    "t1" : [ ]
+    "t1" : [ ],
+    "u2" : [ ]
   },
   "wallets" : {
     "a" : {
@@ -123,11 +164,19 @@
       "transactions" : [ ],
       "balance" : 0.0
     },
+    "u1" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
     "test1" : {
       "transactions" : [ ],
       "balance" : 0.0
     },
     "t1" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
+    "u2" : {
       "transactions" : [ ],
       "balance" : 0.0
     }
