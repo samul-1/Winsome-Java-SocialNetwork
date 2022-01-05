@@ -17,10 +17,10 @@
 \BOOKMARK [1][-]{section.5}{L'API e il router}{}% 17
 \BOOKMARK [2][-]{subsection.5.1}{La classe ApiRoute}{section.5}% 18
 \BOOKMARK [2][-]{subsection.5.2}{La classe ApiRouter}{section.5}% 19
-\BOOKMARK [2][-]{subsection.5.3}{Gestione di una richiesta HTTP}{section.5}% 20
-\BOOKMARK [1][-]{section.6}{Il server}{}% 21
-\BOOKMARK [2][-]{subsection.6.1}{Gestione delle connessioni}{section.6}% 22
-\BOOKMARK [2][-]{subsection.6.2}{La classe ServerConfig}{section.6}% 23
+\BOOKMARK [1][-]{section.6}{Il server}{}% 20
+\BOOKMARK [2][-]{subsection.6.1}{Funzionamento e gestione delle connessioni}{section.6}% 21
+\BOOKMARK [2][-]{subsection.6.2}{Gestione di una richiesta HTTP}{section.6}% 22
+\BOOKMARK [2][-]{subsection.6.3}{La classe ServerConfig}{section.6}% 23
 \BOOKMARK [1][-]{section.7}{Il client CLI}{}% 24
 \BOOKMARK [2][-]{subsection.7.1}{Gestione di una richiesta al server}{section.7}% 25
 \BOOKMARK [2][-]{subsection.7.2}{Rendering dei dati}{section.7}% 26

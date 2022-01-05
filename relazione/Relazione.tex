@@ -15,6 +15,9 @@
 
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{enumitem}
+
+\setlist[enumerate]{label*=\arabic*.}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -79,7 +82,7 @@ In seguito all'analisi dei requisiti, in fase di progettazione sono stati defini
     \item \textbf{Server}: gestisce la connessione logica coi client, espone un'API per accedere ai layer sottostanti secondo le regole di business, si occupa della
           formattazione e presentazione dei dati in entrata e in uscita
 \end{itemize}
-La regola generale è che le classi di un layer hanno dipendenze solo da classi dello stasso layer o di layer più interni (\emph{inward dependency principle}).
+La regola generale è che le classi di un layer hanno dipendenze solo da classi dello stesso layer o di layer più interni (\emph{inward dependency principle}).
 Si noti infine che i nomi dei layer sopracitati non sono in corrispondenza biunivoca coi package Java utilizzati nel progetto, i quali sono stati
 identificati con un criterio differente e più legato ai dettagli implementativi.
 \par(img)
@@ -93,8 +96,8 @@ Il protocollo utilizzato a livello applicativo è HTTP. Il server espone un'API 
 rispettivamente incarnate dalle classi \code{RestRequest} e \code{RestResponse}, che dispongono di metodi per convertirle da (risp. in) stringhe, consentendone
 la (de)serializzazione e lettura (risp. scrittura) mediante socket.
 \par L'autenticazione utilizza il protocollo \textbf{bearer token}, schema definito nell'\href{https://datatracker.ietf.org/doc/html/rfc6750}{RFC 6750}.
-Il protcollo prevede che le richieste vengano autenticate inserendo un header (\code{authorization}) contenente un token di 128 bit.
-La classe \code{AuthenticationMiddleware} (spiegata più nel dettaglio in seguito), responsabile della verifica delle credenziali nelle richieste HTTP,
+Il protcollo prevede che le richieste vengano autenticate inserendo un header (\code{Authorization}) contenente un token di 128 bit.
+La classe \code{AuthenticationMiddleware} (spiegata più in dettaglio nel seguito), responsabile della verifica delle credenziali nelle richieste HTTP,
 controlla la presenza e la validità di questo header.
 \par Il token viene ottenuto per la prima volta dal client in fase di login: la password fornita dall'utente all'atto della registrazione, che viene mantenuta
 nel database criptata utilizzando l'algoritmo \href{https://en.wikipedia.org/wiki/MD5}{MD5}, viene confrontata con quella inviata durante il login (dopo aver
@@ -137,7 +140,7 @@ in operazioni dove la temporanea perdita di consistenza non appare avere effetti
 \begin{itemize}
     \item \code{users}: mappa username su istanze della classe \code{User}; è il metodo principale per reperire un utente
     \item \code{userPosts}: mappa username su insiemi di post (viene utilizzato un \code{TreeSet} per garantire l'ordinamento cronologico consistente); utilizzata per avere un accesso rapido ai post quando vengono cercati per autore
-    \item \code{sessions}: mappa token di autenticazione su utenti; utilizzata per autenticare gli utenti in base al valore del campo header \code{authorization}
+    \item \code{sessions}: mappa token di autenticazione su utenti; utilizzata per autenticare gli utenti in base al valore del campo header \code{Authorization}
     \item \code{posts}: mappa UUID su istanze di \code{Post}; utilizzata per cercare post per ID
     \item \code{followers}: mappa username su insiemi di username; mantiene le relazioni di follower tra gli utenti
     \item \code{wallets}: mappa username su portafogli (si veda il paragrafo sulla classe \code{Wallet})
@@ -153,24 +156,104 @@ di impossibilità di completare l'operazione (file inesistente o malformato), re
 \section{Il business logic layer}
 Lo strato dei servizi/business logic fornisce all'esterno un'interfaccia mediante la quale implementa tutte le operazioni che devono essere esposte all'utente.
 \subsection{La classe SocialNetworkService}
-La classe \code{SocialNetworkService}
-\subsection{La classe RewardIssuer}\quad \\
-\subsection{La classe WalletConversionService}\quad \\
+La classe \code{SocialNetworkService} implementa le operazioni associate alle route dell'API REST/RPC.\\ I metodi \emph{handler} presenti in questa classe
+sono in corrispondenza biunivoca con i path dell'API (si veda capitolo sul router).
+
+\par In generale, un handler è una funzione che prende come parametro un oggetto di tipo \code{RestRequest} e restituisce una \code{RestResponse}. Al suo interno,
+ha luogo la logica di business come la validazione dei parametri della richiesta, il controllo dei permessi, il \emph{dispatching} delle azioni richieste verso il data store, e la
+serializzazione dei dati in uscita per la costruzione della risposta.
+
+\par Gli handler restituiscono direttamente una \code{RestResponse} solo nel caso in cui l'esecuzione abbia successo. Se si verifica un errore, i metodi in questione non restituiscono
+direttamente una risposta (per esempio \code{4xx}) ma sollevano un'eccezione. La gestione degli errori in fase di gestione di una richiesta viene così demandata
+al server (come illustrato nel relativo capitolo), il quale invierà una risposta HTTP contente l'errore appropriato.
+\par Questa strategia, ispirata al modo in cui il framework \href{https://www.djangoproject.com/}{Django} gestisce gli errori nelle sue \emph{views}, serve ad astrarre ulteriormente i casi in cui la richiesta non ha successo:
+anziché avere il codice per la gestione degli errori sparpagliato (e duplicato) tra i vari handler, essi si limitano a lanciare un'eccezione che viene catturata e gestita in una singola locazione.
+Così diventa
+facile, per esempio, aggiungere qualsiasi tipo di logica \emph{custom} per la gestione degli errori. Si pensi per esempio all'aggiunta di un sistema di logging: basterebbe chiamare il metodo esposto dal servizio nel singolo spot in cui
+viene catturata l'eccezione.
+
+\par La classe \code{SocialNetworkService} è prettamente \emph{stateless}: le chiamate ai metodi al suo interno causano cambiamenti nello stato gestito dallo store, ma la classe
+in sé non contiene stato interno. Questo permette, in principio, sia di utilizzare la classe come un \emph{singleton} (come viene effettivamente fatto), oppure di scalarla
+orizzontalmente, dislocando più istanze di essa su più nodi worker (nel caso in cui si trattasse di un sistema distribuito), a patto di mantenere un riferimento allo store centralizzato.
+
+\subsection{La classe RewardIssuer}
+La classe \code{SocialNetworkService} realizza il servizio di ricompense di Winsome. Implementa l'interfaccia \code{Runnable} e una singola istanza di essa viene creata dal server al momento dell'avvio ed eseguita in un thread.
+Nel suo metodo \code{run}, la classe entra in un ciclo infinito, all'interno del quale attende via \code{Thread.sleep} il tempo stabilito nel file di configurazione del server, per poi chiamare un metodo che calcola
+le nuove ricompense per tutti gli utenti.
+\par Il calcolo sui singoli post viene effettuato secondo la formula data dalla specifica. Per reperire i dati necessari al calcolo, il reward issuer si serve di una classe helper interna, \code{PostRewardData}: in essa,
+vengono aggregati i dati necessari all'applicazione della formula, nonché al corretto assegnamento delle ricompense ai curatori. In particolare, la classe contiene l'insieme di: utenti che hanno messo un \emph{upvote}
+dall'ultimo calcolo delle ricompense, utenti che hanno commentato dall'ultima iterazione, nuovi commenti e nuove reazioni.
+\par Una volta completato il calcolo delle ricompense, viene aggiornato un campo nella classe che tiene traccia del timestamp dell'ultimo calcolo ricompense e viene inviata una notifica multicast mediante un \code{DatagramSocket}.
+
+\subsection{La classe WalletConversionService}
+La classe \code{WalletConversionService} è responsabile per la simulazione del cambio nel tasso di conversione tra Wincoin e Bitcoin.
+Per ottenere un tasso casuale, viene effettuata una richiesta HTTP all'API di \href{https://random.org}{random.org}. La richiesta è autenticata mediante l'utilizzo di una \code{apiKey}, come spiegato nella
+\href{https://api.random.org/json-rpc/4/basic}{documentazione dell'API di random.org}. La richiesta viene scritta utilizzando un \code{writer} di tipo \code{DataOutputStream}. La successiva risposta viene letta
+con un \code{BufferedReader} e passata a uno \code{StringBuilder}. La stringa risultante viene parsata per verificare che l'interazione abbia avuto successo ed estrarre il valore casuale restituito dal servizio remoto.
+
+\par Dato che il servizio remoto potrebbe, in generale, non essere disponibile, la classe è dotata di un sistema di tipo \textbf{circuit breaker}, allo scopo di migliorare la disponibilità del servizio.
+L'idea è la seguente: quando una richiesta ha successo, il valore restituito da random.org viene salvato in una variabile interna che svolge la funzione di cache.\\
+Nel caso in cui una successiva richiesta fallisca,
+il servizio proverà periodicamente a ricontattare il server remoto fino a raggiungere il numero \code{MAX\_RETRIES} di tentativi. A quel punto, il circuit breaker verrà attivato. L'effetto risultante è che il valore in cache verrà
+restituito e, per un periodo di tempo pari a \code{CIRCUIT\_BREAKER\_COOL\_DOWN} secondi, tutte le richieste al servizio restituiranno immediatamente il valore in cache, senza provare a contattare l'API di random.org.
+\par L'impiego di questo pattern, comune in architetture a microservizi e sistemi distribuiti in genere, serve a minimizzare il numero di richieste inviate durante un periodo in cui il servizio remoto è, con alta probabilità (dato che le richieste recenti hanno dato esito negativo), ancora non raggiungibile.
+
 \subsection{I servizi di registrazione utente e notifica}\quad \\
 
 
 
 
 \section{L'API e il router}
+La gestione delle richieste da parte del server segue un pattern simile al \textbf{model-view-controller} (MVC).
+I \emph{model} sono rappresentati in maniera naturale dalle entità di dominio e gli handler della classe \code{SocialNetworkService} costituiscono
+le \emph{views}. Il router rappresenta la componente \emph{controller}, ovvero il componente che mappa i path su handler dell'API.
 
-\subsection{La classe ApiRoute}\quad \\
-\subsection{La classe ApiRouter}\quad \\
-\subsection{Gestione di una richiesta HTTP}\quad \\
-(img)\\
+\subsection{La classe ApiRoute}
+La classe \code{ApiRoute} rappresenta una route dell'API e i metodi handler a essa associati. Contiene un campo stringa rappresentante il path e una \code{Map}
+che associa metodi HTTP a stringhe che rappresentano nomi di metodi (spiegato più in dettaglio nel seguito).
+
+\subsection{La classe ApiRouter}
+All'avvio del server, viene istanziato un \code{ApiRouter}, il quale carica in memoria degli oggetti \code{ApiRoute} deserializzandoli da un file JSON.
+\par La respnsabilità del router è quella di risolvere i path richiesti restituendo un riferimento all'appropriato metodo handler per la richiesta.
+Contiene un metodo principale, \code{getRequestHandler}, che prende in ingresso una \code{RestRequest}.
+Il metodo si occupa di estrarre il path e il metodo HTTP della richiesta e di cercare un match all'interno del suo insieme di route.
+\par Se si ha una corrispondenza (ovvero è associato il nome di un metodo handler alla coppia\\ $<path, metodo>$),
+viene restituito il riferimento a un metodo della classe \code{SocialNetworkService}, che verrà poi invocato coi corretti parametri per
+soddisfare la richiesta (si veda capitolo successivo per il flusso completo).
+\par Il meccanismo appena descritto utilizza la classe Java \href{https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html}{Method},
+collocata nel pacchetto\\ \code{java.lang.reflect}.
+\par Si è scelto di utilizzare questo approccio (anziché, per esempio, un controllo \code{switch} sul path della richiesta) per ottenere una dichiarazione \textbf{descrittiva} (e non imperativa) dell'API:
+avere la definizione delle route in un file JSON e non nel codice stesso permette di ottenere un basso grado di accoppiamento tra la logica e la descrizione dell'interfaccia; si pensi per
+esempio all'aggiunta di un nuovo \emph{entry point} nell'API: se la descrizione dell'interfaccia fosse contenuta nel codice, la modifica allo schema richiederebbe anche una modifica al codice del router,
+mentre con questo tipo di definizione è sufficiente aggiornare il file JSON contenente lo schema dell'API (dopo aver, eventualmente, implementato il nuovo handler).
+
+
 
 \section{Il server}
 
-\subsection{Gestione delle connessioni}\quad \\
+\subsection{Funzionamento e gestione delle connessioni}\quad \\
+
+\subsection{Gestione di una richiesta HTTP}
+Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un client, il flusso di gestione della richiesta da parte del server si compone dei seguenti passi:
+\begin{enumerate}
+    \item Il path e metodo della richiesta vengono utilizzati per cercare una corrispondenza nel router.
+          \begin{enumerate}
+              \item Se il path non dà corrispondenza, viene restituito l'errore 404. Se il metodo non dà corrispondenza, viene restituito l'errore 405. Se il lookup ha successo, viene reperito il riferimento al metodo handler appropriato.
+          \end{enumerate}
+    \item L'\code{AuthenticationMiddleware} analizza gli header della richiesta alla ricerca del token nel campo \code{Authorization}.
+          \begin{enumerate}
+              \item Se il token non è presente, viene restituito l'errore 401. Se il token è invalido, viene restituito l'errore 400. Se la verifica ha successo, la richiesta viene autenticata (incapsulandola in una \code{AuthenticatedRestRequest}) e associata all'utente corrispondente al token.
+          \end{enumerate}
+    \item L'handler restituito al punto 1 viene invocato passandogli la richiesta autenticata del punto 2.
+          \begin{enumerate}
+              \item Se si verifica un errore all'interno dello handler, l'eccezione viene catturata come\\ \code{InvocationTargetException}. La tecnica di \emph{exception chaining} permette di estrarre l'eccezione originale
+                    sollevata dallo handler e di inviare in risposta l'errore appropriato. Qualsiasi altro tipo di eccezione sollevata non direttamente dallo handler causa l'emissione di un errore 500. Se l'esecuzione ha successo, lo handler restituisce una \code{RestResponse}.
+          \end{enumerate}
+    \item La risposta viene salvata nell'\emph{attachment} associato al client e verrà scritta sul socket corrispondente quando il client diventa \emph{writable}.
+\end{enumerate}
+(img)\\
+
+
 \subsection{La classe ServerConfig}\quad \\
 
 \section{Il client CLI}
