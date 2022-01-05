@@ -6,8 +6,7 @@
 \contentsline {section}{\numberline {2}Le entità di dominio}{2}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Gli utenti}{2}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Post, commenti, reazioni}{3}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Classi richiesta e risposta}{3}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Serializer}{3}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.3}Serializer}{3}{subsection.2.3}%
 \contentsline {section}{\numberline {3}Il data store}{3}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Strutture dati}{3}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Persistenza dello stato}{4}{subsection.3.2}%
@@ -15,18 +14,18 @@
 \contentsline {subsection}{\numberline {4.1}La classe SocialNetworkService}{4}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}La classe RewardIssuer}{5}{subsection.4.2}%
 \contentsline {subsection}{\numberline {4.3}La classe WalletConversionService}{5}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}I servizi di registrazione utente e notifica}{5}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.4}I servizi di registrazione utente e notifica}{6}{subsection.4.4}%
 \contentsline {section}{\numberline {5}L'API e il router}{6}{section.5}%
 \contentsline {subsection}{\numberline {5.1}La classe ApiRoute}{6}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}La classe ApiRouter}{6}{subsection.5.2}%
 \contentsline {section}{\numberline {6}Il server}{6}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Funzionamento e gestione delle connessioni}{6}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Gestione di una richiesta HTTP}{6}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.2}Gestione di una richiesta HTTP}{7}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}La classe ServerConfig}{7}{subsection.6.3}%
 \contentsline {section}{\numberline {7}Il client CLI}{7}{section.7}%
 \contentsline {subsection}{\numberline {7.1}Gestione di una richiesta al server}{7}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Rendering dei dati}{7}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Gestione dei messaggi}{7}{subsection.7.3}%
-\contentsline {section}{\numberline {8}Il client GUI}{7}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Realizzazione.}{7}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Limitazioni.}{7}{subsection.8.2}%
+\contentsline {subsection}{\numberline {7.2}Rendering dei dati}{8}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Gestione dei messaggi}{8}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Il client GUI}{8}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Realizzazione.}{8}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Limitazioni.}{8}{subsection.8.2}%

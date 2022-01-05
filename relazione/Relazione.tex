@@ -16,6 +16,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{hyperref}
 
 \setlist[enumerate]{label*=\arabic*.}
 
@@ -118,8 +119,12 @@ dalla necessità di mantenere l'ordine temporale di inserimento.
 \par Infine, i post contengono opzionalmente un riferimento a un altro post: ciò viene utilizzato per implementare la feature di \textbf{rewin}. Questo permette, in principio (anche se non
 presente in quanto fuori dai limiti delle specifiche), di effettuare il \emph{rewinning} di un post aggiungendo anche un testo come contenuto del post, come un "commento in evidenza" (feature presente,
 per esempio, nei retweet, a cui il rewin si ispira).
-\subsection{Classi richiesta e risposta}\quad \\
-\subsection{Serializer}\quad \\
+\subsection{Serializer}
+La classe \code{Serializer<T>} è responsabile delle operazioni di serializzazione e de-serializzazione delle entità.
+L'utilizzo del polimorfismo parametrico permette di (de)serializzare tutte le classi che lo necessitano con un singolo metodo per operazione, senza ri-definirne
+la logica.
+\par Internamente, la classe utilizza la libreria Jackson e l'\code{ObjectMapper}. Le entità da (de)serializzare sono annotate, all'occorrenza, con le \emph{annotations} del pacchetto
+\code{jackson.annotation} per avere un controllo più fine su quali proprietà e campi vengono serializzati.
 
 
 \section{Il data store}
@@ -156,7 +161,7 @@ di impossibilità di completare l'operazione (file inesistente o malformato), re
 \section{Il business logic layer}
 Lo strato dei servizi/business logic fornisce all'esterno un'interfaccia mediante la quale implementa tutte le operazioni che devono essere esposte all'utente.
 \subsection{La classe SocialNetworkService}
-La classe \code{SocialNetworkService} implementa le operazioni associate alle route dell'API REST/RPC.\\ I metodi \emph{handler} presenti in questa classe
+La classe \code{SocialNetworkService} implementa le operazioni associate alle route dell'API REST/RPC.\\ I metodi handler presenti in questa classe
 sono in corrispondenza biunivoca con i path dell'API (si veda capitolo sul router).
 
 \par In generale, un handler è una funzione che prende come parametro un oggetto di tipo \code{RestRequest} e restituisce una \code{RestResponse}. Al suo interno,
@@ -174,14 +179,14 @@ viene catturata l'eccezione.
 
 \par La classe \code{SocialNetworkService} è prettamente \emph{stateless}: le chiamate ai metodi al suo interno causano cambiamenti nello stato gestito dallo store, ma la classe
 in sé non contiene stato interno. Questo permette, in principio, sia di utilizzare la classe come un \emph{singleton} (come viene effettivamente fatto), oppure di scalarla
-orizzontalmente, dislocando più istanze di essa su più nodi worker (nel caso in cui si trattasse di un sistema distribuito), a patto di mantenere un riferimento allo store centralizzato.
+orizzontalmente, dislocando più istanze di essa su diversi nodi worker (nel caso di un sistema distribuito), a patto di mantenere un riferimento allo store centralizzato.
 
 \subsection{La classe RewardIssuer}
 La classe \code{SocialNetworkService} realizza il servizio di ricompense di Winsome. Implementa l'interfaccia \code{Runnable} e una singola istanza di essa viene creata dal server al momento dell'avvio ed eseguita in un thread.
 Nel suo metodo \code{run}, la classe entra in un ciclo infinito, all'interno del quale attende via \code{Thread.sleep} il tempo stabilito nel file di configurazione del server, per poi chiamare un metodo che calcola
 le nuove ricompense per tutti gli utenti.
-\par Il calcolo sui singoli post viene effettuato secondo la formula data dalla specifica. Per reperire i dati necessari al calcolo, il reward issuer si serve di una classe helper interna, \code{PostRewardData}: in essa,
-vengono aggregati i dati necessari all'applicazione della formula, nonché al corretto assegnamento delle ricompense ai curatori. In particolare, la classe contiene l'insieme di: utenti che hanno messo un \emph{upvote}
+\par Il calcolo sui singoli post viene effettuato secondo la formula data dalla specifica. Per reperire i dati necessari al calcolo, il reward issuer si serve di una classe \emph{helper} interna, \code{PostRewardData}: in essa,
+vengono aggregati i dati necessari all'applicazione della formula a un singolo post, nonché al corretto assegnamento delle ricompense ai curatori. In particolare, la classe contiene l'insieme di: utenti che hanno messo un \emph{upvote}
 dall'ultimo calcolo delle ricompense, utenti che hanno commentato dall'ultima iterazione, nuovi commenti e nuove reazioni.
 \par Una volta completato il calcolo delle ricompense, viene aggiornato un campo nella classe che tiene traccia del timestamp dell'ultimo calcolo ricompense e viene inviata una notifica multicast mediante un \code{DatagramSocket}.
 
@@ -191,12 +196,15 @@ Per ottenere un tasso casuale, viene effettuata una richiesta HTTP all'API di \h
 \href{https://api.random.org/json-rpc/4/basic}{documentazione dell'API di random.org}. La richiesta viene scritta utilizzando un \code{writer} di tipo \code{DataOutputStream}. La successiva risposta viene letta
 con un \code{BufferedReader} e passata a uno \code{StringBuilder}. La stringa risultante viene parsata per verificare che l'interazione abbia avuto successo ed estrarre il valore casuale restituito dal servizio remoto.
 
-\par Dato che il servizio remoto potrebbe, in generale, non essere disponibile, la classe è dotata di un sistema di tipo \textbf{circuit breaker}, allo scopo di migliorare la disponibilità del servizio.
+\par Dato che il servizio remoto potrebbe, in generale, non essere disponibile, la classe è dotata di un \textbf{circuit breaker} allo scopo di migliorare la disponibilità del servizio.
 L'idea è la seguente: quando una richiesta ha successo, il valore restituito da random.org viene salvato in una variabile interna che svolge la funzione di cache.\\
 Nel caso in cui una successiva richiesta fallisca,
 il servizio proverà periodicamente a ricontattare il server remoto fino a raggiungere il numero \code{MAX\_RETRIES} di tentativi. A quel punto, il circuit breaker verrà attivato. L'effetto risultante è che il valore in cache verrà
 restituito e, per un periodo di tempo pari a \code{CIRCUIT\_BREAKER\_COOL\_DOWN} secondi, tutte le richieste al servizio restituiranno immediatamente il valore in cache, senza provare a contattare l'API di random.org.
 \par L'impiego di questo pattern, comune in architetture a microservizi e sistemi distribuiti in genere, serve a minimizzare il numero di richieste inviate durante un periodo in cui il servizio remoto è, con alta probabilità (dato che le richieste recenti hanno dato esito negativo), ancora non raggiungibile.
+
+\par La classe viene utilizzata come \emph{singleton} ma, a differenza di \code{SocialNetworkService}, contiene stato interno (il valore \emph{cached} e i dati del circuit breaker).
+Per permettere la condivisione fra thread della singola istanza di questa classe, le parti di codice dove lo stato interno viene acceduto sono protette da monitor (mediante il costrutto \code{synchronized}).
 
 \subsection{I servizi di registrazione utente e notifica}\quad \\
 
@@ -206,7 +214,7 @@ restituito e, per un periodo di tempo pari a \code{CIRCUIT\_BREAKER\_COOL\_DOWN}
 \section{L'API e il router}
 La gestione delle richieste da parte del server segue un pattern simile al \textbf{model-view-controller} (MVC).
 I \emph{model} sono rappresentati in maniera naturale dalle entità di dominio e gli handler della classe \code{SocialNetworkService} costituiscono
-le \emph{views}. Il router rappresenta la componente \emph{controller}, ovvero il componente che mappa i path su handler dell'API.
+le \emph{views}. Il router rappresenta il \emph{controller}, ovvero il componente che mappa le coppie $<path, metodo>$ su handler dell'API.
 
 \subsection{La classe ApiRoute}
 La classe \code{ApiRoute} rappresenta una route dell'API e i metodi handler a essa associati. Contiene un campo stringa rappresentante il path e una \code{Map}
@@ -231,16 +239,34 @@ mentre con questo tipo di definizione è sufficiente aggiornare il file JSON con
 
 \section{Il server}
 
-\subsection{Funzionamento e gestione delle connessioni}\quad \\
+\subsection{Funzionamento e gestione delle connessioni}
+Il modello utilizzato per l'implementazione del server è il multiplexing dei canali via \code{Selector} NIO con l'impiego una threadpool per la gestione delle richieste.
+All'avvio il server, dopo aver aperto un \code{ServerSocketChannel} e aver esportato gli stub necessari per l'esposizione dei servizi basati su RMI,
+entra in un ciclo infinito.
+\par All'interno del ciclo, il server utilizza un \code{Selector} per accettare nuove connessioni e richieste.
+Quando un client diventa \emph{readable}, viene chiamato sulla sua key corrispondente il metodo \code{readFromKey}. Al suo interno, viene letta la richiesta inviata dal client,
+la quale viene poi gestita secondo il flusso descritto nel \hyperref[sec:http_flow]{prossimo paragrafo}.
+
+\par Il task della gestione della richiesta viene sottomesso a un \code{ExecutorService}, permettendo al thread principale di continuare ad accettare richieste mentre gli worker gestiscono quelle già prese in carico.
+Per la sottomissione delle richieste al pool viene utilizzata la classe \href{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html}{\code{CompletableFuture}}.
+\par Per prima cosa, il metodo \code{handleRequest} (che si occupa materialmente della gestione della richiesta) viene passato come callback al metodo \code{supplyAsync} della classe \code{CompletableFuture}.
+Questo fa sì che il task venga sottomesso al pool \code{ForkJoinPool.commonPool}, che è gestito internamente dalla JVM ed è ottimizzato con la tecnica del \href{https://en.wikipedia.org/wiki/Work_stealing}{\emph{work stealing}} per massimizzare l'efficienza e l'utilizzo dei thread.
+Al completamento del task da parte di un worker, viene chiamato il callback passato al metodo \code{thenAccept}: questa funzione lambda prende come argomento la \code{RestResponse} restituita dalla gestione della richiesta e la salva nell'\emph{attachment} associato al client.
+Dopodiché, le \code{interestOps} della key del client vengono impostate in modo da tenere traccia di quando il client diventerà \emph{writable}.
+
+\par Una volta verificatosi questo evento, il metodo \code{writeToKey} viene chiamato e causa la scrittura della risposta precedentemente generata sul socket associato al client. Al termine della scrittura, le \code{interestOps} della key in questione
+vengono nuovamente settate in modo da tracciare la \emph{readability}.
 
 \subsection{Gestione di una richiesta HTTP}
+\label{sec:http_flow}
+
 Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un client, il flusso di gestione della richiesta da parte del server si compone dei seguenti passi:
 \begin{enumerate}
     \item Il path e metodo della richiesta vengono utilizzati per cercare una corrispondenza nel router.
           \begin{enumerate}
               \item Se il path non dà corrispondenza, viene restituito l'errore 404. Se il metodo non dà corrispondenza, viene restituito l'errore 405. Se il lookup ha successo, viene reperito il riferimento al metodo handler appropriato.
           \end{enumerate}
-    \item L'\code{AuthenticationMiddleware} analizza gli header della richiesta alla ricerca del token nel campo \code{Authorization}.
+    \item L'\code{AuthenticationMiddleware} analizza gli header della richiesta alla ricerca del token nel campo \code{Authorization}. Questo controllo viene omesso in fase di login.
           \begin{enumerate}
               \item Se il token non è presente, viene restituito l'errore 401. Se il token è invalido, viene restituito l'errore 400. Se la verifica ha successo, la richiesta viene autenticata (incapsulandola in una \code{AuthenticatedRestRequest}) e associata all'utente corrispondente al token.
           \end{enumerate}
