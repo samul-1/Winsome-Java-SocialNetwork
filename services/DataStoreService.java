@@ -257,7 +257,7 @@ public class DataStoreService {
         Set<Post> feed = new TreeSet<>();
 
         this.followers.forEach((user, followerSet) -> {
-            if (followerSet.contains(username)) {
+            if (followerSet.contains(username) || user.equals(username)) {
                 // current user is in the follow set of requested username;
                 // therefore their posts are in the user's feed
                 feed.addAll(this.getUserPosts(user));

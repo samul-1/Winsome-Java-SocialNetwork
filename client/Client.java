@@ -52,11 +52,22 @@ public class Client implements IClient {
 
     private SocketChannel sktChan;
 
-    private final Map<String, String> clientMessages = initMap();
+    private final Map<String, String> clientMessages = initMsgsMap();
+    private final Map<String, Map<Integer, String>> outcomeMessages = initOutcomesMap();
 
-    private Map<String, String> initMap() {
+    private Map<String, String> initMsgsMap() {
         Map<String, String> map = new HashMap<>();
         map.put("client_ok", "Operation completed successfully.");
+        map.put("login_ok", "Successfully logged in.");
+        map.put("logout_ok", "Successfully logged out.");
+        map.put("registration_ok", "Successfully registered. Here's your new account:");
+        map.put("follow_ok", "Successfully followed user.");
+        map.put("unfollow_ok", "Stopped following user.");
+        map.put("delete_ok", "Successfully deleted post.");
+        map.put("rewin_ok", "Successfully rewinned post.");
+        map.put("rate_ok", "Vote added.");
+        map.put("comment_ok", "Comment added.");
+        map.put("new_post_ok", "Successfully created a new post. Here's your post:");
         map.put("wrong_username_password", "Wrong username or password.");
         map.put("server_error", "The server is temporarily unreachable.");
         map.put("cannot_log_out", "You can't log out using this username.");
@@ -71,9 +82,44 @@ public class Client implements IClient {
         map.put("post_constraint_failed",
                 "Titles can only be 20 characters long and the content of the" +
                         "post can be up to 500 characters long.");
-        // map.put(404, "404 NOT FOUND");
-        // map.put(405, "405 METHOD NOT SUPPORTED");
-        // map.put(500, "500 INTERNAL SERVER ERROR");
+        map.put("already_logged_in", "You're already logged in.");
+        map.put("not_logged_in", "You aren't logged in.");
+
+        return Collections.unmodifiableMap(map);
+    }
+
+    private Map<String, Map<Integer, String>> initOutcomesMap() {
+        Map<String, Map<Integer, String>> map = new HashMap<>();
+        map.put("/login", new HashMap<>());
+        map.get("/login").put(403, "Wrong username or password.");
+
+        map.put("/logout", new HashMap<>());
+        map.get("/logout").put(403, "You are not logged in under this username.");
+
+        map.put("/users/following", new HashMap<>());
+        map.get("/users/following").put(404, "Requested user doesn't exist.");
+
+        map.put("/posts", new HashMap<>());
+        map.get("/posts").put(400, "You sent invalid data for this post.");
+
+        map.put("/posts/<id>", new HashMap<>());
+        map.get("/posts/<id>").put(404, "Requested post doesn't exist.");
+        map.get("/posts/<id>").put(403, "You are not the author of this post.");
+
+        map.put("/posts/<id>/rewin", new HashMap<>());
+        map.get("/posts/<id>/rewin").put(404, "Requested post doesn't exist.");
+        map.get("/posts/<id>/rewin").put(403, "You are the author of this post");
+
+        map.put("/posts/<id>/rate", new HashMap<>());
+        map.get("/posts/<id>/rate").put(400, "You sent an invalid value.");
+        map.get("/posts/<id>/rate").put(404, "Requested post doesn't exist.");
+        map.get("/posts/<id>/rate").put(403, "You are the author of this post.");
+
+        map.put("/posts/<id>/comments", new HashMap<>());
+        map.get("/posts/<id>/comments").put(400, "You sent invalid data for the comment.");
+        map.get("/posts/<id>/comments").put(404, "Requested post doesn't exist.");
+        map.get("/posts/<id>/comments").put(403, "You are the author of this post.");
+
         return Collections.unmodifiableMap(map);
     }
 
@@ -108,7 +154,7 @@ public class Client implements IClient {
                 String[] instructionLineTokens = instructionLine.split(" ");
                 String command = instructionLineTokens[0];
                 String[] commandArguments = Arrays.copyOfRange(instructionLineTokens, 1, instructionLineTokens.length);
-                if (command.equals("EXIT")) {
+                if (command.equals("exit")) {
                     break;
                 }
 
@@ -118,21 +164,23 @@ public class Client implements IClient {
                 int value;
 
                 String renderedResponseData = "";
-                System.out.println(instructionLine);
                 try {
                     switch (command) {
                         case "register":
                             User newUser = this.register(commandArguments);
-                            renderedResponseData = new UserRenderer().render(newUser);
+                            renderedResponseData = this.clientMessages.get("registration_ok") + "\n"
+                                    + new UserRenderer().render(newUser);
                             break;
                         case "login":
                             username = this.getStringArgument(commandArguments, 0);
                             password = this.getStringArgument(commandArguments, 1);
                             this.login(username, password);
+                            renderedResponseData = this.clientMessages.get("login_ok");
                             break;
                         case "logout":
                             username = this.getStringArgument(commandArguments, 0);
                             this.logout(username);
+                            renderedResponseData = this.clientMessages.get("logout_ok");
                             break;
                         case "list":
                             parameter = instructionLineTokens[1];
@@ -157,10 +205,12 @@ public class Client implements IClient {
                         case "follow":
                             username = this.getStringArgument(commandArguments, 0);
                             this.followUser(username);
+                            renderedResponseData = this.clientMessages.get("follow_ok") + username;
                             break;
                         case "unfollow":
                             username = this.getStringArgument(commandArguments, 0);
                             this.unfollowUser(username);
+                            renderedResponseData = this.clientMessages.get("unfollow_ok") + username;
                             break;
                         case "blog":
                             Post[] blog = this.viewBlog();
@@ -170,7 +220,8 @@ public class Client implements IClient {
                             title = this.getStringArgument(commandArguments, 0, true);
                             content = this.getStringArgument(commandArguments, title.split(" ").length, true);
                             Post newPost = this.createPost(title, content);
-                            renderedResponseData = new PostRenderer().render(newPost);
+                            renderedResponseData = this.clientMessages.get("new_post_ok") + "\n"
+                                    + new PostRenderer().render(newPost);
                             break;
                         case "show":
                             parameter = instructionLineTokens[1];
@@ -192,21 +243,25 @@ public class Client implements IClient {
                         case "delete":
                             postId = this.getUUIDArgument(commandArguments, 0);
                             this.deletePost(postId);
+                            renderedResponseData = this.clientMessages.get("delete_ok");
                             break;
                         case "rewin":
                             postId = this.getUUIDArgument(commandArguments, 0);
                             // ? maybe no need to return a post
                             this.rewinPost(postId);
+                            renderedResponseData = this.clientMessages.get("rewin_ok");
                             break;
                         case "rate":
                             postId = this.getUUIDArgument(commandArguments, 0);
                             value = this.getIntArgument(commandArguments, 1);
                             this.ratePost(postId, value);
+                            renderedResponseData = this.clientMessages.get("rate_ok");
                             break;
                         case "comment":
                             postId = this.getUUIDArgument(commandArguments, 0);
                             comment = this.getStringArgument(commandArguments, 1, true);
                             this.addComment(postId, comment);
+                            renderedResponseData = this.clientMessages.get("comment_ok");
                             break;
                         case "wallet":
                             try {
@@ -233,9 +288,8 @@ public class Client implements IClient {
                 } catch (InvalidClientArgumentsException e) {
                     System.out.println(this.clientMessages.get("invalid_operation_arguments") + e.getMessage());
                 } catch (ClientOperationFailedException e) {
-                    System.out.println("OPERATION FAILED!");
                     System.out.println(this.getOperationFailedMessage(e));
-                    e.printStackTrace();
+                    // e.printStackTrace();
                 }
             }
             this.sktChan.close();
@@ -247,9 +301,19 @@ public class Client implements IClient {
     }
 
     private String getOperationFailedMessage(ClientOperationFailedException exc) {
-        // TODO implement - if the exc has a message, print that one, otherwise lookup
-        // TODO the pair <request path, error code> from a map
-        return null;
+        if (exc.getMessage() != null && exc.getMessage().length() > 0) {
+            return exc.getMessage();
+        }
+
+        assert exc.getRequest() != null && exc.getResponse() != null;
+
+        if (exc.getResponse().getCode() == 401) {
+            return this.clientMessages.get("not_logged_in");
+        }
+
+        return this.outcomeMessages
+                .get(exc.getRequest().getPath())
+                .get(exc.getResponse().getCode());
     }
 
     private Map<String, String> getRequestHeaders() {
@@ -292,7 +356,7 @@ public class Client implements IClient {
                 break;
             }
         }
-        System.out.println("ARG: " + ret);
+        // System.out.println("ARG: " + ret);
         return ret;
 
     }
@@ -313,7 +377,7 @@ public class Client implements IClient {
         buf.flip();
 
         String responseString = StandardCharsets.UTF_8.decode(buf).toString();
-        System.out.println("RESPONSE:\n" + responseString);
+        // System.out.println("RESPONSE:\n" + responseString);
         RestResponse response = RestResponse.fromString(responseString);
 
         if (response.isClientErrorResponse() || response.isServerErrorResponse()) {
@@ -357,14 +421,17 @@ public class Client implements IClient {
             throw new ClientOperationFailedException(null, response);
         }
 
-        System.out.println(response.getBody());
+        // System.out.println(response.getBody());
         return new Serializer<User>().parse(response.getBody(), User.class);
 
     }
 
     @Override
     public void login(String username, String password) throws IOException, ClientOperationFailedException {
-        // TODO error if already logged in
+        if (this.getRequestHeaders().get("Authorization") != null) {
+            throw new ClientOperationFailedException(this.clientMessages.get("already_logged_in"));
+        }
+
         RestResponse response = this
                 .receiveResponse(new RestRequest("/login", HttpMethod.POST, null, username + "\n" + password));
 

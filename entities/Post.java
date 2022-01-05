@@ -26,8 +26,12 @@ public class Post implements Comparable<Post> {
     public Post(
             @JsonProperty("title") String title,
             @JsonProperty("content") String content) {
-        if (title == null || title.length() == 0 || content == null
-                || content.length() == 0 || title.length() > 20 || content.length() > 500) {
+        // if (title == null || title.length() == 0 || content == null
+        // || content.length() == 0 || title.length() > 20 || content.length() > 500) {
+        // throw new IllegalArgumentException();
+        // }
+
+        if (title.length() > 20 || content.length() > 500) {
             throw new IllegalArgumentException();
         }
         this.title = title;

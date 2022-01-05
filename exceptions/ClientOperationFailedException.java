@@ -8,7 +8,7 @@ public class ClientOperationFailedException extends Exception {
     private RestResponse response;
 
     public ClientOperationFailedException(RestRequest request, RestResponse response) {
-        this(request, response, "");
+        this(request, response, null);
     }
 
     public ClientOperationFailedException(RestRequest request, RestResponse response, String message) {

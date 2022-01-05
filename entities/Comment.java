@@ -12,10 +12,10 @@ public class Comment implements Comparable<Comment> {
 
     @JsonCreator
     public Comment(@JsonProperty("authorUsername") String username, @JsonProperty("content") String content) {
-        if (content == null || content.trim().length() == 0 ||
-                username == null || username.trim().length() == 0) {
-            throw new IllegalArgumentException();
-        }
+        // if (content == null || content.trim().length() == 0 ||
+        // username == null || username.trim().length() == 0) {
+        // throw new IllegalArgumentException();
+        // }
         this.authorUsername = username;
         this.content = content;
     }

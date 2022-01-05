@@ -228,8 +228,8 @@ Il metodo si occupa di estrarre il path e il metodo HTTP della richiesta e di ce
 \par Se si ha una corrispondenza (ovvero è associato il nome di un metodo handler alla coppia\\ $<path, metodo>$),
 viene restituito il riferimento a un metodo della classe \code{SocialNetworkService}, che verrà poi invocato coi corretti parametri per
 soddisfare la richiesta (si veda capitolo successivo per il flusso completo).
-\par Il meccanismo appena descritto utilizza la classe Java \href{https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html}{Method},
-collocata nel pacchetto\\ \code{java.lang.reflect}.
+\par Il meccanismo appena descritto utilizza la feature della \emph{reflection} e la classe Java \href{https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html}{\code{Method}},
+collocata nel pacchetto \code{java.lang.reflect}.
 \par Si è scelto di utilizzare questo approccio (anziché, per esempio, un controllo \code{switch} sul path della richiesta) per ottenere una dichiarazione \textbf{descrittiva} (e non imperativa) dell'API:
 avere la definizione delle route in un file JSON e non nel codice stesso permette di ottenere un basso grado di accoppiamento tra la logica e la descrizione dell'interfaccia; si pensi per
 esempio all'aggiunta di un nuovo \emph{entry point} nell'API: se la descrizione dell'interfaccia fosse contenuta nel codice, la modifica allo schema richiederebbe anche una modifica al codice del router,
@@ -245,7 +245,7 @@ All'avvio il server, dopo aver aperto un \code{ServerSocketChannel} e aver espor
 entra in un ciclo infinito.
 \par All'interno del ciclo, il server utilizza un \code{Selector} per accettare nuove connessioni e richieste.
 Quando un client diventa \emph{readable}, viene chiamato sulla sua key corrispondente il metodo \code{readFromKey}. Al suo interno, viene letta la richiesta inviata dal client,
-la quale viene poi gestita secondo il flusso descritto nel \hyperref[sec:http_flow]{prossimo paragrafo}.
+la quale viene poi gestita secondo il flusso descritto nel paragrafo \hyperref[sec:http_flow]{\emph{Gestione di una richiesta HTTP}}.
 
 \par Il task della gestione della richiesta viene sottomesso a un \code{ExecutorService}, permettendo al thread principale di continuare ad accettare richieste mentre gli worker gestiscono quelle già prese in carico.
 Per la sottomissione delle richieste al pool viene utilizzata la classe \href{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html}{\code{CompletableFuture}}.

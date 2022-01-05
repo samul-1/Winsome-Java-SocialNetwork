@@ -69,6 +69,7 @@ public class SocialNetworkService {
     }
 
     public RestResponse logoutHandler(AuthenticatedRestRequest request) throws PermissionDeniedException {
+        // TODO check username in body is the correct one
         if (this.store.deleteUserToken(new AuthenticationToken(
                 request.getRequest().getHeader("Authorization").substring("Bearer ".length())))) {
             return new RestResponse(204);
@@ -220,7 +221,6 @@ public class SocialNetworkService {
             throw new BadRequestException();
         }
         comment.setUser(request.getUser().getUsername());
-
         OperationStatus outcome = this.store.addPostComment(request.getRequest().getPathParameter(), comment);
         if (outcome.status == Status.NOT_FOUND) {
             throw new ResourceNotFoundException();
