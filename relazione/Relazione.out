@@ -1,29 +1,30 @@
-\BOOKMARK [1][-]{section.1}{Architettura di massima del progetto}{}% 1
-\BOOKMARK [2][-]{subsection.1.1}{Suddivisione in layer}{section.1}% 2
-\BOOKMARK [2][-]{subsection.1.2}{Protocollo applicazione}{section.1}% 3
-\BOOKMARK [1][-]{section.2}{Le entit\340 di dominio}{}% 4
-\BOOKMARK [2][-]{subsection.2.1}{Gli utenti}{section.2}% 5
-\BOOKMARK [2][-]{subsection.2.2}{Post, commenti, reazioni}{section.2}% 6
-\BOOKMARK [2][-]{subsection.2.3}{Serializer}{section.2}% 7
-\BOOKMARK [1][-]{section.3}{Il data store}{}% 8
-\BOOKMARK [2][-]{subsection.3.1}{Strutture dati}{section.3}% 9
-\BOOKMARK [2][-]{subsection.3.2}{Persistenza dello stato}{section.3}% 10
-\BOOKMARK [1][-]{section.4}{Il business logic layer}{}% 11
-\BOOKMARK [2][-]{subsection.4.1}{La classe SocialNetworkService}{section.4}% 12
-\BOOKMARK [2][-]{subsection.4.2}{La classe RewardIssuer}{section.4}% 13
-\BOOKMARK [2][-]{subsection.4.3}{La classe WalletConversionService}{section.4}% 14
-\BOOKMARK [2][-]{subsection.4.4}{I servizi di registrazione utente e notifica}{section.4}% 15
-\BOOKMARK [1][-]{section.5}{L'API e il router}{}% 16
-\BOOKMARK [2][-]{subsection.5.1}{La classe ApiRoute}{section.5}% 17
-\BOOKMARK [2][-]{subsection.5.2}{La classe ApiRouter}{section.5}% 18
-\BOOKMARK [1][-]{section.6}{Il server}{}% 19
-\BOOKMARK [2][-]{subsection.6.1}{Funzionamento e gestione delle connessioni}{section.6}% 20
-\BOOKMARK [2][-]{subsection.6.2}{Gestione di una richiesta HTTP}{section.6}% 21
-\BOOKMARK [2][-]{subsection.6.3}{La classe ServerConfig}{section.6}% 22
-\BOOKMARK [1][-]{section.7}{Il client CLI}{}% 23
-\BOOKMARK [2][-]{subsection.7.1}{Gestione di una richiesta al server}{section.7}% 24
-\BOOKMARK [2][-]{subsection.7.2}{Rendering dei dati}{section.7}% 25
-\BOOKMARK [2][-]{subsection.7.3}{Gestione dei messaggi}{section.7}% 26
-\BOOKMARK [1][-]{section.8}{Il client GUI}{}% 27
-\BOOKMARK [2][-]{subsection.8.1}{Realizzazione.}{section.8}% 28
-\BOOKMARK [2][-]{subsection.8.2}{Limitazioni.}{section.8}% 29
+\BOOKMARK [1][-]{section.1}{Note sulla compilazione ed esecuzione}{}% 1
+\BOOKMARK [1][-]{section.2}{Architettura di massima del progetto}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Suddivisione in layer}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Protocollo applicazione}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Le entit\340 di dominio}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Gli utenti}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Post, commenti, reazioni}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.3}{Serializer}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Il data store}{}% 9
+\BOOKMARK [2][-]{subsection.4.1}{Strutture dati e concorrenza}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.2}{Persistenza dello stato}{section.4}% 11
+\BOOKMARK [1][-]{section.5}{Il business logic layer}{}% 12
+\BOOKMARK [2][-]{subsection.5.1}{La classe SocialNetworkService}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.2}{La classe RewardIssuer}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.3}{La classe WalletConversionService}{section.5}% 15
+\BOOKMARK [2][-]{subsection.5.4}{I servizi di registrazione utente e notifica}{section.5}% 16
+\BOOKMARK [1][-]{section.6}{L'api e il router}{}% 17
+\BOOKMARK [2][-]{subsection.6.1}{La classe ApiRoute}{section.6}% 18
+\BOOKMARK [2][-]{subsection.6.2}{La classe ApiRouter}{section.6}% 19
+\BOOKMARK [1][-]{section.7}{Il server}{}% 20
+\BOOKMARK [2][-]{subsection.7.1}{Funzionamento e gestione delle connessioni}{section.7}% 21
+\BOOKMARK [2][-]{subsection.7.2}{Gestione di una richiesta http}{section.7}% 22
+\BOOKMARK [2][-]{subsection.7.3}{La classe ServerConfig}{section.7}% 23
+\BOOKMARK [1][-]{section.8}{Il client cli}{}% 24
+\BOOKMARK [2][-]{subsection.8.1}{Gestione di una richiesta al server}{section.8}% 25
+\BOOKMARK [2][-]{subsection.8.2}{Rendering dei dati}{section.8}% 26
+\BOOKMARK [2][-]{subsection.8.3}{Gestione dei messaggi}{section.8}% 27
+\BOOKMARK [1][-]{section.9}{Il client gui}{}% 28
+\BOOKMARK [2][-]{subsection.9.1}{Realizzazione}{section.9}% 29
+\BOOKMARK [2][-]{subsection.9.2}{Limitazioni}{section.9}% 30
