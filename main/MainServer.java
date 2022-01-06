@@ -12,6 +12,7 @@ public class MainServer {
     public static void main(String[] args) {
         File configFile = MainServer.DEFAULT_CONFIG_FILE;
         File apiSchemaFile = MainServer.DEFAULT_API_SCHEMA_FILE;
+        // TODO read arguments for config and schema file
         try {
             new Server(configFile, apiSchemaFile).start();
         } catch (IOException e) {

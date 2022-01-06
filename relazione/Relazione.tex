@@ -18,6 +18,10 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+
 \setlist[enumerate]{label*=\arabic*.}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -48,11 +52,11 @@
 \lstset{style=mystyle}
 
 \def\code#1{\texttt{#1}}
-\title{Progetto di laboratorio di reti} % \LaTeX è una macro che compone il logo "LaTeX"
+\title{Winsome --- progetto di laboratorio di reti} % \LaTeX è una macro che compone il logo "LaTeX"
 % I commenti (introdotti da %) vengono ignorati
 
 \author{Samuele Bonini}
-\date{}
+\date{10 gennaio 2022}
 % in alternativa a \date il comando \today introduce la data di sistema.
 
 \begin{document}
@@ -206,8 +210,16 @@ restituito e, per un periodo di tempo pari a \code{CIRCUIT\_BREAKER\_COOL\_DOWN}
 \par La classe viene utilizzata come \emph{singleton} ma, a differenza di \code{SocialNetworkService}, contiene stato interno (il valore \emph{cached} e i dati del circuit breaker).
 Per permettere la condivisione fra thread della singola istanza di questa classe, le parti di codice dove lo stato interno viene acceduto sono protette da monitor (mediante il costrutto \code{synchronized}).
 
-\subsection{I servizi di registrazione utente e notifica}\quad \\
+\subsection{I servizi di registrazione utente e notifica}
+Il servizio di registrazione utente è esposto dalla classe \code{UserRegistrationService}, che a sua volta implementa \code{UserRegistrationInterface}.
+Il singolo metodo a disposizione, \code{registerUser}, prende in input i dati necessari per la registrazione (username, password e insieme di tag), ne verifica la correttezza e,
+in caso di esito positivo, provvede alla creazione e restituzione di un nuovo oggetto \code{User}. Gli appropriati errori vengono restituiti in caso di parametri invalidi oppure se lo username
+scelto è già in uso.
 
+\par Il sistema di notifiche per i nuovi follower è implementato, come da specifica, utilizzando il meccanismo RMI callback. La classe \code{FollowerNotificationService} espone il metodo \code{subscribe}, chiamato dal client al momento del login.
+La classe dispone altresì del metodo \code{notifyUser}, che viene chiamato negli handler \code{followUser} e \code{unfollowUser} al momento del completamento dell'operazione. Il metodo in questione reperisce un riferimento a \code{IClientFollowerNotificationService},
+acquisito al momento del login e associato nello store allo username dell'utente, e chiama il metodo \code{updateFollowerList} esposto da quest'ultima interfaccia, passando come parametro il nuovo insieme di follower.
+Il client provvede quindi ad aggiornare la propria lista locale utilizzando il valore fornito dal servizio.
 
 
 
@@ -277,10 +289,24 @@ Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un cl
           \end{enumerate}
     \item La risposta viene salvata nell'\emph{attachment} associato al client e verrà scritta sul socket corrispondente quando il client diventa \emph{writable}.
 \end{enumerate}
-(img)\\
+\par Il seguente diagramma UML di sequenza esemplfica lo schema delle interazioni tra classi appena sintetizzato.
+\par \includegraphics[width=\textwidth]{sequence.png}
 
+\subsection{La classe ServerConfig}
+La classe \code{ServerConfig} rappresenta l'insieme delle impostazioni del server che, da specifica, devono poter essere regolate.
+Il file di configurazione risulta quindi essere un file JSON contenente un'istanza serializzata di questa classe. Il vantaggio principale derivante dall'uso di questo approccio è
+il riutilizzo delle componenti già esistenti all'interno del progetto: per leggere il file di configurazione basta, infatti, istanziare un \code{Serializer<ServerConfig>} e de-serializzare il contenuto del file
+specificato.
+\par Di default, il server utilizzerà il file \code{config.json} all'avvio, ma è possibile sovrascrivere questa impostazione eseguendo la classe \code{MainServer} con un argomento da linea di comando, per esempio
+\code{java MainServer myconfig.json}.
 
-\subsection{La classe ServerConfig}\quad \\
+\par Al fine di permettere di avviare il server con il minimo livello di configurazione manuale possibile, la classe \code{ServerConfig} è dotata di valori di default per ciascun \emph{setting}, che verranno utilizzati
+se omessi nel file di configurazione utilizzato.
+
+\par Il client, per semplicità, ha accesso a un riferimento a \code{ServerConfig} in maniera analoga al server: questo permette di reperire facilmente informazioni come l'indirizzo IP e la porta per avviare la connessione TCP.
+Nell'ipotesi di un sistema realmente distribuito, dove client e server non risiedono sulla stessa macchina, si utilizzerebbe un sistema più sofisticato per il reperimento di tali dati, come per esempio l'accesso a un terzo servizio (se
+il server fosse dotato di un nome di dominio, per esempio, basterebbe un lookup DNS). Si noti che, seppure la maggior parte dei dati vengono letti dal client direttamente dall'istanza di \code{ServerConfig}, questo
+non avviene per gli estremi del gruppo multicast, in quanto la specifica richiede che sia il server a comunicarli: essi vengono infatti inclusi nel corpo della risposta alle richieste di login.
 
 \section{Il client CLI}
 All'avvio, il client reperisce utilizzando l'RMI \code{Registry} i servizi di registrazione utente e notifica per i follower, precedentemente esportati dal server.
@@ -315,9 +341,9 @@ legata alla formattazione (o \emph{rendering}) degli stessi, si è utilizzata un
 \label{sec:err_handling}
 L'approccio scelto per la gestione dei messaggi (sia informativi che di errore) è di mantenerli in strutture dati separate dal resto del codice.
 L'idea è quella di associare a ogni messaggio un codice mnemomico, e di accedere ai messaggi con un lookup nella struttura dedicata utilizzando il codice corrispondente.
-\par L'utilizzo di questo metodo è motivato dall'obiettivo di disaccoppiare la logica del client dalla presentazione dei dati (non è buona pratica, in generale, avere \emph{magic strings} all'interno codice). Inoltre,
-come possibile estensione, si consideri cosa succederebbe se si volesse tradurre il client in più lingue. Disaccoppiando i messaggi dal codice dei vari metodi e impiegando un tool di traduzione quale \href{https://docs.oracle.com/javase/8/docs/technotes/guides/intl/index.html}{\code{i18n}},
-basterebbe modificare l'accesso alla struttura dati che contiene i messaggi testuali; diversamente, bisognerebbe intervenire nel codice modificando le stringhe \emph{hard-coded} una ad una.
+\par L'utilizzo di questo metodo è motivato dall'obiettivo di disaccoppiare la logica del client dalla presentazione dei dati (non è buona pratica, in generale, avere \emph{magic strings} all'interno del codice). Inoltre,
+come possibile estensione, si consideri cosa succederebbe se si volesse tradurre il client in più lingue. Disaccoppiando i messaggi dal codice dei vari metodi e impiegando un tool di traduzione, quale \href{https://docs.oracle.com/javase/8/docs/technotes/guides/intl/index.html}{\code{i18n}},
+basterebbe modificare l'accesso alla struttura dati che contiene i messaggi testuali; diversamente, se le stringhe fossero \emph{hard-coded}, bisognerebbe intervenire sul codice modificandole \emph{una ad una}.
 \par La maggior parte dei messaggi del client sono salvati all'interno della mappa \code{clientMessages}. Essa viene inizializzata e resa immutabile utilizzando la \emph{factory} \code{Collections.unmodifiableMap}.
 \par Per avere un controllo più fine sui messaggi di errore, una seconda struttura viene impiegata: \\ \code{outcomeMessages}. Essa mappa nomi di path su mappe, che a loro volta mappano interi
 (rappresentanti codici HTTP di esito) su stringhe. L'idea è di fornire messaggi contestualizzati all'operazione e all'esito risultante.
