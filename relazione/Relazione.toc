@@ -23,9 +23,9 @@
 \contentsline {subsection}{\numberline {6.2}Gestione di una richiesta HTTP}{7}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}La classe ServerConfig}{7}{subsection.6.3}%
 \contentsline {section}{\numberline {7}Il client CLI}{7}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Gestione di una richiesta al server}{7}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.1}Gestione di una richiesta al server}{8}{subsection.7.1}%
 \contentsline {subsection}{\numberline {7.2}Rendering dei dati}{8}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Gestione dei messaggi}{8}{subsection.7.3}%
-\contentsline {section}{\numberline {8}Il client GUI}{8}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Realizzazione.}{8}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Limitazioni.}{8}{subsection.8.2}%
+\contentsline {subsection}{\numberline {7.3}Gestione dei messaggi}{9}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Il client GUI}{9}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Realizzazione.}{9}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Limitazioni.}{9}{subsection.8.2}%

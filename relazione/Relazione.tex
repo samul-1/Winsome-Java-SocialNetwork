@@ -250,7 +250,7 @@ la quale viene poi gestita secondo il flusso descritto nel paragrafo \hyperref[s
 \par Il task della gestione della richiesta viene sottomesso a un \code{ExecutorService}, permettendo al thread principale di continuare ad accettare richieste mentre gli worker gestiscono quelle già prese in carico.
 Per la sottomissione delle richieste al pool viene utilizzata la classe \href{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html}{\code{CompletableFuture}}.
 \par Per prima cosa, il metodo \code{handleRequest} (che si occupa materialmente della gestione della richiesta) viene passato come callback al metodo \code{supplyAsync} della classe \code{CompletableFuture}.
-Questo fa sì che il task venga sottomesso al pool \code{ForkJoinPool.commonPool}, che è gestito internamente dalla JVM ed è ottimizzato con la tecnica del \href{https://en.wikipedia.org/wiki/Work_stealing}{\emph{work stealing}} per massimizzare l'efficienza e l'utilizzo dei thread.
+Questo fa sì che il task venga sottomesso al pool \href{https://medium.com/swlh/the-unfairly-unknown-forkjoinpool-c262777def6a}{\code{ForkJoinPool.commonPool}}, che è gestito internamente dalla JVM ed è ottimizzato con la tecnica del \href{https://en.wikipedia.org/wiki/Work_stealing}{\emph{work stealing}} per massimizzare l'efficienza e l'utilizzo dei thread.
 Al completamento del task da parte di un worker, viene chiamato il callback passato al metodo \code{thenAccept}: questa funzione lambda prende come argomento la \code{RestResponse} restituita dalla gestione della richiesta e la salva nell'\emph{attachment} associato al client.
 Dopodiché, le \code{interestOps} della key del client vengono impostate in modo da tenere traccia di quando il client diventerà \emph{writable}.
 
@@ -270,7 +270,7 @@ Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un cl
           \begin{enumerate}
               \item Se il token non è presente, viene restituito l'errore 401. Se il token è invalido, viene restituito l'errore 400. Se la verifica ha successo, la richiesta viene autenticata (incapsulandola in una \code{AuthenticatedRestRequest}) e associata all'utente corrispondente al token.
           \end{enumerate}
-    \item L'handler restituito al punto 1 viene invocato passandogli la richiesta autenticata del punto 2.
+    \item Lo handler restituito al punto 1 viene invocato passandogli la richiesta autenticata del punto 2.
           \begin{enumerate}
               \item Se si verifica un errore all'interno dello handler, l'eccezione viene catturata come\\ \code{InvocationTargetException}. La tecnica di \emph{exception chaining} permette di estrarre l'eccezione originale
                     sollevata dallo handler e di inviare in risposta l'errore appropriato. Qualsiasi altro tipo di eccezione sollevata non direttamente dallo handler causa l'emissione di un errore 500. Se l'esecuzione ha successo, lo handler restituisce una \code{RestResponse}.
@@ -283,10 +283,45 @@ Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un cl
 \subsection{La classe ServerConfig}\quad \\
 
 \section{Il client CLI}
+All'avvio, il client reperisce utilizzando l'RMI \code{Registry} i servizi di registrazione utente e notifica per i follower, precedentemente esportati dal server.
+Dopodiché, viene aperta una connessione TCP utilizzando un \code{SocketChannel} NIO. Una volta stabilita la connessione al server, il client entra in un ciclo infinito
+dove attende di leggere istruzioni da \code{stdin}. Ogni istruzione letta in input viene divisa in token in corrispondenza del carattere spazio: il primo token (o i primi due,
+per le istruzioni composte da due parole) viene utilizzato per cercare corrispondenza con uno dei comandi supportati. Successivamente, vengono utilizzati tre metodi -- \code{getStringArgument},
+\code{getIntArgument} e \code{getUUIDArgument}, a seconda del contesto -- per acquisire i parameteri del comando ricevuto, verificandone l'arietà e il tipo. Infine, se tutti i controlli hanno
+esito positivo, viene chiamato il metodo handler corrispondente al comando con i parametri dati dall'utente.
+\par Dopo aver effettuato il login, il client ottiene gli estremi (indirizzo IP e porta) per unirsi al gruppo multicast per le notifiche sugli aggiornamenti dei portafogli, inviatigli dal server
+all'interno della risposta alla richiesta di autenticazione, e vi si connette in un thread separato. Il token di autenticazione altresì contenuto nella risposta viene salvato in una variabile locale e utilizzato per autenticare le richieste future.
+Infine, una volta ottenuto il token, il client si registra via RMI callback al servizio di notifica per i follower. Il token viene passato come argomento al metodo per la registrazione, certificando così l'identità dell'utente.
+\subsection{Gestione di una richiesta al server}
+Gli handler del client implementano il seguente schema:
+\begin{enumerate}
+    \item Viene generata una \code{RestRequest} coi parametri (path, header e body) appropriati in base all'operazione
+    \item Viene chiamato il metodo \code{receiveResponse}, che wrappa la richiesta in un \code{ByteBuffer} e la scrive sul socket che mantiene la connessione al server
+    \item Viene letta la risposta. Se la risposta contiene un errore (codice \code{4xx} o \code{5xx}), viene sollevata una \code{ClientOperationFailedException}, altrimenti viene restituita la risposta allo handler chiamante
+    \item All'interno dello handler, viene processato il contenuto della risposta. Il \emph{processing} effettuato dipende dalla semantica dell'operazione; nella maggior parte dei casi, viene istanziato un \code{Serializer} che ricostruisce un'entità (o un array di entità) e lo restituisce in uscita.
+\end{enumerate}
+La classe \code{ClientOperationFailedException} viene utilizzata per rappresentare il fallimento di un'interazione col server, dovuto nella maggior parte dei casi alla ricezione di una risposta HTTP contenente un codice di errore.
+Quando un'eccezione di questo tipo viene lanciata, possono esserle passati come parametro la richiesta e la risposta che costituiscono l'interazione fallita. Questi dati vengono utilizzati dal client per stampare il messaggio di errore appropriato (si veda la sezione \hyperref[sec:err_handling]{Gestione dei messaggi}).
 
-\subsection{Gestione di una richiesta al server}\quad \\
-\subsection{Rendering dei dati}\quad \\
-\subsection{Gestione dei messaggi}\quad \\
+\subsection{Rendering dei dati}
+La maggior parte delle operazioni svolte dal client si conclude con la stampa su \code{stdout} di dati ricevuti dal server. Per astrarre la logica di ricezione dei dati da quella
+legata alla formattazione (o \emph{rendering}) degli stessi, si è utilizzata un'interfaccia parametrica dedicata: \code{IRenderer<E>}.
+
+\par Le classi che implementano quest'interfaccia dispongono del metodo \code{render}, \emph{overloaded} in modo da poter essere utilizzato sia con singole istanze che con array. Il metodo
+\code{render} si occupa, preso in input un oggetto del tipo assegnato dalla classe che implementa l'interfaccia, di formattarlo e restituire una stringa che rappresenta una versione \emph{pretty-printed} dell'oggetto.
+\par Il client, all'atto della ricezione di dati dal server, istanzia un \code{Renderer} del tipo appropriato. Al termine dell'interazione, la stringa restituita dal renderer viene stampata su \code{stdout}.
+
+\subsection{Gestione dei messaggi}
+\label{sec:err_handling}
+L'approccio scelto per la gestione dei messaggi (sia informativi che di errore) è di mantenerli in strutture dati separate dal resto del codice.
+L'idea è quella di associare a ogni messaggio un codice mnemomico, e di accedere ai messaggi con un lookup nella struttura dedicata utilizzando il codice corrispondente.
+\par L'utilizzo di questo metodo è motivato dall'obiettivo di disaccoppiare la logica del client dalla presentazione dei dati (non è buona pratica, in generale, avere \emph{magic strings} all'interno codice). Inoltre,
+come possibile estensione, si consideri cosa succederebbe se si volesse tradurre il client in più lingue. Disaccoppiando i messaggi dal codice dei vari metodi e impiegando un tool di traduzione quale \href{https://docs.oracle.com/javase/8/docs/technotes/guides/intl/index.html}{\code{i18n}},
+basterebbe modificare l'accesso alla struttura dati che contiene i messaggi testuali; diversamente, bisognerebbe intervenire nel codice modificando le stringhe \emph{hard-coded} una ad una.
+\par La maggior parte dei messaggi del client sono salvati all'interno della mappa \code{clientMessages}. Essa viene inizializzata e resa immutabile utilizzando la \emph{factory} \code{Collections.unmodifiableMap}.
+\par Per avere un controllo più fine sui messaggi di errore, una seconda struttura viene impiegata: \\ \code{outcomeMessages}. Essa mappa nomi di path su mappe, che a loro volta mappano interi
+(rappresentanti codici HTTP di esito) su stringhe. L'idea è di fornire messaggi contestualizzati all'operazione e all'esito risultante.
+La struttura in questione, popolata nello stesso modo della precedente, viene acceduta quando si verifica una \code{ClientOperationFailedException}, se essa non è già stata inizializzata con un messaggio: la \code{RestRequest} e \code{RestResponse} contenute nell'eccezione vengono utilizzate per il lookup nella mappa.
 
 \section{Il client GUI}
 
