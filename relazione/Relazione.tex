@@ -174,7 +174,7 @@ Lo strato dei servizi/business logic fornisce all'esterno un'interfaccia mediant
 La classe \code{SocialNetworkService} implementa le operazioni associate alle route dell'\textsc{api} \textsc{rest}/\textsc{rpc}.\\ I metodi handler presenti in questa classe
 sono in corrispondenza biunivoca con i path dell'\textsc{api} (si veda capitolo sul router).
 
-\par In generale, un handler è una funzione che prende come parametro un oggetto di tipo \code{RestRequest} e restituisce una \code{RestResponse}. Al suo interno,
+\par In generale, uno handler è una funzione che prende come parametro un oggetto di tipo \code{RestRequest} e restituisce una \code{RestResponse}. Al suo interno,
 ha luogo la logica di business come la validazione dei parametri della richiesta, il controllo dei permessi, il \emph{dispatching} delle azioni richieste verso il data store, e la
 serializzazione dei dati in uscita per la costruzione della risposta.
 
@@ -192,7 +192,7 @@ in sé non contiene stato interno. Questo permette, in principio, sia di utilizz
 orizzontalmente, dislocando più istanze di essa su diversi nodi worker (nel caso di un sistema distribuito), a patto di mantenere un riferimento allo store centralizzato.
 
 \subsection{La classe RewardIssuer}
-La classe \code{SocialNetworkService} realizza il servizio di ricompense di Winsome. Implementa l'interfaccia \code{Runnable} e una singola istanza di essa viene creata dal server al momento dell'avvio ed eseguita in un thread.
+La classe \code{RewardIssuer} realizza il servizio di ricompense di Winsome. Implementa l'interfaccia \code{Runnable} e una singola istanza di essa viene creata dal server al momento dell'avvio ed eseguita in un thread.
 Nel suo metodo \code{run}, la classe entra in un ciclo infinito, all'interno del quale attende via \code{Thread.sleep} il tempo stabilito nel file di configurazione del server, per poi chiamare un metodo che calcola
 le nuove ricompense per tutti gli utenti.
 \par Il calcolo sui singoli post viene effettuato secondo la formula data dalla specifica. Per reperire i dati necessari al calcolo, il reward issuer si serve di una classe \emph{helper} interna, \code{PostRewardData}: in essa,
