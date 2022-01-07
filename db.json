@@ -7,18 +7,18 @@
         "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
       }
     },
-    "a" : {
-      "username" : "a",
-      "tags" : [ "c" ],
-      "password" : {
-        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
-      }
-    },
     "new" : {
       "username" : "new",
       "tags" : [ "b" ],
       "password" : {
         "encryptedPassword" : "0cc175b9c0f1b6a831c399e269772661"
+      }
+    },
+    "a" : {
+      "username" : "a",
+      "tags" : [ "c" ],
+      "password" : {
+        "encryptedPassword" : "92eb5ffee6ae2fec3ad71c777531578f"
       }
     },
     "test" : {
@@ -94,6 +94,17 @@
   },
   "userPosts" : {
     "vv" : [ {
+      "title" : "abc",
+      "content" : "def",
+      "id" : "a6eecc7b-a5ea-4f8d-a674-ae143fcb80c9",
+      "author" : "vv",
+      "comments" : [ ],
+      "timestamp" : 1641425247919,
+      "originalPost" : null,
+      "reactions" : [ ],
+      "upvotes" : 0,
+      "downvotes" : 0
+    }, {
       "title" : "",
       "content" : "",
       "id" : "7969369c-9b47-4cf7-a8ed-ad545990113f",
@@ -115,13 +126,14 @@
       "reactions" : [ ],
       "upvotes" : 0,
       "downvotes" : 0
-    }, {
-      "title" : "abc",
-      "content" : "def",
-      "id" : "a6eecc7b-a5ea-4f8d-a674-ae143fcb80c9",
-      "author" : "vv",
+    } ],
+    "new" : [ {
+      "title" : "a",
+      "content" : "b",
+      "id" : "44cbaaaf-db3f-4712-b662-3b62029fd44a",
+      "author" : "new",
       "comments" : [ ],
-      "timestamp" : 1641425247919,
+      "timestamp" : 1641426256032,
       "originalPost" : null,
       "reactions" : [ ],
       "upvotes" : 0,
@@ -134,18 +146,6 @@
       "author" : "a",
       "comments" : [ ],
       "timestamp" : 1641250241580,
-      "originalPost" : null,
-      "reactions" : [ ],
-      "upvotes" : 0,
-      "downvotes" : 0
-    } ],
-    "new" : [ {
-      "title" : "a",
-      "content" : "b",
-      "id" : "44cbaaaf-db3f-4712-b662-3b62029fd44a",
-      "author" : "new",
-      "comments" : [ ],
-      "timestamp" : 1641426256032,
       "originalPost" : null,
       "reactions" : [ ],
       "upvotes" : 0,
@@ -174,10 +174,10 @@
     "user" : [ {
       "title" : "abc",
       "content" : "def",
-      "id" : "0c1c43ff-69bb-46b6-9935-989d7e594d88",
+      "id" : "671fb91b-c75f-4fcb-913d-912c57ffd8b7",
       "author" : "user",
       "comments" : [ ],
-      "timestamp" : 1641424390498,
+      "timestamp" : 1641424868602,
       "originalPost" : null,
       "reactions" : [ ],
       "upvotes" : 0,
@@ -185,10 +185,10 @@
     }, {
       "title" : "abc",
       "content" : "def",
-      "id" : "671fb91b-c75f-4fcb-913d-912c57ffd8b7",
+      "id" : "0c1c43ff-69bb-46b6-9935-989d7e594d88",
       "author" : "user",
       "comments" : [ ],
-      "timestamp" : 1641424868602,
+      "timestamp" : 1641424390498,
       "originalPost" : null,
       "reactions" : [ ],
       "upvotes" : 0,
@@ -303,8 +303,8 @@
   },
   "followers" : {
     "vv" : [ ],
-    "a" : [ ],
     "new" : [ ],
+    "a" : [ ],
     "test" : [ ],
     "test1" : [ ],
     "q" : [ ],
@@ -321,6 +321,10 @@
       "transactions" : [ ],
       "balance" : 0.0
     },
+    "new" : {
+      "transactions" : [ ],
+      "balance" : 0.0
+    },
     "a" : {
       "transactions" : [ {
         "delta" : 1.0,
@@ -333,10 +337,6 @@
         "timestamp" : 1641239119620
       } ],
       "balance" : 3.0
-    },
-    "new" : {
-      "transactions" : [ ],
-      "balance" : 0.0
     },
     "test" : {
       "transactions" : [ ],

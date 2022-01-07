@@ -61,6 +61,9 @@ public class Client implements IClient {
         map.put("login_ok", "Successfully logged in.");
         map.put("logout_ok", "Successfully logged out.");
         map.put("registration_ok", "Successfully registered. Here's your new account:");
+        map.put("invalid_registration_data", "There was an error creating your account. You sent invalid data.");
+        map.put("username_already_taken", "The username you chose is already taken.");
+        map.put("unknown_registration_error", "An unknown error occurred during registration.");
         map.put("follow_ok", "Successfully followed user.");
         map.put("unfollow_ok", "Stopped following user.");
         map.put("delete_ok", "Successfully deleted post.");
@@ -418,7 +421,10 @@ public class Client implements IClient {
         }
 
         if (response.isClientErrorResponse() || response.isServerErrorResponse()) {
-            throw new ClientOperationFailedException(null, response);
+            throw new ClientOperationFailedException(
+                    response.getCode() == 400 ? this.clientMessages.get("invalid_register_data")
+                            : (response.getCode() == 403 ? this.clientMessages.get("username_already_taken")
+                                    : this.clientMessages.get("unknown_registration_error")));
         }
 
         // System.out.println(response.getBody());
