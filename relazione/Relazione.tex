@@ -69,7 +69,12 @@
 \setlength{\parskip}{0.5em}
 
 \section{Note sulla compilazione ed esecuzione}
-a
+Per compilare il progetto, \textbf{si esegua lo script} \code{compile.sh}, collocato all'interno della root del progetto.
+Lo script reperisce i file \code{.java}  necessari alla compilazione dalle \emph{classh paths} e utilizza il comando \code{javac} per creare la build,
+includendo anche i file \code{.jar} delle librerie esterne utilizzate (\href{https://twin.sh/articles/8/how-to-compile-large-java-projects-from-terminal}{fonte}).
+
+\par Per eseguire la classe \code{MainClient}, si esegua lo script \code{client.sh}, mentre per la classe \code{MainServer} (che deve essere
+eseguita prima del client), si esegua lo script \code{server.sh}. Entrambe le classi possono altresì essere utilizzate via i rispettivi file \code{jar}, entrambi collocati nell'omonima directory.
 
 \section{Architettura di massima del progetto} %
 \subsection{Suddivisione in layer}
@@ -361,6 +366,7 @@ Il client \textsc{gui} è costituito da una web app realizzata utilizzando \text
 \par La motivazione dietro la realizzazione di un client web è quello di esemplificare il funzionamento del server anche con client eterogenei (in, particolare, non scritti in Java), mostrando
 che l'\textsc{api} esposta è \emph{compliant} con le specifiche \textsc{rest}/\textsc{rpc} e può essere raggiunta anche da browser.
 \par Per avviare la web app, è sufficiente aprire con un browser il file \code{index.html} presente all'interno della cartella \code{guiClient}, nella root del progetto.
+
 \subsection{Realizzazione}
 La struttura della web app è quella di \emph{single-page application} (\textsc{spa}): tutte le funzionalità sono raggruppate all'interno di una singola pagina \textsc{html}, e l'utilizzo di JavaScript permette di mostrare programmaticamente
 solo la parte di pagina inerente all'operazione che si sta svolgendo.
@@ -375,6 +381,11 @@ Il client web implementa tutte e sole le funzionalità interagibili tramite l'\t
 In altre parole, il sistema di registrazione utente, le notifiche per i follower e le notifiche multicast non sono presenti in questa versione del client.
 \par Per ovviare all'impossibilità di registrarsi, si può registrare un utente utilizzando il client \textsc{cli} ed effettuare il login dal client web, oppure utilizzare l'utente
 che viene \textbf{fornito di default} (incluso per permettere di testare agilmente la web app senza dover utilizzare prima il client \textsc{cli}): è sempre possibile, infatti, effettuare il login utilizzando lo username \code{admin} e la password \code{pass}.
-
+\subsection{Alcuni screenshot dell'utilizzo della \textsc{gui}}
+\includegraphics[width=\textwidth]{feed.png}\vspace*{0.5cm}
+\includegraphics[width=\textwidth]{users.png}\vspace*{0.5cm}
+\includegraphics[width=\textwidth]{rewin.png}\vspace*{0.5cm}\newpage
+\includegraphics[width=\textwidth]{wallet.png}\vspace*{0.5cm}
+\includegraphics[width=\textwidth]{newpost.png}
 
 \end{document}

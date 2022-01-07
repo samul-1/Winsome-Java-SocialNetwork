@@ -21,7 +21,6 @@ public class RewardIssuer implements Runnable {
     private long timeInBetween;
     private double authorPercentage;
     private final HashMap<UUID, Integer> postIterations = new HashMap<>();
-    private final HashMap<String, Integer> userCommentsCount = new HashMap<>();
     private final ServerConfig config;
     private DatagramSocket skt;
 
@@ -30,7 +29,6 @@ public class RewardIssuer implements Runnable {
         this.authorPercentage = authorPercentage;
         this.store = store;
         this.config = config;
-        // TODO how to close
         try {
             this.skt = new DatagramSocket(5555);
         } catch (SocketException e) {
@@ -150,7 +148,6 @@ public class RewardIssuer implements Runnable {
         while (true) {
             try {
                 Thread.sleep(this.timeInBetween * 1000);
-                System.out.println("Running!");
                 this.updateUsersWallets();
                 this.lastUpdate = new Date();
                 this.notifyWalletUpdates();

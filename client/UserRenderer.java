@@ -10,7 +10,7 @@ public class UserRenderer implements IRenderer<User> {
 
     @Override
     public String render(User data) {
-        String ret = data.getUsername() + " ";
+        String ret = "Username: " + data.getUsername() + "\t | \t Tags: ";
         for (String tag : data.getTags()) {
             ret += tag + ", ";
         }

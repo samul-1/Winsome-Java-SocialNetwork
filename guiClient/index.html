@@ -1,98 +1,241 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
     <title>Winsome</title>
     <script src="script.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js" integrity="sha512-u9akINsQsAkG9xjc1cnGF4zw5TFDwkxuc9vUp5dltDWYCSmyd0meygbvgXrlc/z7/o4a19Fb5V0OUE58J7dcyw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"
+      integrity="sha512-u9akINsQsAkG9xjc1cnGF4zw5TFDwkxuc9vUp5dltDWYCSmyd0meygbvgXrlc/z7/o4a19Fb5V0OUE58J7dcyw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            background: linear-gradient(to bottom, #333881 60% , white 40%);
-        }
-        .animate-light-pulse {
-            animation: pulse 3s cubic-bezier(.6,1,.6,.9) infinite;
-        }
-        .post {
-            background: rgb(250, 250, 250);
-        }
-        .view {
-            display: none;
-        }
-        .current-view {
-            display: block !important;
-        }
-        .avatar {
-            background-image: url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1024px-User-avatar.svg.png");
-            background-size: contain;
-        }
+      body {
+        background: linear-gradient(
+          to bottom,
+          #333881 60%,
+          white 40%
+        );
+      }
+      .animate-light-pulse {
+        animation: pulse 3s cubic-bezier(0.6, 1, 0.6, 0.9) infinite;
+      }
+      .post {
+        background: rgb(250, 250, 250);
+      }
+      .view {
+        display: none;
+      }
+      .current-view {
+        display: block !important;
+      }
+      .avatar {
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1024px-User-avatar.svg.png');
+        background-size: contain;
+      }
     </style>
-</head>
-<body>
-    <div id="notification" class="opacity-0 w-3/5 mx-auto bg-green-300 text-green-900 rounded-md transition-opacity duration-100 shadow-2xl text-center px-4 py-2.5 fixed top-6 left-1/2 transform -translate-x-1/2 z-50"></div>
-    <div id="post-creation-backdrop" class="hidden w-screen h-screen absolute top-0 left-0 bg-gray-800 opacity-50 z-40"></div>
-    <div id="post-creation-modal" class="flex flex-col pt-10 pb-16 px-8 hidden w-9/12 absolute top-0 left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 bg-white z-50 rounded-lg shadow-lg my-4">
-        <div class="flex">
-            <h1 class="text-2xl font-semibold mb-10">Nuovo post</h1>
-            <button class="ml-auto bg-red-500 w-6 h-6 rounded-full text-white font-bold pb-1" onclick="togglePostCreation()">&times;</button>
-        </div>
-        <input id="new-post-title" type="text" maxlength="20" placeholder="Titolo" class="w-full rounded-md border border-gray-200 py-2 px-4" />
-        <textarea id="new-post-content" placeholder="Contenuto del post" rows="10" maxlength="200" class="mt-6 w-full rounded-md border border-gray-200 py-2 px-4"></textarea>
-        <button class="mt-8 ml-auto rounded-md px-4 py-1.5 bg-green-500 text-white hover:bg-green-600" onclick="createPost()">Nuovo post</button>
+  </head>
+  <body>
+    <div
+      id="notification"
+      class="opacity-0 w-3/5 mx-auto bg-green-300 text-green-900 rounded-md transition-opacity duration-100 shadow-2xl text-center px-4 py-2.5 fixed top-6 left-1/2 transform -translate-x-1/2 z-50"
+    ></div>
+    <div
+      id="post-creation-backdrop"
+      class="hidden w-screen h-screen absolute top-0 left-0 bg-gray-800 opacity-50 z-40"
+    ></div>
+    <div
+      id="post-creation-modal"
+      class="flex flex-col pt-10 pb-16 px-8 hidden w-9/12 absolute top-0 left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 bg-white z-50 rounded-lg shadow-lg my-4"
+    >
+      <div class="flex">
+        <h1 class="text-2xl font-semibold mb-10">Nuovo post</h1>
+        <button
+          class="ml-auto bg-red-500 w-6 h-6 rounded-full text-white font-bold pb-1"
+          onclick="togglePostCreation()"
+        >
+          &times;
+        </button>
+      </div>
+      <input
+        id="new-post-title"
+        type="text"
+        maxlength="20"
+        placeholder="Titolo"
+        class="w-full rounded-md border border-gray-200 py-2 px-4"
+      />
+      <textarea
+        id="new-post-content"
+        placeholder="Contenuto del post"
+        rows="10"
+        maxlength="200"
+        class="mt-6 w-full rounded-md border border-gray-200 py-2 px-4"
+      ></textarea>
+      <button
+        class="mt-8 ml-auto rounded-md px-4 py-1.5 bg-green-500 text-white hover:bg-green-600"
+        onclick="createPost()"
+      >
+        Nuovo post
+      </button>
     </div>
     <div class="z-10 flex flex-col mx-8 my-4">
-        <h1 class="mb-8 text-5xl font-medium text-center text-white">
-            Winsome
-        </h1>
-        <div class="view current-view" id="login-view">
-            <div class="flex flex-col w-3/5 py-4 py-8 mx-auto mt-24 space-y-4 bg-white border rounded-lg shadow-xl">
-                <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Login</h2>
-                <input id="form-username" type="text" class="w-4/5 px-2 py-4 mx-auto border border-gray-200 rounded-md" placeholder="Username"  value="admin" />
-                <input id="form-password" type="password" class="w-4/5 px-2 py-4 mx-auto border border-gray-200 rounded-md" placeholder="Password" value="p" />
-                <button
-                onclick="login()"
-                class="px-4 py-2 mx-auto font-medium text-white bg-indigo-800 rounded-md w-60 hover:bg-indigo-900">Entra</button>
-            </div>
+      <h1 class="mb-8 text-5xl font-medium text-center text-white">
+        Winsome
+      </h1>
+      <div class="view current-view" id="login-view">
+        <div
+          class="flex flex-col w-3/5 py-4 py-8 mx-auto mt-24 space-y-4 bg-white border rounded-lg shadow-xl"
+        >
+          <h2
+            class="mb-6 text-3xl font-medium text-center text-blue-800"
+          >
+            Login
+          </h2>
+          <input
+            id="form-username"
+            type="text"
+            class="w-4/5 px-2 py-4 mx-auto border border-gray-200 rounded-md"
+            placeholder="Username"
+            value="admin"
+          />
+          <input
+            id="form-password"
+            type="password"
+            class="w-4/5 px-2 py-4 mx-auto border border-gray-200 rounded-md"
+            placeholder="Password"
+            value="pass"
+          />
+          <button
+            onclick="login()"
+            class="px-4 py-2 mx-auto font-medium text-white bg-indigo-800 rounded-md w-60 hover:bg-indigo-900"
+          >
+            Entra
+          </button>
         </div>
-        <div id="navbar" class="hidden flex w-full h-12 px-10 py-2 text-white bg-gray-800 rounded-t-lg">
-            <div class="my-auto w-6 h-6 mr-2 rounded-full shadow-md avatar bg-gray-50"></div>
-            <p id="my-username" class="my-auto"></p> 
-            <button class="ml-6 rounded-md px-4 py-0.5 bg-green-500 text-white hover:bg-green-600" onclick="togglePostCreation()">Nuovo post</button>
-            <button id="user-list-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700" onclick="switchViewTo('user-list-view')">Utenti</button>
-            <button id="feed-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700" onclick="switchViewTo('feed-view')">Feed</button>
-            <button id="my-posts-view-btn" class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700 mr-auto" onclick="switchViewTo('my-posts-view')">I tuoi post</button>
+      </div>
+      <div
+        id="navbar"
+        class="hidden flex w-full h-12 px-10 py-2 text-white bg-gray-800 rounded-t-lg"
+      >
+        <div
+          class="my-auto w-6 h-6 mr-2 rounded-full shadow-md avatar bg-gray-50"
+        ></div>
+        <p id="my-username" class="my-auto"></p>
+        <button
+          class="ml-6 rounded-md px-4 py-0.5 bg-green-500 text-white hover:bg-green-600"
+          onclick="togglePostCreation()"
+        >
+          Nuovo post
+        </button>
+        <button
+          id="user-list-view-btn"
+          class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700"
+          onclick="switchViewTo('user-list-view')"
+        >
+          Utenti
+        </button>
+        <button
+          id="feed-view-btn"
+          class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700"
+          onclick="switchViewTo('feed-view')"
+        >
+          Feed
+        </button>
+        <button
+          id="my-posts-view-btn"
+          class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700"
+          onclick="switchViewTo('my-posts-view')"
+        >
+          I tuoi post
+        </button>
+        <button
+          id="wallet-view-btn"
+          class="ml-2 rounded-md px-4 py-0.5 bg-transparent text-white hover:bg-gray-700 mr-auto"
+          onclick="switchViewTo('wallet-view')"
+        >
+          Portafoglio
+        </button>
 
-            <button class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600" onclick="logout()">Logout</button>
+        <button
+          class="rounded-md px-4 py-0.5 bg-red-500 text-white hover:bg-red-600"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+      </div>
+      <div class="view" id="feed-view">
+        <div
+          class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl"
+        >
+          <h2
+            class="mb-2 text-3xl font-medium text-center text-blue-800"
+          >
+            Il tuo feed
+          </h2>
+          <div id="feed-content"></div>
         </div>
-        <div class="view" id="feed-view">
-            <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
-                <h2 class="mb-2 text-3xl font-medium text-center text-blue-800">Il tuo feed</h2>
-                <div id="feed-content">
-                </div>
-            </div>
+      </div>
+      <div class="view" id="wallet-view">
+        <div
+          class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl"
+        >
+          <h2
+            class="mb-2 text-3xl font-medium text-center text-blue-800"
+          >
+            Il tuo portafoglio
+          </h2>
+          <h3 class="text-bold text-xl">
+            Saldo:
+            <span id="wallet-balance" class="text-blue-800"></span>
+            wincoin
+          </h3>
+          <h3 class="text-bold text-xl">Transazioni</h3>
+          <div id="transactions"></div>
         </div>
-        <div class="view" id="my-posts-view">
-            <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
-                <h2 class="mb-2 text-3xl font-medium text-center text-blue-800">Il tuo blog</h2>
-                <div id="my-posts-content">
-                </div>
-            </div>
+      </div>
+      <div class="view" id="my-posts-view">
+        <div
+          class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl"
+        >
+          <h2
+            class="mb-2 text-3xl font-medium text-center text-blue-800"
+          >
+            Il tuo blog
+          </h2>
+          <div id="my-posts-content"></div>
         </div>
-        <div class="view" id="user-list-view">
-            <div class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl">
-                <h2 class="mb-6 text-3xl font-medium text-center text-blue-800">Utenti con tag in comune</h2>
-                <div id="user-list-content">
-                </div>
-            </div>
+      </div>
+      <div class="view" id="user-list-view">
+        <div
+          class="flex flex-col w-full px-6 py-4 py-8 space-y-4 bg-white border rounded-b-lg shadow-xl"
+        >
+          <h2
+            class="mb-6 text-3xl font-medium text-center text-blue-800"
+          >
+            Utenti con tag in comune
+          </h2>
+          <div id="user-list-content"></div>
         </div>
+      </div>
     </div>
     <script>
-        axios.defaults.baseURL = 'http://127.0.0.1:8000'
-        window.onload = restoreToken
-        // setTimeout(()=> {
-        //     document.getElementById("feed-content").innerHTML = getPostHtml("id", "title", "wejoriefwop", "username", [{username: "abc", content: "qweuiorwiqo"},{username: "qwerty", content:"asdjfoiew"}])
-        // }, 100)
+      axios.defaults.baseURL = 'http://127.0.1.1:8000';
+      window.onload = restoreToken;
+      setInterval(() => {
+        getWallet();
+      }, 3000);
+      // setTimeout(()=> {
+      //     document.getElementById("feed-content").innerHTML = getPostHtml("id", "title", "wejoriefwop", "username", [{username: "abc", content: "qweuiorwiqo"},{username: "qwerty", content:"asdjfoiew"}])
+      // }, 100)
     </script>
-</body>
+  </body>
 </html>

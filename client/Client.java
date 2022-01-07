@@ -11,6 +11,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -47,6 +48,8 @@ public class Client implements IClient {
     private FollowerNotificationServiceInterface notificationService = null;
     private final Set<User> localFollowers = new HashSet<>();
     private MulticastSocket multicastSkt = null;
+    private Thread multicastThread = null;
+    private ClientFollowerNotificationService clientNotificationService = null;
 
     private Map<String, String> requestHeaders = new HashMap<>();
 
@@ -87,6 +90,9 @@ public class Client implements IClient {
                         "post can be up to 500 characters long.");
         map.put("already_logged_in", "You're already logged in.");
         map.put("not_logged_in", "You aren't logged in.");
+        map.put("discarding_services", "Leaving multicast group and discarding RMI service...");
+        map.put("unable_connect",
+                "Unable to connect to server. Make sure the server is running before launching the client.");
 
         return Collections.unmodifiableMap(map);
     }
@@ -139,7 +145,7 @@ public class Client implements IClient {
             this.notificationService = (FollowerNotificationServiceInterface) registry
                     .lookup("FOLLOWER-NOTIFICATION-SERVICE");
         } catch (RemoteException | NotBoundException e) {
-            e.printStackTrace();
+            System.out.println(this.clientMessages.get("unable_connect"));
             System.exit(1);
         }
 
@@ -292,14 +298,37 @@ public class Client implements IClient {
                     System.out.println(this.clientMessages.get("invalid_operation_arguments") + e.getMessage());
                 } catch (ClientOperationFailedException e) {
                     System.out.println(this.getOperationFailedMessage(e));
-                    // e.printStackTrace();
                 }
             }
             this.sktChan.close();
-            this.multicastSkt.close();
+            this.discardLoggedInServices();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+    }
+
+    private void discardLoggedInServices() {
+        System.out.println(this.clientMessages.get("discarding_services"));
+        if (this.multicastThread != null) {
+            this.multicastThread.interrupt();
+            try {
+                this.multicastThread.join();
+            } catch (InterruptedException e) {
+                ;
+            }
+            this.multicastThread = null;
+        }
+        if (this.multicastSkt != null) {
+            this.multicastSkt.close();
+        }
+        if (this.clientNotificationService != null) {
+            try {
+                UnicastRemoteObject.unexportObject(this.clientNotificationService, true);
+            } catch (NoSuchObjectException e) {
+                System.exit(1);
+            }
+            this.clientNotificationService = null;
         }
     }
 
@@ -447,8 +476,9 @@ public class Client implements IClient {
         this.requestHeaders.put("Authorization", "Bearer " + authToken.getToken());
 
         // subscribe to follower updates service
+        this.clientNotificationService = new ClientFollowerNotificationService(this.localFollowers);
         IClientFollowerNotificationService callbackStub = (IClientFollowerNotificationService) UnicastRemoteObject
-                .exportObject(new ClientFollowerNotificationService(this.localFollowers), 0);
+                .exportObject(this.clientNotificationService, 0);
         this.notificationService.subscribe(callbackStub, authToken);
 
         // join multicast group
@@ -460,26 +490,30 @@ public class Client implements IClient {
         NetworkInterface netIf = NetworkInterface.getByName("wlan1");
         multicastSkt.joinGroup(multicastGroup, netIf);
 
-        new Thread(() -> {
-            // TODO make interruptable
+        this.multicastThread = new Thread(() -> {
             byte[] buf = new byte[this.BUF_CAPACITY];
             while (true) {
+                if (Thread.interrupted()) {
+                    break;
+                }
                 DatagramPacket pkt = new DatagramPacket(buf, buf.length);
                 try {
                     this.multicastSkt.receive(pkt);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                assert new String(pkt.getData()).equals("WALLETS_UPDATED");
+                // assert new String(pkt.getData()).equals("WALLETS_UPDATED");
                 // System.out.println(new String(pkt.getData()));
             }
-        }).start();
+        });
+        this.multicastThread.start();
     }
 
     @Override
     public void logout(String username) throws IOException, ClientOperationFailedException {
         this.receiveResponse(new RestRequest("/logout", HttpMethod.POST, this.getRequestHeaders(), username));
         this.requestHeaders.remove("Authorization");
+        this.discardLoggedInServices();
     }
 
     @Override

@@ -16,7 +16,6 @@ public class ClientFollowerNotificationService extends RemoteObject implements I
 
     @Override
     public void updateFollowerList(Set<User> followers) throws RemoteException {
-        System.out.println("notification");
         this.localRef.clear();
         this.localRef.addAll(followers);
     }

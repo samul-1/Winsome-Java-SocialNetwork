@@ -74,7 +74,9 @@ public class DataStoreService {
             return ret;
         } catch (IOException | NullPointerException e) {
             // file not found or invalid file content
-            return new DataStoreService(source);
+            DataStoreService ret = new DataStoreService(source);
+            ret.loadFakeData();
+            return ret;
         }
     }
 
@@ -131,20 +133,26 @@ public class DataStoreService {
         String[] tags1 = { "Crypto", "CS", "JavaScript", "Python", "C++" };
         String[] tags2 = { "CS", "OCaml", "Python", "C" };
         String[] tags3 = { "Unix", "CS", "JavaScript", "Java", "C++" };
-        this.registerUser("admin", new HashSet<String>(Arrays.asList(tags1)), new Password("p"));
-        this.registerUser("admin2", new HashSet<String>(Arrays.asList(tags2)), new Password("password"));
-        this.registerUser("admin3", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
+        this.registerUser("admin", new HashSet<String>(Arrays.asList(tags1)), new Password("pass"));
+        this.registerUser("user1", new HashSet<String>(Arrays.asList(tags2)), new Password("password"));
+        this.registerUser("user2", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
+        this.registerUser("user3", new HashSet<String>(Arrays.asList(tags3)), new Password("password"));
 
-        Post post1 = new Post("admin", "Test post 1", "Test post1 content abc abc abc");
+        Post post1 = new Post("admin", "Test post 1", "Lorem ipsum, quia dolor sit, amet, consectetur," +
+                " adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam" +
+                "aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam " +
+                "corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?");
 
         this.addPost("admin", post1);
-        this.addPost("admin", new Post("admin", "Test post 2", "Test post2 content abc abc abc"));
-        this.addPost("admin2", new Post("admin2", "Test post 3", "Test post3 content abc abc abc"));
-        this.addFollower("admin2", "admin");
-        this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
-        this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
-        this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
-        this.setUserToken(this.getUser("admin"), new AuthenticationToken("aaa"));
+        // this.addPost("admin", new Post("admin", "Test post 2", "Test post2 content
+        // abc abc abc"));
+        // this.addPost("admin2", new Post("admin2", "Test post 3", "Test post3 content
+        // abc abc abc"));
+        this.addFollower("admin", "user1");
+        // this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
+        // this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
+        // this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
+        // this.setUserToken(this.getUser("admin"), new AuthenticationToken("aaa"));
     }
 
     public User registerUser(String username, Set<String> tags, Password password) {
@@ -178,8 +186,18 @@ public class DataStoreService {
         this.sessions.put(token, user);
     }
 
-    public boolean deleteUserToken(AuthenticationToken token) {
-        return this.sessions.remove(token) != null;
+    public boolean deleteUserToken(AuthenticationToken token, String username) {
+        OperationStatus status = new OperationStatus();
+        status.status = Status.NOT_FOUND;
+        this.sessions.computeIfPresent(token, (__, user) -> {
+            if (user.getUsername().equals(username)) {
+                status.status = Status.OK;
+                return null;
+            }
+            status.status = Status.ILLEGAL_OPERATION;
+            return user;
+        });
+        return status.status == Status.OK;
     }
 
     public User getUserFromToken(AuthenticationToken token) {

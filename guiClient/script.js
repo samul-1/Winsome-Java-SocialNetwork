@@ -35,6 +35,7 @@ async function onLoginDone (username, token) {
   await getUsers()
   await getMyPosts()
   await getFeed()
+  await getWallet()
   switchViewTo('feed-view')
   document.getElementById('navbar').classList.remove('hidden')
 }
@@ -42,7 +43,8 @@ async function onLoginDone (username, token) {
 async function login () {
   try {
     const response = await axios.post('login', getLoginParameters())
-    const token = response.data
+    const token = response.data.split('\n')[0]
+    console.log(token)
     const username = getLoginParameters().split('\n')[0]
     notify('Login effettuato con successo')
     localStorage.setItem('winsome_token', token)
@@ -86,6 +88,16 @@ async function getUsers () {
   }
 }
 
+async function getWallet () {
+  const response = await axios.get('wallet')
+  console.log('wallet', response)
+  document.getElementById('transactions').innerHTML = getTransactionsHtml(
+    response.data.transactions
+  )
+  document.getElementById('wallet-balance').innerHTML =
+    Math.round(response.data.balance * 100) / 100
+}
+
 async function getMyPosts () {
   const response = await axios.get('posts/my-posts')
   if (response.data.length == 0) {
@@ -101,6 +113,7 @@ async function getMyPosts () {
 async function getFeed () {
   document.getElementById('feed-content').innerHTML = ''
   const response = await axios.get('posts')
+  console.log('response', response)
   if (response.data.length == 0) {
     document.getElementById('feed-content').innerHTML =
       'Non ci sono post nel tuo feed. Inizia a seguire qualcuno!'
@@ -323,7 +336,7 @@ function getPostHtml (post) {
                         </div>
                         <div class="ml-auto flex flex-col space-y-6">
                             <button id="post-${post.id}-upvote-btn" class="${
-    post.reactions.some(r => r.voterUsername == getMyUsername() && r.value == 1)
+    post.reactions.some(r => r.username == getMyUsername() && r.value == 1)
       ? 'pointer-events-none bg-green-200'
       : ''
   } ${
@@ -332,9 +345,7 @@ function getPostHtml (post) {
     post.id
   }', 1)">+1</button>
                             <button id="post-${post.id}-downvote-btn" class="${
-    post.reactions.some(
-      r => r.voterUsername == getMyUsername() && r.value == -1
-    )
+    post.reactions.some(r => r.username == getMyUsername() && r.value == -1)
       ? 'pointer-events-none bg-red-200'
       : ''
   } ${
@@ -383,17 +394,40 @@ function getReactionsHtml (reactions) {
     reactions.some(r => r.value == 1) ? '' : 'hidden'
   }">+1</strong><span class="upvotes-content">${reactions
     .filter(r => r.value == 1)
-    .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
+    .reduce((acc, reaction) => (acc += reaction.username + ', '), '')
     .slice(0, -2)}</span></p></div>`
 
   const downVotesHtml = `<div class="my-2"><p><strong class="downvotes text-red-800 mr-1 ${
     reactions.some(r => r.value == -1) ? '' : 'hidden'
   }">&minus;1</strong><span class="downvotes-content">${reactions
     .filter(r => r.value == -1)
-    .reduce((acc, reaction) => (acc += reaction.voterUsername + ', '), '')
+    .reduce((acc, reaction) => (acc += reaction.username + ', '), '')
     .slice(0, -2)}</span></p></div>`
 
   return upVotesHtml + downVotesHtml
+}
+
+function getTransactionsHtml (transactions) {
+  if (transactions.length == 0) {
+    return '<p>Non ci sono ancora transazioni.</p>'
+  }
+  return transactions.reduce(
+    (acc, transaction) =>
+      (acc += `
+  <div class="py-2.5 px-2 mb-2 flex bg-gray-200 rounded-lg">
+  <div class="mr-auto flex items-center"><div class="h-4 w-4 rounded-full bg-green-600 mr-3"></div>${(transaction.delta >
+  0
+    ? '+'
+    : '') +
+    Math.round(transaction.delta * 100) / 100}</div>
+  <div>${new Date(transaction.timestamp).toLocaleDateString('it-IT', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })}, alle ${new Date(transaction.timestamp).toLocaleTimeString('it-IT')}</div>
+  </div>`),
+    ''
+  )
 }
 
 function getCommentsHtml (comments) {

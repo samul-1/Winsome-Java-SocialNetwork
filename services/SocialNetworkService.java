@@ -69,9 +69,10 @@ public class SocialNetworkService {
     }
 
     public RestResponse logoutHandler(AuthenticatedRestRequest request) throws PermissionDeniedException {
-        // TODO check username in body is the correct one
-        if (this.store.deleteUserToken(new AuthenticationToken(
-                request.getRequest().getHeader("Authorization").substring("Bearer ".length())))) {
+        String claimedUsername = request.getRequest().getBody().trim();
+        AuthenticationToken token = new AuthenticationToken(
+                request.getRequest().getHeader("Authorization").substring("Bearer ".length()));
+        if (this.store.deleteUserToken(token, claimedUsername)) {
             return new RestResponse(204);
         }
         throw new PermissionDeniedException();
