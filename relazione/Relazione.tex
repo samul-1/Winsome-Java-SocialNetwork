@@ -279,6 +279,7 @@ la quale viene poi gestita secondo il flusso descritto nel paragrafo \hyperref[s
 Per la sottomissione delle richieste al pool viene utilizzata la classe \href{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html}{\code{CompletableFuture}}.
 \par Per prima cosa, il metodo \code{handleRequest} (che si occupa materialmente della gestione della richiesta) viene passato come callback al metodo \code{supplyAsync} della classe \code{CompletableFuture}.
 Questo fa sì che il task venga sottomesso al pool \href{https://medium.com/swlh/the-unfairly-unknown-forkjoinpool-c262777def6a}{\code{ForkJoinPool.commonPool}}, che è gestito internamente dalla JVM, inizializzato staticamente, ed è ottimizzato con la tecnica del \href{https://en.wikipedia.org/wiki/Work_stealing}{\emph{work stealing}} per massimizzare l'efficienza e l'utilizzo dei thread.
+Il funzionamento di questo tipo di pool è simile a quello del \emph{cached threadpool}: all'occorrenza, vengono generati nuovi thread, se possibile, vengono utilizzati thread già esistenti, e se un thread rimane inattivo per una soglia prestabilita di tempo, esso viene interrotto.
 Al completamento del task da parte di un worker, viene chiamato il callback passato al metodo \code{thenAccept}: questa funzione lambda prende come argomento la \code{RestResponse} restituita dalla gestione della richiesta e la salva nell'\emph{attachment} associato al client.
 Dopodiché, le \code{interestOps} della key del client vengono impostate in modo da tenere traccia di quando il client diventerà \emph{writable}.
 
@@ -387,10 +388,11 @@ In altre parole, il sistema di registrazione utente, le notifiche per i follower
 \par Per ovviare all'impossibilità di registrarsi, si può registrare un utente utilizzando il client \textsc{cli} ed effettuare il login dal client web, oppure utilizzare l'utente
 che viene \textbf{fornito di default} (incluso per permettere di testare agilmente la web app senza dover utilizzare prima il client \textsc{cli}): è sempre possibile, infatti, effettuare il login utilizzando lo username \code{admin} e la password \code{pass}.
 \subsection{Alcuni screenshot dell'utilizzo della \textsc{gui}}
-\includegraphics[width=\textwidth]{feed.png}\vspace*{0.5cm}
-\includegraphics[width=\textwidth]{users.png}\vspace*{0.5cm}
+\includegraphics[width=\textwidth]{feed.png}\vspace*{1cm}
 \includegraphics[width=\textwidth]{rewin.png}\newpage
-\includegraphics[width=\textwidth]{wallet.png}\vspace*{0.4cm}
+
+\includegraphics[width=\textwidth]{users.png}\vspace*{0.9cm}
+\includegraphics[width=\textwidth]{wallet.png}\vspace*{0.9cm}
 \includegraphics[width=\textwidth]{newpost.png}
 
 \end{document}

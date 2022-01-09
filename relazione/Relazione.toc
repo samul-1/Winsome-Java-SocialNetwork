@@ -30,5 +30,5 @@
 \contentsline {subsection}{\numberline {8.3}Gestione dei messaggi}{11}{subsection.8.3}%
 \contentsline {section}{\numberline {9}Il client \textsc {gui}}{11}{section.9}%
 \contentsline {subsection}{\numberline {9.1}Realizzazione}{11}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}Limitazioni}{11}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.2}Limitazioni}{12}{subsection.9.2}%
 \contentsline {subsection}{\numberline {9.3}Alcuni screenshot dell'utilizzo della \textsc {gui}}{12}{subsection.9.3}%
