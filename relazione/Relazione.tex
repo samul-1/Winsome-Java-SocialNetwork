@@ -74,7 +74,7 @@ Lo script reperisce i file \code{.java}  necessari alla compilazione dalle \emph
 includendo anche i file \code{.jar} delle librerie esterne utilizzate (\href{https://twin.sh/articles/8/how-to-compile-large-java-projects-from-terminal}{fonte}).
 
 \par Per eseguire la classe \code{MainClient}, si esegua lo script \code{client.sh}, mentre per la classe \code{MainServer} (che deve essere
-eseguita prima del client), si esegua lo script \code{server.sh}. Entrambe le classi possono altresì essere utilizzate via i rispettivi file \code{jar}, entrambi collocati nell'omonima directory.
+eseguita prima del client), si esegua lo script \code{server.sh}. Entrambe le classi possono altresì essere utilizzate via i rispettivi file \code{jar}, entrambi collocati nella root directory.
 
 \section{Architettura di massima del progetto} %
 \subsection{Suddivisione in layer}
@@ -85,7 +85,7 @@ Avere un basso grado di accoppiamento tra le classi implica la possibilità di s
 le varie componenti, modificandole (o anche riscrivendole da zero) all'occorrenza, oltre che avere un vantaggio nelle fasi di testing e debugging, ove è
 più facile isolare eventuali fault.
 \par
-In seguito all'analisi dei requisiti, in fase di progettazione sono stati definiti i seguenti layer:
+In seguito all'analisi dei requisiti, in fase di progettazione sono stati individuati i seguenti layer:
 \begin{itemize}
     \item \textbf{Entità}: sono le classi che rappresentano il dominio dell'applicazione e incarnano l'universo delineato dal progetto
     \item \textbf{Data store}: espone le entità al mondo esterno attraverso un'interfaccia controllata e definisce le operazioni primitive sulle stesse
@@ -104,16 +104,16 @@ layer o verso classi dei layer più interni.
 \includegraphics[width=\textwidth]{dependencies.png}
 
 \par Questo documento è strutturato in maniera tale da illustrare, come prima cosa, le caratteristiche delle entità
-di dominio e quali sono le operazioni primitive a esse associate, per poi spostarsi progressivamente sui layer
+di dominio e le operazioni primitive a esse associate, per poi spostarsi progressivamente sui layer
 più esterni dell'architettura, dando un'idea di come le classi appartenenti allo strato della business logic sono
 implementate, chiarendo infine come viene realizzata, agli atti, la comunicazione tra il server e il client.\\
 \subsection{Protocollo applicazione}
 Il protocollo utilizzato a livello applicativo è \textsc{http}. Il server espone un'\textsc{api} di tipo \textsc{rest} misto a \textsc{rpc}. Le richieste e le risposte \textsc{http} vengono
-rispettivamente incarnate dalle classi \code{RestRequest} e \code{RestResponse}, che dispongono di metodi per convertirle da (risp. in) stringhe, consentendone
+incarnate rispettivamente dalle classi \code{RestRequest} e \code{RestResponse}, che dispongono di metodi per convertirle da (risp. in) stringhe, consentendone
 la (de)serializzazione e lettura (risp. scrittura) mediante socket.
 \par L'autenticazione utilizza il protocollo \textbf{bearer token}, schema definito nell'\href{https://datatracker.ietf.org/doc/html/rfc6750}{\textsc{rfc} 6750}.
-Il protcollo prevede che le richieste vengano autenticate inserendo un header (\code{Authorization}) contenente un token di 128 bit.
-La classe \code{AuthenticationMiddleware} (spiegata più in dettaglio nel seguito), responsabile della verifica delle credenziali nelle richieste \textsc{http},
+Il protcollo prevede che le richieste vengano autenticate inserendo uno header (\code{Authorization}) contenente un token di 128 bit.
+La classe \code{AuthenticationMiddleware} (illustrata più in dettaglio nel seguito), responsabile della verifica delle credenziali nelle richieste \textsc{http},
 controlla la presenza e la validità di questo header.
 \par Il token viene ottenuto per la prima volta dal client in fase di login: la password fornita dall'utente all'atto della registrazione, che viene mantenuta
 nel database criptata utilizzando l'algoritmo \href{https://en.wikipedia.org/wiki/MD5}{\textsc{md5}}, viene confrontata con quella inviata durante il login (dopo aver
@@ -127,13 +127,18 @@ rappresentati da stringhe \emph{lowercase}. L'univocità dello username non è g
 \subsection{Post, commenti, reazioni}
 La classe \code{Post} rappresenta un post all'interno di Winsome. Contiene informazioni circa il titolo, il contenuto e il timestamp di creazione. L'identificativo del post è uno \textsc{uuid}.
 \par Il post contiene una stringa che si riferisce allo username del suo autore. La scelta di utilizzare una stringa anziché un riferimento a un oggetto \code{User} deriva dalla volontà
-di gestire l'integrità referenziale a livello di store anziché all'interno delle entità stesse: si è scelto, in altre parole, di non utilizzare l'\textbf{active record pattern}, in favore
+di gestire l'integrità referenziale a livello dello store anziché all'interno delle entità stesse: si è scelto, in altre parole, di non utilizzare l'\textbf{active record pattern}, in favore
 della presenza di un layer dedicato all'accesso ai dati.
 \par I commenti e le reazioni (upvote o downvote) ai post vengono aggregati all'interno di due insiemi presenti nella classe. La scelta di utilizzare un \code{TreeSet} per entrambi deriva
 dalla necessità di mantenere l'ordine temporale di inserimento.
 \par Infine, i post contengono opzionalmente un riferimento a un altro post: ciò viene utilizzato per implementare la feature di \textbf{rewin}. Questo permette, in principio (anche se non
-presente in quanto fuori dai limiti delle specifiche), di effettuare il \emph{rewinning} di un post aggiungendo anche un testo come contenuto del post, come un "commento in evidenza" (feature presente,
+presente in quanto fuori dalla specifica), di effettuare il \emph{rewinning} di un post aggiungendo anche un testo come contenuto del post, come un "commento in evidenza" (feature presente,
 per esempio, nei retweet, a cui il rewin si ispira).
+\subsection{Il portafoglio}
+La classe \code{Wallet} rappresenta il portafoglio di un utente registrato a Winsome. Al momento della registrazione di un utente, un'istanza di questa classe viene creata
+e associata al nuovo \code{User} all'interno del data store (si veda il relativo capitolo).
+\par Al suo interno, è definita la \emph{inner class} \code{WalletTransaction}, che rappresenta un cambiamento nel bilancio del portafoglio. Il metodo \code{getBalance} permette di ottenere il bilancio
+aggregando l'ammontare di tutte le transazioni associate al portafoglio.
 \subsection{Serializer}
 La classe \code{Serializer<T>} è responsabile delle operazioni di serializzazione e de-serializzazione delle entità.
 L'utilizzo del polimorfismo parametrico permette di (de)serializzare tutte le classi che lo necessitano con un singolo metodo per operazione, senza ri-definirne
@@ -167,9 +172,9 @@ in operazioni dove la temporanea perdita di consistenza non appare avere effetti
     \item \code{notificationCallbacks}: mappa username su \code{IClientFollowerNotificationService}; utilizzata per reperire l'istanza del client per il servizio di notifica dei follower via \textsc{rmi} callback
 \end{itemize}
 \subsection{Persistenza dello stato}
-Al momento dell'istanziazione, la classe \code{DataStoreService} inizializza un thread demone che, periodicamente, effettua il salvataggio dello stato dello store.
+Al momento dell'istanziazione, la classe \code{DataStoreService} inizializza un thread che, periodicamente, effettua il salvataggio dello stato dello store.
 Il salvataggio avviene mediante una serializzazione dell'istanza dello store e successiva scrittura su un file indicato al momento della creazione dell'istanza.
-La classe espone altresì il metodo statico \code{restoreOrCreate} che, passato il nome di un file \textsc{json}, tenta di ripristinare lo stato a partire da quel file, deserializzandolo e, in caso
+La classe espone altresì il metodo statico \code{restoreOrCreate} che, passato il nome di un file \textsc{json}, tenta di ripristinare lo stato a partire da quel file, de-serializzandolo e, in caso
 di impossibilità di completare l'operazione (file inesistente o malformato), restituisce una nuova istanza dello store.
 
 
@@ -184,7 +189,7 @@ ha luogo la logica di business come la validazione dei parametri della richiesta
 serializzazione dei dati in uscita per la costruzione della risposta.
 
 \par Gli handler restituiscono direttamente una \code{RestResponse} solo nel caso in cui l'esecuzione abbia successo. Se si verifica un errore, i metodi in questione non restituiscono
-direttamente una risposta (per esempio \code{4xx}) ma sollevano un'eccezione. La gestione degli errori in fase di \emph{handling} di una richiesta viene così demandata
+una risposta (per esempio \code{4xx}), bensì sollevano un'eccezione. La gestione degli errori in fase di \emph{handling} di una richiesta viene così demandata
 al server (come illustrato nel relativo capitolo), il quale invierà una risposta \textsc{\textsc{http}} contente l'errore appropriato.
 \par Questa strategia, ispirata al modo in cui il framework \href{https://www.djangoproject.com/}{Django} gestisce gli errori nelle sue \emph{views}, serve ad astrarre ulteriormente i casi in cui la richiesta non ha successo:
 anziché avere il codice per la gestione degli errori sparpagliato (e duplicato) tra i vari handler, essi si limitano a lanciare un'eccezione che viene catturata e gestita in una singola locazione.
@@ -208,8 +213,8 @@ dall'ultimo calcolo delle ricompense, utenti che hanno commentato dall'ultima it
 \subsection{La classe WalletConversionService}
 La classe \code{WalletConversionService} è responsabile per la simulazione del cambio nel tasso di conversione tra Wincoin e Bitcoin.
 Per ottenere un tasso casuale, viene effettuata una richiesta \textsc{http} all'\textsc{api} di \href{https://random.org}{random.org}. La richiesta è autenticata mediante l'utilizzo di una \code{apiKey}, come spiegato nella
-\href{https://api.random.org/json-rpc/4/basic}{documentazione dell'\textsc{api} di random.org}. La richiesta viene scritta utilizzando un \code{writer} di tipo \code{DataOutputStream}. La successiva risposta viene letta
-con un \code{BufferedReader} e passata a uno \code{StringBuilder}. La stringa risultante viene parsata per verificare che l'interazione abbia avuto successo ed estrarre il valore casuale restituito dal servizio remoto.
+\href{https://api.random.org/json-rpc/4/basic}{documentazione dell'\textsc{api} di random.org}. \\La connessione al servizio viene aperta utilizzando la classe \code{HttpURLConnection}. La richiesta viene scritta utilizzando un \code{writer} di tipo \code{DataOutputStream} e la successiva risposta viene letta
+con un \code{BufferedReader} e passata a uno \code{StringBuilder}. La stringa risultante viene \emph{parsata} per verificare che l'interazione abbia avuto successo ed estrarre il valore casuale restituito dal servizio remoto.
 
 \par Dato che il servizio remoto potrebbe, in generale, non essere disponibile, la classe è dotata di un \textbf{circuit breaker} allo scopo di migliorare la disponibilità del servizio.
 L'idea è la seguente: quando una richiesta ha successo, il valore restituito da random.org viene salvato in una variabile interna che svolge la funzione di cache.\\
@@ -219,7 +224,7 @@ restituito e, per un periodo di tempo pari a \code{CIRCUIT\_BREAKER\_COOL\_DOWN}
 \par L'impiego di questo pattern, comune in architetture a microservizi e sistemi distribuiti in genere, serve a minimizzare il numero di richieste inviate durante un periodo in cui il servizio remoto è, con alta probabilità (dato che le richieste recenti hanno dato esito negativo), ancora non raggiungibile.
 
 \par La classe viene utilizzata come \emph{singleton} ma, a differenza di \code{SocialNetworkService}, contiene stato interno (il valore \emph{cached} e i dati del circuit breaker).
-Per permettere la condivisione fra thread della singola istanza di questa classe, le parti di codice dove lo stato interno viene acceduto sono protette da monitor (mediante il costrutto \code{synchronized}).
+Per permettere la condivisione fra thread della singola istanza di questa classe, le parti di codice dove lo stato interno viene acceduto sono protette da \textbf{monitor} (mediante il costrutto \code{synchronized}).
 
 \subsection{I servizi di registrazione utente e notifica}
 Il servizio di registrazione utente è esposto dalla classe \code{UserRegistrationService}, che a sua volta implementa \code{UserRegistrationInterface}.
@@ -244,8 +249,8 @@ La classe \code{ApiRoute} rappresenta una route dell'\textsc{api} e i metodi han
 che associa metodi \textsc{http} a stringhe che rappresentano nomi di metodi (spiegato più in dettaglio nel seguito).
 
 \subsection{La classe ApiRouter}
-All'avvio del server, viene istanziato un \code{ApiRouter}, il quale carica in memoria degli oggetti \code{ApiRoute} deserializzandoli da un file \textsc{json}.
-\par La respnsabilità del router è quella di risolvere i path richiesti restituendo un riferimento all'appropriato metodo handler per la richiesta.
+All'avvio del server, viene istanziato un \code{ApiRouter}, il quale carica in memoria degli oggetti di tipo \code{ApiRoute}, de-serializzandoli da un file \textsc{json}.
+\par La responsabilità del router è quella di risolvere i path richiesti restituendo un riferimento all'appropriato metodo handler per la richiesta.
 Contiene un metodo principale, \code{getRequestHandler}, che prende in ingresso una \code{RestRequest}.
 Il metodo si occupa di estrarre il path e il metodo \textsc{http} della richiesta e di cercare un match all'interno del suo insieme di route.
 \par Se si ha una corrispondenza (ovvero è associato il nome di un metodo handler alla coppia\\ $<path, metodo>$),
@@ -253,7 +258,7 @@ viene restituito il riferimento a un metodo della classe \code{SocialNetworkServ
 soddisfare la richiesta (si veda capitolo successivo per il flusso completo).
 \par Il meccanismo appena descritto utilizza la feature della \emph{reflection} e la classe Java \href{https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html}{\code{Method}},
 collocata nel pacchetto \code{java.lang.reflect}.
-\par Si è scelto di utilizzare questo approccio (anziché, per esempio, un controllo \code{switch} sul path della richiesta) per ottenere una dichiarazione \textbf{descrittiva} (e non imperativa) dell'\textsc{api}:
+\par Si è scelto di utilizzare questo approccio (anziché, per esempio, un controllo \code{switch} sul path della richiesta) per definire l'\textsc{api} in maniera \textbf{dichiarativa} (e non imperativa):
 avere la definizione delle route in un file \textsc{json} e non nel codice stesso permette di ottenere un basso grado di accoppiamento tra la logica e la descrizione dell'interfaccia; si pensi per
 esempio all'aggiunta di un nuovo \emph{entry point} nell'\textsc{api}: se la descrizione dell'interfaccia fosse contenuta nel codice, la modifica allo schema richiederebbe anche una modifica al codice del router,
 mentre con questo tipo di definizione è sufficiente aggiornare il file \textsc{json} contenente lo schema dell'\textsc{api} (dopo aver, eventualmente, implementato il nuovo handler).
@@ -267,8 +272,8 @@ Il modello utilizzato per l'implementazione del server è il multiplexing dei ca
 All'avvio il server, dopo aver aperto un \code{ServerSocketChannel} e aver esportato gli stub necessari per l'esposizione dei servizi basati su \textsc{rmi},
 entra in un ciclo infinito.
 \par All'interno del ciclo, il server utilizza un \code{Selector} per accettare nuove connessioni e richieste.
-Quando un client diventa \emph{readable}, viene chiamato sulla sua key corrispondente il metodo \code{readFromKey}. Al suo interno, viene letta la richiesta inviata dal client,
-la quale viene poi gestita secondo il flusso descritto nel paragrafo \hyperref[sec:http_flow]{\emph{Gestione di una richiesta \textsc{http}}}.
+\\ Quando un client diventa \emph{readable}, viene chiamato sulla key corrispondente il metodo \code{readFromKey}. Al suo interno, viene letta la richiesta inviata dal client,
+la quale viene poi gestita secondo il flusso descritto nel paragrafo \hyperref[sec:http_flow]{\emph{Gestione di una richiesta HTTP}}.
 
 \par Il task della gestione della richiesta viene sottomesso a un \code{ExecutorService}, permettendo al thread principale di continuare ad accettare richieste mentre gli worker gestiscono quelle già prese in carico.
 Per la sottomissione delle richieste al pool viene utilizzata la classe \href{https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html}{\code{CompletableFuture}}.
@@ -296,7 +301,7 @@ Dopo aver letto dal socket e ricostruito una \code{RestRequest} inviata da un cl
     \item Lo handler restituito al punto 1 viene invocato passandogli la richiesta autenticata del punto 2.
           \begin{enumerate}
               \item Se si verifica un errore all'interno dello handler, l'eccezione viene catturata come\\ \code{InvocationTargetException}. La tecnica di \emph{exception chaining} permette di estrarre l'eccezione originale
-                    sollevata dallo handler e di inviare in risposta l'errore appropriato. Qualsiasi altro tipo di eccezione sollevata non direttamente dallo handler causa l'emissione di un errore 500. Se l'esecuzione ha successo, lo handler restituisce una \code{RestResponse}.
+                    sollevata dallo handler e inviare in risposta l'errore appropriato. Qualsiasi altro tipo di eccezione sollevata non direttamente dallo handler causa l'emissione di un errore 500. Se l'esecuzione ha successo, lo handler restituisce una \code{RestResponse}.
           \end{enumerate}
     \item La risposta viene salvata nell'\emph{attachment} associato al client e verrà scritta sul socket corrispondente quando il client diventa \emph{writable}.
 \end{enumerate}
@@ -312,7 +317,7 @@ specificato.
 \code{java MainServer myconfig.json}.
 
 \par Al fine di permettere di avviare il server con il minimo livello di configurazione manuale possibile, la classe \code{ServerConfig} è dotata di valori di default per ciascun \emph{setting}, che verranno utilizzati
-se omessi nel file di configurazione utilizzato.
+se omessi nel file di configurazione scelto.
 
 \par Il client, per semplicità, ha accesso a un riferimento a \code{ServerConfig} in maniera analoga al server: questo permette di reperire facilmente informazioni come l'indirizzo \textsc{ip} e la porta per avviare la connessione \textsc{tcp}.
 Nell'ipotesi di un sistema realmente distribuito, dove client e server non risiedono sulla stessa macchina, si utilizzerebbe un sistema più sofisticato per il reperimento di tali dati, come per esempio l'accesso a un terzo servizio (se
@@ -338,7 +343,7 @@ Gli handler del client implementano il seguente schema:
     \item All'interno dello handler, viene processato il contenuto della risposta. Il \emph{processing} effettuato dipende dalla semantica dell'operazione; nella maggior parte dei casi, viene istanziato un \code{Serializer} che ricostruisce un'entità (o un array di entità) e lo restituisce in uscita.
 \end{enumerate}
 La classe \code{ClientOperationFailedException} viene utilizzata per rappresentare il fallimento di un'interazione col server, dovuto nella maggior parte dei casi alla ricezione di una risposta \textsc{http} contenente un codice di errore.
-Quando un'eccezione di questo tipo viene lanciata, possono esserle passati come parametro la richiesta e la risposta che costituiscono l'interazione fallita. Questi dati vengono utilizzati dal client per stampare il messaggio di errore appropriato (si veda la sezione \hyperref[sec:err_handling]{Gestione dei messaggi}).
+Quando un'eccezione di questo tipo viene lanciata, possono esserle passati come parametro la richiesta e la risposta che costituiscono l'interazione fallita. Questi dati vengono utilizzati dal client per stampare il messaggio di errore appropriato (si veda la sezione \hyperref[sec:err_handling]{\emph{Gestione dei messaggi}}).
 
 \subsection{Rendering dei dati}
 La maggior parte delle operazioni svolte dal client si conclude con la stampa su \code{stdout} di dati ricevuti dal server. Per astrarre la logica di ricezione dei dati da quella
@@ -363,8 +368,8 @@ La struttura in questione, popolata nello stesso modo della precedente, viene ac
 \section{Il client \textsc{gui}}
 Il client \textsc{gui} è costituito da una web app realizzata utilizzando \textsc{html5} e \emph{vanilla} JavaScript.
 È stato utilizzato il framework \href{https://tailwindcss.com/}{Tailwind \textsc{css}} per avere un set di classi di stile predefinite sopra le quali costruire il layout.
-\par La motivazione dietro la realizzazione di un client web è quello di esemplificare il funzionamento del server anche con client eterogenei (in, particolare, non scritti in Java), mostrando
-che l'\textsc{api} esposta è \emph{compliant} con le specifiche \textsc{rest}/\textsc{rpc} e può essere raggiunta anche da browser.
+\par La motivazione dietro la realizzazione di un client web è di esemplificare il funzionamento del server anche con client eterogenei (in particolare, non scritti in Java), mostrando
+che l'\textsc{api} esposta è \emph{compliant} con le specifiche \textsc{rest}/\textsc{rpc} e può essere consumata anche da browser.
 \par Per avviare la web app, è sufficiente aprire con un browser il file \code{index.html} presente all'interno della cartella \code{guiClient}, nella root del progetto.
 
 \subsection{Realizzazione}
@@ -384,8 +389,8 @@ che viene \textbf{fornito di default} (incluso per permettere di testare agilmen
 \subsection{Alcuni screenshot dell'utilizzo della \textsc{gui}}
 \includegraphics[width=\textwidth]{feed.png}\vspace*{0.5cm}
 \includegraphics[width=\textwidth]{users.png}\vspace*{0.5cm}
-\includegraphics[width=\textwidth]{rewin.png}\vspace*{0.5cm}\newpage
-\includegraphics[width=\textwidth]{wallet.png}\vspace*{0.5cm}
+\includegraphics[width=\textwidth]{rewin.png}\newpage
+\includegraphics[width=\textwidth]{wallet.png}\vspace*{0.4cm}
 \includegraphics[width=\textwidth]{newpost.png}
 
 \end{document}

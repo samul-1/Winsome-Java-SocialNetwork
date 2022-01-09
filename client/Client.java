@@ -256,7 +256,6 @@ public class Client implements IClient {
                             break;
                         case "rewin":
                             postId = this.getUUIDArgument(commandArguments, 0);
-                            // ? maybe no need to return a post
                             this.rewinPost(postId);
                             renderedResponseData = this.clientMessages.get("rewin_ok");
                             break;

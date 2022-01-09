@@ -7,7 +7,8 @@
 \contentsline {section}{\numberline {3}Le entità di dominio}{3}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Gli utenti}{3}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Post, commenti, reazioni}{3}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Serializer}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.3}Il portafoglio}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Serializer}{4}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Il data store}{4}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Strutture dati e concorrenza}{4}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Persistenza dello stato}{5}{subsection.4.2}%
@@ -15,7 +16,7 @@
 \contentsline {subsection}{\numberline {5.1}La classe SocialNetworkService}{5}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}La classe RewardIssuer}{6}{subsection.5.2}%
 \contentsline {subsection}{\numberline {5.3}La classe WalletConversionService}{6}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}I servizi di registrazione utente e notifica}{6}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.4}I servizi di registrazione utente e notifica}{7}{subsection.5.4}%
 \contentsline {section}{\numberline {6}L'\textsc {api} e il router}{7}{section.6}%
 \contentsline {subsection}{\numberline {6.1}La classe ApiRoute}{7}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}La classe ApiRouter}{7}{subsection.6.2}%
@@ -23,10 +24,10 @@
 \contentsline {subsection}{\numberline {7.1}Funzionamento e gestione delle connessioni}{8}{subsection.7.1}%
 \contentsline {subsection}{\numberline {7.2}Gestione di una richiesta \textsc {http}}{8}{subsection.7.2}%
 \contentsline {subsection}{\numberline {7.3}La classe ServerConfig}{9}{subsection.7.3}%
-\contentsline {section}{\numberline {8}Il client \textsc {cli}}{9}{section.8}%
+\contentsline {section}{\numberline {8}Il client \textsc {cli}}{10}{section.8}%
 \contentsline {subsection}{\numberline {8.1}Gestione di una richiesta al server}{10}{subsection.8.1}%
 \contentsline {subsection}{\numberline {8.2}Rendering dei dati}{10}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Gestione dei messaggi}{10}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.3}Gestione dei messaggi}{11}{subsection.8.3}%
 \contentsline {section}{\numberline {9}Il client \textsc {gui}}{11}{section.9}%
 \contentsline {subsection}{\numberline {9.1}Realizzazione}{11}{subsection.9.1}%
 \contentsline {subsection}{\numberline {9.2}Limitazioni}{11}{subsection.9.2}%
