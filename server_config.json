@@ -1,0 +1,13 @@
+{
+    "serverAddr": "127.0.1.1",
+    "tcpPort": 8000,
+    "udpPort": 33333,
+    "multicastAddr": "239.255.32.32",
+    "multicastPort": 44444,
+    "registryHost": "127.0.1.1",
+    "registryPort": 7777,
+    "sktTimeout": 100000,
+    "storageLocation": "db.json",
+    "timeInBetweenRewards": 10,
+    "authorRewardPercentage": 70.0
+}

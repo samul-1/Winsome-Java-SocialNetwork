@@ -85,10 +85,7 @@ public class DataStoreService {
     }
 
     public DataStoreService(String storageFilename) {
-        // dummy data for testing the web interface
-        // loadFakeData();
         this.storageFileName = storageFilename;
-        System.out.println("starting thread");
         this.startStatePersistenceThread();
     }
 
@@ -144,15 +141,7 @@ public class DataStoreService {
                 "corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?");
 
         this.addPost("admin", post1);
-        // this.addPost("admin", new Post("admin", "Test post 2", "Test post2 content
-        // abc abc abc"));
-        // this.addPost("admin2", new Post("admin2", "Test post 3", "Test post3 content
-        // abc abc abc"));
         this.addFollower("admin", "user1");
-        // this.addPostComment(post1.getId(), new Comment("admin2", "comment1"));
-        // this.addPostComment(post1.getId(), new Comment("admin", "comment2"));
-        // this.addPostComment(post1.getId(), new Comment("admin3", "comment3"));
-        // this.setUserToken(this.getUser("admin"), new AuthenticationToken("aaa"));
     }
 
     public User registerUser(String username, Set<String> tags, Password password) {

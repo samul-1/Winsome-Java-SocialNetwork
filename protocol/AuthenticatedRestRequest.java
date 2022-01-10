@@ -1,6 +1,5 @@
 package protocol;
 
-import auth.AuthenticationToken;
 import entities.User;
 
 public class AuthenticatedRestRequest {

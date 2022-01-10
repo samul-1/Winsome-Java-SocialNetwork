@@ -134,7 +134,6 @@ public class Server {
                 try {
                     if (currKey.isAcceptable()) {
                         this.acceptKey(currKey);
-                        System.out.println("A client connected");
                     } else if (currKey.isReadable()) {
                         this.readFromKey(currKey);
                     } else if (currKey.isWritable()) {
@@ -149,7 +148,6 @@ public class Server {
                         e1.printStackTrace();
                         System.exit(1);
                     }
-                    System.out.println("A client left");
                 }
             }
         }
@@ -161,6 +159,8 @@ public class Server {
 
         clientSkt.configureBlocking(false);
         SelectionKey clientKey = clientSkt.register(this.selector, SelectionKey.OP_READ);
+
+        // will be used to keep track of not-yet-written responses for this client
         clientKey.attach(new ClientConnectionState());
     }
 

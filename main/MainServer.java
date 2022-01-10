@@ -6,7 +6,7 @@ import java.io.IOException;
 import services.Server;
 
 public class MainServer {
-    private static final File DEFAULT_CONFIG_FILE = new File("config.json");
+    private static final File DEFAULT_CONFIG_FILE = new File("server_config.json");
     private static final File DEFAULT_API_SCHEMA_FILE = new File("apiRoutes.json");
 
     public static void main(String[] args) {

@@ -29,7 +29,7 @@ public class PostRenderer implements IRenderer<Post> {
         if (data.length == 0) {
             return "No posts to show.";
         }
-        String ret = "ID"; // \t\t\t | Author \t\t\t | Title\n --------------------------- \n";
+        String ret = "ID";
         for (int i = 0; i < data[0].getId().toString().length() - 1; i++) {
             ret += " ";
         }

@@ -1,0 +1,7 @@
+{
+    "serverAddr": "127.0.1.1",
+    "tcpPort": 8000,
+    "registryHost": "127.0.1.1",
+    "registryPort": 7777,
+    "sktTimeout": 100000
+}

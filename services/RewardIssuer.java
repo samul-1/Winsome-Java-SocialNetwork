@@ -47,6 +47,7 @@ public class RewardIssuer implements Runnable {
 
         double commentScore = 0.0;
         for (Comment comment : contributors.newComments) {
+            // count comments from this user to this post
             long commenterCount = post
                     .getComments()
                     .stream()
@@ -151,9 +152,7 @@ public class RewardIssuer implements Runnable {
                 this.updateUsersWallets();
                 this.lastUpdate = new Date();
                 this.notifyWalletUpdates();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
         }

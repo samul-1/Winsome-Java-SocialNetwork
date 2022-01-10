@@ -308,7 +308,6 @@ public class Client implements IClient {
     }
 
     private void discardLoggedInServices() {
-        System.out.println(this.clientMessages.get("discarding_services"));
         if (this.multicastThread != null) {
             this.multicastThread.interrupt();
             try {
@@ -332,10 +331,12 @@ public class Client implements IClient {
     }
 
     private String getOperationFailedMessage(ClientOperationFailedException exc) {
+        // if exception was instantiated with a string, return that message
         if (exc.getMessage() != null && exc.getMessage().length() > 0) {
             return exc.getMessage();
         }
 
+        // sanity check
         assert exc.getRequest() != null && exc.getResponse() != null;
 
         if (exc.getResponse().getCode() == 401) {
@@ -401,6 +402,7 @@ public class Client implements IClient {
     }
 
     private RestResponse receiveResponse(RestRequest request) throws IOException, ClientOperationFailedException {
+        // write request to socket
         this.sktChan.write(ByteBuffer.wrap(request.toString().getBytes()));
 
         ByteBuffer buf = ByteBuffer.allocate(this.BUF_CAPACITY);
@@ -408,7 +410,7 @@ public class Client implements IClient {
         buf.flip();
 
         String responseString = StandardCharsets.UTF_8.decode(buf).toString();
-        // System.out.println("RESPONSE:\n" + responseString);
+        // construct response from string read from socket
         RestResponse response = RestResponse.fromString(responseString);
 
         if (response.isClientErrorResponse() || response.isServerErrorResponse()) {
@@ -455,7 +457,6 @@ public class Client implements IClient {
                                     : this.clientMessages.get("unknown_registration_error")));
         }
 
-        // System.out.println(response.getBody());
         return new Serializer<User>().parse(response.getBody(), User.class);
 
     }
@@ -502,7 +503,6 @@ public class Client implements IClient {
                     e.printStackTrace();
                 }
                 // assert new String(pkt.getData()).equals("WALLETS_UPDATED");
-                // System.out.println(new String(pkt.getData()));
             }
         });
         this.multicastThread.start();

@@ -63,13 +63,13 @@ public class RestResponse implements Serializable {
         try (BufferedReader reader = new BufferedReader(new StringReader(source))) {
             String responseLine = reader.readLine();
             if (!responseLine.substring(0, 9).equals("HTTP/1.1 ")) {
-                System.out.println(responseLine.substring(0, 8) + "!");
                 throw new IllegalArgumentException("Invalid response line format " + responseLine);
             }
 
             // trim leading "HTTP/1.1 " and tailing "\r\n"
             String verboseResponseCode = responseLine.substring("HTTP/1.1 ".length(), responseLine.length())
                     .toUpperCase();
+            // reverse lookup on `verboseCodes` map
             Integer code = RestResponse.verboseCodes
                     .entrySet()
                     .stream()
@@ -85,6 +85,7 @@ public class RestResponse implements Serializable {
             Map<String, String> headers = new HashMap<String, String>();
             String body = "";
 
+            // read headers
             String header = reader.readLine();
             while (header.length() > 0) { // read up to "\r\n"
                 String[] tokens = header.split(": ");
@@ -92,6 +93,7 @@ public class RestResponse implements Serializable {
                 header = reader.readLine();
             }
 
+            // read body
             String bodyLine = reader.readLine();
             while (bodyLine != null) { // read until the end of the response string
                 body += "\n" + bodyLine;

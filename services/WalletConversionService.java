@@ -43,7 +43,6 @@ public class WalletConversionService {
             } catch (IOException e) {
                 triesCount += 1;
                 e.printStackTrace();
-                System.out.println("TRYING AGAIN...");
             }
 
             // try again after a bit
