@@ -192,7 +192,6 @@ public class Server {
         RestRequest request;
 
         try {
-            System.out.println(reqString);
             request = RestRequest.parseRequestString(reqString);
 
             CompletableFuture

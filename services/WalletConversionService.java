@@ -98,8 +98,6 @@ public class WalletConversionService {
                 sb.append((char) c);
         }
 
-        System.out.println("RECEIVED: " + sb.toString());
-
         if (sb.toString().indexOf("error") != -1 || sb.toString().indexOf("data") == -1) {
             // unsuccessful interaction with remote service
             throw new IOException();
@@ -114,7 +112,6 @@ public class WalletConversionService {
                                 this.DECIMAL_PLACES + 3 // leading digit + '.'
                         );
 
-        System.out.println("GENERATED " + generatedNumberData);
         return Double.parseDouble(generatedNumberData);
     }
 

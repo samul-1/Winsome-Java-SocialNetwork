@@ -41,13 +41,11 @@ public class ApiRouter {
          * 
          */
 
-        System.out.println("REQ IN ROUTER: " + request.getMethod().name() + " --- " + request.getPath());
         Class<?> serviceClass = SocialNetworkService.class;
 
         ApiRoute matchingRoute = this.resolveRoute(request.getPath());
 
         if (matchingRoute == null) {
-            System.out.println("matching route null");
             throw new RouteNotFoundException();
         }
 
@@ -55,7 +53,6 @@ public class ApiRouter {
         try {
             // find handler method name based on the HTTP method of the request
             String handlerName = matchingRoute.getMethodAction(request.getMethod());
-            System.out.println("handler: " + handlerName);
             if (handlerName == null) {
                 // matched route doesn't support the requested HTTP method
                 throw new MethodNotSupportedException();

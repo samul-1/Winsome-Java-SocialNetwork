@@ -57,7 +57,7 @@ async function login () {
 
 async function logout () {
   try {
-    await axios.post('logout')
+    await axios.post('logout', getMyUsername())
     axios.defaults.headers.common['Authorization'] = undefined
     localStorage.removeItem('winsome_token')
     localStorage.removeItem('winsome_username')

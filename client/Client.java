@@ -79,7 +79,7 @@ public class Client implements IClient {
         map.put("cannot_log_out", "You can't log out using this username.");
         map.put("unknown_operation", "Unknown operation: ");
         map.put("invalid_operation_arguments", "Invalid arguments. ");
-        map.put("welcome_message", "Connected to server!\nTo start, type" +
+        map.put("welcome_message", "Connected to server!\nTo start, type " +
                 "register <username> <password> <tags> (at least one tag is REQUIRED)" +
                 " or, if you already have an account, login <username> <password>\n" +
                 "You can type 'exit' at any time to exit the program.\n");
